@@ -1,0 +1,48 @@
+<!-- ファイルパス: /blog/2025-04-28-koppy-daily.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>こっぴーの日常【2025/4/28】</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" type="image/png" href="../favicon.png" />
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="../favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <article>
+      <h2>こっぴーの日常【2025/4/28】</h2>
+
+      <p>こんにちは！こっぴーです🌱</p>
+
+      <p>今日はちょっと日常のことを話したいと思います！</p>
+
+      <p>
+        最近、マイクラだけじゃなくてプログラミングにも力を入れていて、<br>
+        毎日ちょっとずつ勉強してます💻（とくにhtml）<br>
+        新しいことを学ぶのって大変だけど、すごく楽しいですよね～！！
+      </p>
+
+      <p>
+        また少しずつ、こういう日常のこともブログに書いていきたいなと思っています！<br>
+        よかったらこれからも見に来てください😊
+      </p>
+
+    </article>
+
+    <p><a href="../index.html" class="button">← トップページに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+</body>
+</html>
