@@ -51,16 +51,18 @@
         list.innerHTML = "";
 
         data
-          .sort((a, b) => new Date(b.date) - new Date(a.date))
-          .slice(0, 3)
-          .forEach(article => {
-            const li = document.createElement("li");
-            const a = document.createElement("a");
-            a.href = article.url;
-            a.textContent = article.title + "（" + article.date + "）";
-            li.appendChild(a);
-            list.appendChild(li);
-          });
+         .sort((a, b) => new Date(b.date) - new Date(a.date))
+         .slice(0, 3)
+         .forEach(article => {
+           const li = document.createElement("li");
+           const a = document.createElement("a");
+           a.href = article.url;
+           a.textContent = article.title + "（" + article.date + "）";
+           a.className = "article-button"; // 🔥 ここ！クラス付与
+           li.appendChild(a);
+           list.appendChild(li);
+         });
+
       });
   </script>
 </body>
