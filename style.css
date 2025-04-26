@@ -4,6 +4,7 @@ body {
   font-family: sans-serif;
   background-color: #ffffff;
   color: #333;
+  text-align: center; /* 中央寄せ */
 }
 
 header {
@@ -37,7 +38,8 @@ footer {
 }
 
 ul#blog-list {
-  padding-left: 20px;
+  padding-left: 0;
+  list-style-position: inside;
 }
 
 ul#blog-list li {
