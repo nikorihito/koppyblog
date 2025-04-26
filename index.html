@@ -4,6 +4,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- 🔽 SEO & SNS向けmetaタグ -->
+  <meta name="description" content="ゆるっと気ままに、マイクラのことを書いてます。YouTubeの配布物も載せます。" />
+  <meta property="og:title" content="こっぴーのマイクラひとやすみ" />
+  <meta property="og:description" content="マインクラフトのブログ＆配布物紹介サイトです。" />
+  <meta property="og:image" content="https://nikorihito.github.io/koppyblog/favicon.png" />
+  <meta property="og:url" content="https://nikorihito.github.io/koppyblog/" />
+  <meta property="og:type" content="website" />
+  <!-- 🔼 ここまで -->
+
   <title>こっぴーのマイクラひとやすみ</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/png" href="./favicon.png" />
@@ -12,7 +22,7 @@
   <header>
     <img src="./favicon.png" alt="サイトロゴ" class="logo" />
     <h1>こっぴーのマイクラひとやすみ</h1>
-    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。YouTubeの配布物も載せます。</p>
   </header>
 
   <main>
@@ -41,7 +51,7 @@
 
         data
           .sort((a, b) => new Date(b.date) - new Date(a.date))
-          .slice(0, 3) // 最新3件だけ表示
+          .slice(0, 3)
           .forEach(article => {
             const li = document.createElement("li");
             const a = document.createElement("a");
