@@ -1,0 +1,56 @@
+<!-- ファイルパス: /index.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>こっぴーのマイクラひとやすみ</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="./favicon.png" />
+</head>
+<body>
+  <header>
+    <img src="./favicon.png" alt="サイトロゴ" class="logo" />
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <section class="blog-list">
+      <h2>最新の記事</h2>
+      <ul id="blog-list">
+        <li>読み込み中...</li>
+      </ul>
+
+      <div class="button-container">
+        <a href="./all-articles.html" class="button">▶ 記事一覧を見る</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+
+  <script>
+    fetch("articles.json")
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById("blog-list");
+        list.innerHTML = "";
+
+        data
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 3) // 最新3件だけ表示
+          .forEach(article => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = article.url;
+            a.textContent = article.title + "（" + article.date + "）";
+            li.appendChild(a);
+            list.appendChild(li);
+          });
+      });
+  </script>
+</body>
+</html>

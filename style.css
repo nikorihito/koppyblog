@@ -1,0 +1,102 @@
+/* ファイルパス: /style.css */
+
+/* 全体設定 */
+body {
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+/* ヘッダー */
+header {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.logo {
+  width: 100px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 14px;
+}
+
+/* メイン */
+main {
+  padding: 20px;
+}
+
+h1, h2, h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+/* ブログリスト */
+.blog-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.blog-list li {
+  display: inline-block;
+  margin: 5px;
+}
+
+/* 小さめかわいいボタンにする */
+.blog-list li a {
+  display: inline-block;
+  background-color: #66ccff; /* 水色ボタン */
+  color: #ffffff; /* 白文字 */
+  padding: 8px 16px;
+  margin: 6px;
+  text-decoration: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px #3399cc;
+  transition: all 0.2s;
+}
+
+.blog-list li a:hover {
+  background-color: #3399cc;
+  box-shadow: 0 1px #2277aa;
+  transform: translateY(1px);
+}
+
+/* ボタン（記事一覧へとか、戻るボタンとか） */
+.button-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.button {
+  display: inline-block;
+  background-color: #66ccff;
+  color: #ffffff;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 20px;
+  box-shadow: 0 4px #3399cc;
+  transition: all 0.2s;
+}
+
+.button:hover {
+  background-color: #3399cc;
+  box-shadow: 0 2px #2277aa;
+  transform: translateY(1px);
+}
+
+/* フッター */
+footer {
+  text-align: center;
+  font-size: 12px;
+  padding: 20px;
+  background-color: #ffcc66; /* オレンジ色 */
+  color: #333;
+}

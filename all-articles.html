@@ -1,0 +1,56 @@
+<!-- ファイルパス: /all-articles.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>すべての記事一覧 - こっぴーのマイクラひとやすみ</title>
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <a href="./index.html">
+      <img src="./favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <section class="blog-list">
+      <h2>すべての記事一覧</h2>
+      <ul id="all-blog-list">
+        <li>読み込み中...</li>
+      </ul>
+
+      <p><a href="./index.html" class="button">← トップページに戻る</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+
+  <script>
+    fetch("articles.json")
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById("all-blog-list");
+        list.innerHTML = "";
+
+        data
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .forEach(article => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = article.url;
+            a.textContent = article.title + "（" + article.date + "）";
+            li.appendChild(a);
+            list.appendChild(li);
+          });
+      });
+  </script>
+</body>
+</html>
