@@ -1,102 +1,110 @@
-/* ファイルパス: /style.css */
-
-/* 全体設定 */
+/* 全体基本設定 */
 body {
-  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
   background-color: #ffffff;
+  color: #333;
   margin: 0;
   padding: 0;
-  color: #333;
 }
 
 /* ヘッダー */
 header {
+  background-color: #f9f9f9;
   text-align: center;
-  padding: 30px 20px;
+  padding: 20px;
+  border-bottom: 2px solid #ccc;
 }
 
 .logo {
-  width: 100px;
+  width: 60px;
   height: auto;
   margin-bottom: 10px;
 }
 
+h1 {
+  margin: 10px 0 5px;
+  font-size: 22px;
+}
+
 .subtitle {
-  color: #666;
   font-size: 14px;
+  color: #777;
 }
 
 /* メイン */
 main {
   padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-h1, h2, h3 {
-  font-size: 20px;
-  margin-bottom: 10px;
+h2 {
+  color: #333;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 8px;
 }
 
-/* ブログリスト */
-.blog-list ul {
-  list-style: none;
-  padding: 0;
+h3 {
+  margin-top: 30px;
+  font-size: 18px;
+  color: #444;
 }
 
-.blog-list li {
-  display: inline-block;
-  margin: 5px;
+ul {
+  padding-left: 20px;
 }
 
-/* 小さめかわいいボタンにする */
-.blog-list li a {
-  display: inline-block;
-  background-color: #66ccff; /* 水色ボタン */
-  color: #ffffff; /* 白文字 */
-  padding: 8px 16px;
-  margin: 6px;
-  text-decoration: none;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: bold;
-  box-shadow: 0 2px #3399cc;
-  transition: all 0.2s;
-}
-
-.blog-list li a:hover {
-  background-color: #3399cc;
-  box-shadow: 0 1px #2277aa;
-  transform: translateY(1px);
-}
-
-/* ボタン（記事一覧へとか、戻るボタンとか） */
-.button-container {
-  text-align: center;
-  margin: 20px 0;
-}
-
+/* ボタンデザイン */
 .button {
   display: inline-block;
-  background-color: #66ccff;
-  color: #ffffff;
-  padding: 10px 20px;
+  padding: 8px 14px;
+  background-color: #4ec5f1;
+  color: white;
   text-decoration: none;
-  font-weight: bold;
-  border-radius: 20px;
-  box-shadow: 0 4px #3399cc;
-  transition: all 0.2s;
+  border-radius: 8px;
+  font-size: 14px;
+  margin: 6px 4px;
+  transition: background-color 0.2s;
+  cursor: pointer;
 }
 
 .button:hover {
-  background-color: #3399cc;
-  box-shadow: 0 2px #2277aa;
-  transform: translateY(1px);
+  background-color: #3aaed8;
 }
 
 /* フッター */
 footer {
   text-align: center;
-  font-size: 12px;
-  padding: 20px;
-  background-color: #ffcc66; /* オレンジ色 */
+  background-color: #ffcc99;
   color: #333;
+  padding: 15px;
+  margin-top: 40px;
+  font-size: 13px;
+  border-top: 2px solid #ddd;
+}
+
+/* ブログ記事リスト */
+.blog-list ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.blog-list li {
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.blog-list a {
+  text-decoration: none;
+  color: #007acc;
+}
+
+.blog-list a:hover {
+  text-decoration: underline;
+}
+
+/* 画像 */
+img {
+  max-width: 100%;
+  border-radius: 8px;
 }
