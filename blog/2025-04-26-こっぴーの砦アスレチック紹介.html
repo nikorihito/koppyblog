@@ -1,12 +1,11 @@
-<!-- ファイルパス: /blog/2025-04-27-koppy-fortress-asle.html -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>難易度MAX!! 1000メートル!! こっぴーの砦アスレチック</title>
-  <link rel="stylesheet" href="../style.css">
-  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" type="image/png" href="../favicon.png" />
 </head>
 <body>
   <header>
@@ -14,54 +13,45 @@
       <img src="../favicon.png" alt="サイトロゴ" class="logo" />
     </a>
     <h1>こっぴーのマイクラひとやすみ</h1>
-    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。YouTubeの配布物も載せます。</p>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
   </header>
 
   <main>
     <article>
       <h2>難易度MAX!! 1000メートル!! こっぴーの砦アスレチック</h2>
 
-      <!-- サムネイル画像（もし入れるならここ） -->
-      <img src="thumbnail/koppy_toride.png" alt="こっぴーの砦アスレチック サムネイル" style="max-width:100%; margin: 20px 0; border-radius: 8px;">
-
       <p>こっぴーのアスレチック第３弾です！！</p>
       <p>今回は前作より難易度がかなり上がっています！</p>
       <p>攻略動画を見ながらクリア目指して頑張って下さい！！</p>
 
-      <h3>🎥 紹介動画はこちら</h3>
+      <h3>【紹介動画】</h3>
       <p>
-        <a href="https://youtu.be/e2eDG5KcYWA?si=gitxt83GEELqTleN" class="button" target="_blank">
-          ▶ 紹介動画を見る
-        </a>
+        ▶️ <a href="https://youtu.be/e2eDG5KcYWA?si=gitxt83GEELqTleN" target="_blank" class="button">▶ 動画を見る</a>
       </p>
 
-      <h3>📥 ダウンロード</h3>
+      <h3>【前作リンク】</h3>
       <p>
-        <a href="./downloads/koppy_toride_world.mcworld" class="button" download>
-          ▶ このワールドをダウンロードする
-        </a>
+        ▶️ <a href="https://minecraft-mcworld.com/94327/" target="_blank">第1弾</a> |
+        <a href="https://minecraft-mcworld.com/97142/" target="_blank">第2弾</a>
       </p>
 
-      <h3>【前作1】</h3>
+      <h3>📦 ワールドダウンロード</h3>
       <p>
-        <a href="https://minecraft-mcworld.com/94327/" class="button" target="_blank">
-          ▶ 前作1を見る
-        </a>
+        <a href="./downloads/koppy_toride_world.mcworld" class="button" download>📥 砦アスレワールドをダウンロード</a>
       </p>
 
-      <h3>【前作2】</h3>
-      <p>
-        <a href="https://minecraft-mcworld.com/97142/" class="button" target="_blank">
-          ▶ 前作2を見る
-        </a>
-      </p>
+      <!-- 評価＆コメント -->
+      <div class="article-feedback">
+        <p>この記事は役に立ちましたか？</p>
+        <button onclick="rate('like')">👍 いいね (<span id="like-count">0</span>)</button>
+        <button onclick="rate('dislike')">👎 わるいね (<span id="dislike-count">0</span>)</button>
 
-      <h3>🌟 注意事項</h3>
-      <ul>
-        <li>配布ファイルの無断転載は禁止です！</li>
-        <li>改変・配信などは自由ですが、クレジット表記をお願いします。</li>
-      </ul>
+        <h3>💬 コメントをどうぞ</h3>
+        <textarea id="comment-input" rows="3" placeholder="コメントを入力してください"></textarea><br>
+        <button onclick="submitComment()">コメント送信</button>
 
+        <ul id="comment-list"></ul>
+      </div>
     </article>
 
     <p><a href="../index.html" class="button">← トップページに戻る</a></p>
@@ -70,5 +60,48 @@
   <footer>
     <p>&copy; 2025 こっぴー</p>
   </footer>
+
+  <script>
+    const keyBase = location.pathname;
+    const likeKey = keyBase + '-like';
+    const dislikeKey = keyBase + '-dislike';
+    const commentKey = keyBase + '-comments';
+
+    function loadFeedback() {
+      document.getElementById("like-count").textContent = localStorage.getItem(likeKey) || 0;
+      document.getElementById("dislike-count").textContent = localStorage.getItem(dislikeKey) || 0;
+
+      const comments = JSON.parse(localStorage.getItem(commentKey) || "[]");
+      const list = document.getElementById("comment-list");
+      list.innerHTML = "";
+      comments.forEach(c => {
+        const li = document.createElement("li");
+        li.textContent = c;
+        list.appendChild(li);
+      });
+    }
+
+    function rate(type) {
+      const key = type === "like" ? likeKey : dislikeKey;
+      let count = parseInt(localStorage.getItem(key) || "0");
+      count++;
+      localStorage.setItem(key, count);
+      loadFeedback();
+    }
+
+    function submitComment() {
+      const input = document.getElementById("comment-input");
+      const text = input.value.trim();
+      if (!text) return;
+
+      const comments = JSON.parse(localStorage.getItem(commentKey) || "[]");
+      comments.push(text);
+      localStorage.setItem(commentKey, JSON.stringify(comments));
+      input.value = "";
+      loadFeedback();
+    }
+
+    loadFeedback();
+  </script>
 </body>
 </html>
