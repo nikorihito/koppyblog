@@ -26,19 +26,6 @@
       <p>新しいことを学ぶのって大変だけど、すごく楽しいですよね～！！</p>
       <p>また少しずつ、こういう日常のこともブログに書いていきたいなと思っています！</p>
       <p>よかったらこれからも見に来てください😊</p>
-
-      <!-- 評価＆コメント -->
-      <div class="article-feedback">
-        <p>この記事は役に立ちましたか？</p>
-        <button onclick="rate('like')">👍 いいね (<span id="like-count">0</span>)</button>
-        <button onclick="rate('dislike')">👎 わるいね (<span id="dislike-count">0</span>)</button>
-
-        <h3>💬 コメントをどうぞ</h3>
-        <textarea id="comment-input" rows="3" placeholder="コメントを入力してください"></textarea><br>
-        <button onclick="submitComment()">コメント送信</button>
-
-        <ul id="comment-list"></ul>
-      </div>
     </article>
 
     <p><a href="../index.html" class="button">← トップページに戻る</a></p>
@@ -47,48 +34,5 @@
   <footer>
     <p>&copy; 2025 こっぴー</p>
   </footer>
-
-  <script>
-    const keyBase = location.pathname;
-    const likeKey = keyBase + '-like';
-    const dislikeKey = keyBase + '-dislike';
-    const commentKey = keyBase + '-comments';
-
-    function loadFeedback() {
-      document.getElementById("like-count").textContent = localStorage.getItem(likeKey) || 0;
-      document.getElementById("dislike-count").textContent = localStorage.getItem(dislikeKey) || 0;
-
-      const comments = JSON.parse(localStorage.getItem(commentKey) || "[]");
-      const list = document.getElementById("comment-list");
-      list.innerHTML = "";
-      comments.forEach(c => {
-        const li = document.createElement("li");
-        li.textContent = c;
-        list.appendChild(li);
-      });
-    }
-
-    function rate(type) {
-      const key = type === "like" ? likeKey : dislikeKey;
-      let count = parseInt(localStorage.getItem(key) || "0");
-      count++;
-      localStorage.setItem(key, count);
-      loadFeedback();
-    }
-
-    function submitComment() {
-      const input = document.getElementById("comment-input");
-      const text = input.value.trim();
-      if (!text) return;
-
-      const comments = JSON.parse(localStorage.getItem(commentKey) || "[]");
-      comments.push(text);
-      localStorage.setItem(commentKey, JSON.stringify(comments));
-      input.value = "";
-      loadFeedback();
-    }
-
-    loadFeedback();
-  </script>
 </body>
 </html>
