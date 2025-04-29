@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>防具立てで自動整地する「整地君」を作ってみた!!</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" type="image/png" href="../favicon.png" />
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="../favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <article>
+      <h2>防具立てで自動整地する「整地君」を作ってみた!!</h2>
+
+      <img src="thumbnail/seitikun.png" alt="整地君 サムネイル" style="max-width: 100%; border-radius: 12px;" />
+
+      <p>防具立てを使った、ちょっと面白い自動整地装置を作ってみました！</p>
+      <p>名前は「整地君」！どんどん前に進みながら、地面をキレイに整地していきます✨</p>
+      <p>ゴールに到達すると、ぐるぐる回転しながら空へ飛んでいくかわいい演出つきです！</p>
+
+      <h3>▶️ 紹介動画はこちら</h3>
+      <p>
+        <a href="https://www.youtube.com/shorts/O6Z4VXM7CjI" target="_blank" class="button">▶ YouTubeで見る</a>
+      </p>
+
+      <h3>🔧 使い方</h3>
+      <p>
+        ワールドにコマンドをセットして、整地したい方向に「整地君」を向けてスタート！
+        <br>地面を問わず、サクサク整地してくれます。
+      </p>
+      <p>
+        ゴール地点には「ダイヤモンドブロック」を置いてください。<br>
+        整地君がそこに到達すると、整地完了演出が始まります♪
+      </p>
+
+      <h3>📦 コマンド例</h3>
+      <pre>
+/execute as @e[type=armor_stand,name=seiti] at @s unless block ^^-1^1 diamond_block run tp @s ^^^0.1
+/execute as @e[type=armor_stand,name=seiti] at @s unless block ^^-1^1 diamond_block run fill ^^^1 ^^10^1 air destroy
+/execute as @e[type=armor_stand,name=seiti] at @s if block ^^-1^1 diamond_block run kill @s
+/execute as @e[type=armor_stand,name=seiti] at @s if block ^^-1^1 diamond_block run summon armor_stand goal
+/execute as @e[type=armor_stand,name=goal] at @s run tp @s ~~~~30~
+/execute as @e[type=armor_stand,name=goal] at @s run tp @s ~~0.1~
+/execute as @e[type=armor_stand,name=goal] at @s run kill @s
+      </pre>
+
+    </article>
+
+    <p><a href="../index.html" class="button">← トップページに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+</body>
+</html>
