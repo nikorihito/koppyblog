@@ -50,51 +50,5 @@
   <footer>
     <p>&copy; 2025 こっぴー</p>
   </footer>
-// 👀 カウント追加
-    const viewRef = ref(db, `views/${encodedUrl}`);
-    push(viewRef, true);
-
-    // 👀 カウント表示
-    onValue(viewRef, snapshot => {
-      const count = snapshot.size;
-      document.getElementById("viewCount").textContent = `👀 ${count}`;
-    });
-
-    // 💬 コメント表示
-    const commentRef = ref(db, `comments/${encodedUrl}`);
-    onValue(commentRef, snapshot => {
-      const commentList = document.getElementById("commentList");
-      commentList.innerHTML = "";
-      snapshot.forEach(child => {
-        const val = child.val();
-        const div = document.createElement("div");
-        div.className = "comment";
-        div.innerHTML = `<strong>${val.name}</strong><br>${val.comment}`;
-        commentList.appendChild(div);
-      });
-    });
-
-    // 💬 コメント投稿
-    window.submitComment = () => {
-      const name = document.getElementById("username").value || "匿名";
-      const text = document.getElementById("commentText").value.trim();
-      if (!text) return alert("コメントを入力してね");
-      push(commentRef, { name, comment: text, timestamp: Date.now() });
-      document.getElementById("commentText").value = "";
-    };
-  </script>
-</head>
-<body>
-  <h1>記事ページ</h1>
-  <p id="viewCount">👀 カウント中...</p>
-
-  <div class="comment-box">
-    <h2>💬 コメント欄</h2>
-    <div id="commentList">読み込み中...</div>
-    <br>
-    <input type="text" id="username" placeholder="名前（匿名でもOK）"><br>
-    <textarea id="commentText" rows="4" placeholder="コメントを入力してね"></textarea><br>
-    <button onclick="submitComment()">コメント送信！</button>
-  </div>
 </body>
 </html>
