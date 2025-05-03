@@ -38,10 +38,12 @@
   </style>
 </head>
 <body>
-    <header class="header-top">
+  <header class="header-top">
     <img src="./favicon.png" alt="サイトロゴ" class="logo" />
     <h1>こっぴーのマイクラひとやすみ</h1>
     <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。YouTubeの配布物も載せます。</p>
+  </header>
+
   <h1>📝 記事にコメントしよう！</h1>
   <div class="form-container">
     <label for="articleSelect">コメントする記事を選んでね</label><br>
@@ -58,8 +60,25 @@
 
   <p><a href="./index.html" class="button">← トップページに戻る</a></p>
 
-  <script>
-    // 🔽 記事一覧を読み込んでセレクトに反映
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDyHNG2u3N20ssA8QUl0y1liwYSMAKrnSm0",
+      authDomain: "koppyblog.firebaseapp.com",
+      databaseURL: "https://koppyblog-default-rtdb.firebaseio.com",
+      projectId: "koppyblog",
+      storageBucket: "koppyblog.appspot.com",
+      messagingSenderId: "1050975011839",
+      appId: "1:1050975011839:web:8d68888f53b99363e94cfa",
+      measurementId: "G-Z9S68LNHCK"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // 記事一覧の取得
     fetch("articles.json")
       .then(res => res.json())
       .then(data => {
@@ -73,8 +92,8 @@
         });
       });
 
-    // 🔽 コメント送信（今は仮動作）
-    function submitComment() {
+    // コメント保存
+    window.submitComment = () => {
       const article = document.getElementById("articleSelect").value;
       const username = document.getElementById("username").value || "匿名";
       const comment = document.getElementById("commentText").value.trim();
@@ -84,31 +103,16 @@
         return;
       }
 
-      // 仮メッセージ表示（本番では保存処理が必要）
-      document.getElementById("resultMsg").textContent =
-        `「${article}」にコメントを送信しました！ありがとう、${username}さん✨`;
+      const commentRef = ref(db, `comments/${encodeURIComponent(article)}`);
+      push(commentRef, {
+        name: username,
+        comment: comment,
+        timestamp: Date.now()
+      });
 
-      // 入力リセット
+      document.getElementById("resultMsg").textContent = `${username}さん、コメントありがとう！✨`;
       document.getElementById("commentText").value = "";
-    }
-    
+    };
   </script>
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDyHNG2u3N20ssA8QUl0y1liwYSMAKrnSm0",
-    authDomain: "koppyblog.firebaseapp.com",
-    projectId: "koppyblog",
-    storageBucket: "koppyblog.appspot.com",
-    messagingSenderId: "1050975011839",
-    appId: "1:1050975011839:web:8d68888f53b99363e94cfa",
-    measurementId: "G-Z9S68LNHCK"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 </body>
 </html>
