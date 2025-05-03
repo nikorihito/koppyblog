@@ -1,1 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>記事コメント投稿ページ</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    select, textarea, input {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+      width: 80%;
+      max-width: 400px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .form-container {
+      max-width: 500px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>📝 記事にコメントしよう！</h1>
+  <div class="form-container">
+    <label for="articleSelect">コメントする記事を選んでね</label><br>
+    <select id="articleSelect">
+      <option>読み込み中...</option>
+    </select><br>
 
+    <input type="text" id="username" placeholder="名前（匿名でもOK）"><br>
+    <textarea id="commentText" rows="5" placeholder="コメントを入力してね"></textarea><br>
+    <button onclick="submitComment()">コメント送信！</button>
+
+    <p id="resultMsg"></p>
+  </div>
+
+  <script>
+    // 🔽 記事一覧を読み込んでセレクトに反映
+    fetch("articles.json")
+      .then(res => res.json())
+      .then(data => {
+        const select = document.getElementById("articleSelect");
+        select.innerHTML = "";
+        data.forEach(article => {
+          const opt = document.createElement("option");
+          opt.value = article.url;
+          opt.textContent = article.title + "（" + article.date + "）";
+          select.appendChild(opt);
+        });
+      });
+
+    // 🔽 コメント送信（今は仮動作）
+    function submitComment() {
+      const article = document.getElementById("articleSelect").value;
+      const username = document.getElementById("username").value || "匿名";
+      const comment = document.getElementById("commentText").value.trim();
+
+      if (!comment) {
+        alert("コメントを入力してね！");
+        return;
+      }
+
+      // 仮メッセージ表示（本番では保存処理が必要）
+      document.getElementById("resultMsg").textContent =
+        `「${article}」にコメントを送信しました！ありがとう、${username}さん✨`;
+
+      // 入力リセット
+      document.getElementById("commentText").value = "";
+    }
+  </script>
+</body>
+</html>
