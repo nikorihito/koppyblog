@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>滑らかな円を作るツール「円作る君」を作ってみた！</title>
+  <title>「円作る君」を作ってみた！</title>
   <link rel="stylesheet" href="../style.css" />
   <link rel="icon" type="image/png" href="../favicon.png" />
 </head>
@@ -35,6 +35,7 @@
 
       <h3>🔧 使っているコマンド</h3>
       <p>今回使用しているコマンドはこちらです：</p>
+      <p>・メインのコマンド</p>
       <pre>
 /execute store result score @e[type=armor_stand,name="en",limit=1] rot run data get entity @e[type=armor_stand,name="en",limit=1] Rotation[0] 1
 /scoreboard players add @e[type=armor_stand,name="en",limit=1] rot 1
@@ -42,9 +43,12 @@
 /execute as @e[type=armor_stand,name="en"] at @s run summon armor_stand ^ ^ ^5 {CustomName:"\"sand\"",NoGravity:1b,Invisible:1b,Marker:1b,ArmorItems:[{},{},{},{id:"minecraft:player_head",Count:1b,tag:{SkullOwner:"nikorihito"}}]}
       </pre>
 
-      <p>このコマンドでは、防具立て「en」を回転させ、Rotationデータをスコアボードに記録し、回転角度に応じて新しい防具立て（「sand」）を前方にサモンしています。</p>
+      <p>・真ん中の防具立て召喚のコマンド</p>
+      <pre>/summon armor_stand ~ ~2 ~ {CustomName:"\"en\"",NoGravity:1b,Marker:1b,ArmorItems:[{},{},{},{id:"minecraft:player_head",Count:1b,tag:{SkullOwner:"nikorihito"}}]}</pre>
 
-      <p>結果として、防具立てが一周するごとに円を構成する点がサモンされ、**なめらかな円**を作り出せます✨</p>
+      <p>このコマンドでは、防具立て「en」を回転させ、Rotationデータをスコアボードに記録し、回転角度に応じて新しい防具立て（「sand」）を前方に召喚しています。</p>
+
+      <p>結果として、防具立てが一周するごとに円を構成する点が召喚され、**なめらかな円**を作り出せます✨</p>
 
       <h3>📝 こんな人におすすめ！</h3>
       <ul>
@@ -54,6 +58,8 @@
       </ul>
 
       <p>ぜひ、動画を見て「円作る君」の動きをチェックしてみてください！</p>
+      
+      <p>※注意書き  このコマンドは、JE版 (Java版)でしか動かなく、メインのコマンドはリピートの常時実行、真ん中の防具立て召喚のコマンドはインパルスの動力が必要で、ボタンを付けてください。</p>
 
     </article>
 
