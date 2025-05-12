@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ニコリメモ - インストーラー配布ページ</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" type="image/png" href="../favicon.png" />
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="../favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <article>
+      <h2>📝 ニコリメモ - インストーラー配布ページ</h2>
+
+      <img src="thumbnail/nikorimemo.png" alt="ニコリメモ アイコン" style="max-width: 100%; border-radius: 12px;" />
+
+      <p>デスクトップで動くメモ帳アプリ「ニコリメモ」をリリースしました！</p>
+      <p>日本語・英語切り替え、タブ編集、フォント・テーマ変更にも対応。<br>お気軽にご利用ください！</p>
+
+      <h3>🔧 使い方</h3>
+      <ul>
+        <li>インストール後、デスクトップまたはスタートメニューから「ニコリメモ」を起動できます。</li>
+        <li>Ctrl+S で保存、ファイルを複数開くタブ機能あり。</li>
+        <li>.txtファイルを右クリック→「プログラムから開く」で関連付け可能。</li>
+      </ul>
+
+      <h3>📦 ダウンロード</h3>
+      <p>
+        <a href="downloads/nikori_memo_setup.exe" class="button" download>📥 ニコリメモ インストーラーをダウンロード</a>
+      </p>
+    </article>
+
+    <p><a href="../index.html" class="button">← トップページに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+</body>
+</html>
