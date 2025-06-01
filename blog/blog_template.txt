@@ -18,7 +18,14 @@
 
   <main>
     <article>
-      内容
+      <h2>題名</h2>
+      <p>内容</p>
+      <p>内容</p>
+      <p>内容</p>
+      <p>内容</p>
+      <p>内容</p>
+      <p>内容</p>
+      ......
     </article>
 
     <p><a href="../index.html" class="button">← トップページに戻る</a></p>
