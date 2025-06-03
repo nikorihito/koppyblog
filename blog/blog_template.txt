@@ -19,6 +19,7 @@
   <main>
     <article>
       <h2>題名</h2>
+      <img src="thumbnail/ファイル名.png" alt="サムネイル" style="max-width: 大きさ%; border-radius: 12px;" />
       <p>内容</p>
       <p>内容</p>
       <p>内容</p>
