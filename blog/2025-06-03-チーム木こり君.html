@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>【チーム木こり君】を作ってみた！！</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" type="image/png" href="../favicon.png" />
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="../favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <article>
+      <h2>【チーム木こり君】を作ってみた！！</h2>
+      <img src="thumbnail/kikori.png" alt="サムネイル" style="max-width: 大きさ%; border-radius: 12px;" />
+      <h2>【チーム木こり君】を作ってみた！！</h2>
+      <img src="thumbnail/kikori.png" alt="サムネイル" style="max-width: 80%; border-radius: 12px;" />
+
+      <p>こんにちは、こっぴーです！</p>
+      <p>今回は、森を一気に伐採してくれる便利な「チーム木こり君」を作ってみたのでご紹介します🌳✂️</p>
+
+      <h3>🌲 チーム木こり君とは？</h3>
+      <p>防具立てを設置して「スタートコマンド」を実行するだけで、周囲の <strong>木材や葉っぱなどを一気に消し飛ばしてくれる</strong>、森の整理にぴったりな仕組みです！</p>
+      <p>森林伐採のコマンドはちょっと怖い印象もあるかもしれないので、「チーム木こり君」という名前で可愛くカバーしてみました（笑）</p>
+
+      <h3>🛠 使用するコマンド</h3>
+      <h4>🔁 リピート／常時実行 のコマンドブロックに以下を設置：</h4>
+      <pre><code>execute as @e[type=armor_stand,tag=start] at @s unless block ~~~ log unless block ~~~ air run tp @s ~~1~
+      execute as @e[type=armor_stand,tag=start] at @s if block ~~-1~ air run tp @s ~~-1~
+      execute as @e[type=armor_stand,tag=start] at @s if block ~~~ air run tp @s ^^^0.1
+      execute as @e[type=armor_stand,tag=start] at @s if block ~~-1~ diamond_block run kill @s
+      execute as @e[type=armor_stand,tag=start] at @s run fill ^^^1 ^^50^1 air replace log
+      execute as @e[type=armor_stand,tag=start] at @s run fill ^^^1 ^^50^1 air replace leaves
+      execute as @e[type=armor_stand,tag=start] at @s run fill ^^^1 ^^50^1 air replace birch_log
+      execute as @e[type=armor_stand,tag=start] at @s run fill ^^^1 ^^50^1 air replace birch_leaves
+      execute as @e[type=armor_stand,tag=start] at @s run fill ^^^1 ^^50^1 air replace wildflowers
+      execute as @e[type=armor_stand,tag=start] at @s run fill ^^^1 ^^50^1 air replace leaf_litter</code></pre>
+
+      <h4>🟢 スタート用のコマンド：</h4>
+      <pre><code>/tag @e[type=armor_stand] add start</code></pre>
+      <p><strong>※ポイント：</strong><br>
+      すべての防具立てが「木こり君」になってしまうのを防ぐには、<code>@e[type=armor_stand,name=start]</code> のように、名前付きで指定するのがおすすめです。</p>
+      
+      <h3>✅ こんなときに便利！</h3>
+      <ul>
+        <li>森を更地にして建築したいとき</li>
+        <li>重くなったワールドの軽量化をしたいとき</li>
+        <li>材料集めのあと片づけに！</li>
+      </ul>
+      <h3>🎮 実際の動きが見たい方へ</h3>
+      <p>YouTubeでも動作の様子を紹介しています！（※リンクは別途挿入）</p>
+      <a href="https://www.youtube.com/shorts/aYpjN-DW4Ow" target="_blank" class="button">動画を観る</a>
+      <h3>🔚 まとめ</h3>
+      <p>「チーム木こり君」は、森を一掃したいときの超便利アイテムです！</p>
+      <p>みなさんもぜひ、<strong>マイクラの整地作業に導入</strong>してみてくださいね🌟</p>
+    </article>
+    <p><a href="../index.html" class="button">← トップページに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+</body>
+</html>
