@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO & SNS向けmetaタグ -->
+  <meta name="description" content="ゆるっと気ままに、マイクラのことを書いてます。YouTubeの配布物も載せます。" />
+  <meta property="og:title" content="こっぴーのマイクラひとやすみ" />
+  <meta property="og:description" content="マインクラフトのブログ＆配布物紹介サイトです。" />
+  <meta property="og:image" content="https://nikorihito.github.io/koppyblog/favicon.png" />
+  <meta property="og:url" content="https://nikorihito.github.io/koppyblog/" />
+  <meta property="og:type" content="website" />
+  <meta name="google-site-verification" content="BcHZ2CVQDYweUD5vv5wQeP6BOqjDZ4Dt35w-T_dvPgA" />
+  <meta name="keywords" content="こっぴー, マイクラ, Minecraft, こっぴーふーちゃんねる, 配布物, MOD, プログラミング, 日常, ブログ">
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z9S68LNHCK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-Z9S68LNHCK');
+  </script>
+
+  
+  <title>こっぴーのマイクラひとやすみ</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  
+  <style>
+    .header-top {
+      position: relative;
+    }
+    .clock-container {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #analog-clock {
+      width: 50px;
+      height: 50px;
+      border: 2px solid #333;
+      border-radius: 50%;
+      position: relative;
+      background: white;
+    }
+    .hand {
+      position: absolute;
+      background: #333;
+      transform-origin: bottom center;
+    }
+    .hour {
+      width: 4px;
+      height: 15px;
+      top: 10px;
+      left: 23px;
+    }
+    .minute {
+      width: 2px;
+      height: 20px;
+      top: 5px;
+      left: 24px;
+    }
+    .second {
+      width: 1px;
+      height: 24px;
+      top: 1px;
+      left: 24.5px;
+      background: red;
+    }
+    #digital-clock {
+      margin-top: 5px;
+      font-size: 12px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+  
+<body>
+  <header class="header-top">
+    <img src="./favicon.png" alt="サイトロゴ" class="logo" />
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。YouTubeの配布物も載せます。</p>
+    <div class="clock-container">
+      <div id="analog-clock">
+        <div class="hand hour" id="hour-hand"></div>
+        <div class="hand minute" id="minute-hand"></div>
+        <div class="hand second" id="second-hand"></div>
+      </div>
+      <div id="digital-clock">00:00:00</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="blog-list">
+      <h2>最新の記事</h2>
+      <p>※ここは最新の3つしか出てきません。すべて見たかったら「記事一覧を見る」ボタンを押してください。</p>
+      <ul id="blog-list">
+        <li>読み込み中...</li>
+      </ul>
+      <div class="button-container">
+        <a href="./all-articles.html" class="button">? 記事一覧を見る</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+
+  <script>
+    // 記事一覧読み込み
+    fetch("articles.json")
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById("blog-list");
+        list.innerHTML = "";
+
+        data
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 3)
+          .forEach(article => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = article.url;
+            a.textContent = article.title + "（" + article.date + "）";
+            a.className = "article-button";
+            li.appendChild(a);
+            list.appendChild(li);
+          });
+      });
+
+    // 時計動作
+    function updateClock() {
+      const now = new Date();
+      const seconds = now.getSeconds();
+      const minutes = now.getMinutes();
+      const hours = now.getHours();
+
+      document.getElementById('second-hand').style.transform = `rotate(${seconds * 6}deg)`;
+      document.getElementById('minute-hand').style.transform = `rotate(${minutes * 6}deg)`;
+      document.getElementById('hour-hand').style.transform = `rotate(${(hours % 12) * 30 + minutes * 0.5}deg)`;
+
+      document.getElementById('digital-clock').textContent = 
+        now.toLocaleTimeString('ja-JP', { hour12: false });
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>
