@@ -80,3 +80,22 @@ ul#blog-list li {
 .button:hover {
   background-color: #2ba6d9;
 }
+
+.top-banner {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+nav ul {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: #444;
+  font-weight: bold;
+}
