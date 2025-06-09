@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ニコリタイマー／ストップウォッチ</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="./favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <h2>⏱️ ニコリタイマー／ストップウォッチ</h2>
+    <p id="display" style="font-size: 2em;">0.00 秒</p>
+    <button onclick="start()">スタート</button>
+    <button onclick="stop()">ストップ</button>
+    <button onclick="reset()">リセット</button>
+    <p><a href="./index.html">← トップページに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+
+  <script>
+    let timer, startTime;
+
+    function start() {
+      startTime = Date.now();
+      timer = setInterval(() => {
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+        document.getElementById("display").textContent = `${elapsed} 秒`;
+      }, 10);
+    }
+
+    function stop() {
+      clearInterval(timer);
+    }
+
+    function reset() {
+      clearInterval(timer);
+      document.getElementById("display").textContent = "0.00 秒";
+    }
+  </script>
+</body>
+</html>
