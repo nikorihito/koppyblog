@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>『暇』つぶし</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    body {
+      text-align: center;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    #score {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+    }
+    #game-area {
+      position: relative;
+      width: 100%;
+      height: 60vh;
+      background-color: #f0f0f0;
+      overflow: hidden;
+      border: 2px dashed #ccc;
+      margin: 0 auto;
+    }
+    .hima {
+      position: absolute;
+      font-size: 2rem;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.1s ease;
+    }
+    .hima:active {
+      transform: scale(1.3);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="./index.html">
+      <img src="./favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+  </header>
+
+  <main>
+    <h2>🕹️ 『暇』つぶし</h2>
+    <p>出てくる「暇」をどんどんタップしてスコアを伸ばそう！</p>
+    <div id="score">スコア: 0</div>
+    <div id="game-area"></div>
+    <p><a href="./index.html">← トップページに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+
+  <script>
+    const gameArea = document.getElementById("game-area");
+    const scoreDisplay = document.getElementById("score");
+    let score = 0;
+
+    function spawnHima() {
+      const old = document.querySelector(".hima");
+      if (old) old.remove();
+
+      const hima = document.createElement("div");
+      hima.className = "hima";
+      hima.textContent = "暇";
+
+      const areaWidth = gameArea.clientWidth;
+      const areaHeight = gameArea.clientHeight;
+
+      const x = Math.random() * (areaWidth - 40);
+      const y = Math.random() * (areaHeight - 40);
+
+      hima.style.left = `${x}px`;
+      hima.style.top = `${y}px`;
+
+      hima.onclick = () => {
+        score++;
+        scoreDisplay.textContent = `スコア: ${score}`;
+        spawnHima(); // 次の暇を出す
+      };
+
+      gameArea.appendChild(hima);
+    }
+
+    // 初回表示
+    window.onload = () => {
+      spawnHima();
+    };
+  </script>
+</body>
+</html>
