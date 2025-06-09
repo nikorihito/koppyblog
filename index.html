@@ -7,11 +7,15 @@
   <link rel="stylesheet" href="../style.css" />
   <link rel="icon" href="https://nikorihito.github.io/koppyblog/favicon.png" type="image/png">
   <style>
+    body {
+      text-align: center;
+    }
     .game-buttons {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 20px;
       padding: 20px;
+      justify-items: center;
     }
     .game-box {
       display: block;
@@ -24,6 +28,8 @@
       color: #333;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       transition: transform 0.2s;
+      width: 90%;
+      max-width: 300px;
     }
     .game-box:hover {
       transform: scale(1.05);
@@ -36,7 +42,7 @@
 <body>
   <header>
     <a href="../index.html">
-      <img src="../favicon.png" alt="サイトロゴ" class="logo" />
+      <img src="./favicon.png" alt="サイトロゴ" class="logo" />
     </a>
     <h1>こっぴーのマイクラひとやすみ</h1>
     <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
@@ -56,97 +62,16 @@
     <section>
       <h2>🎮 ミニゲームで遊ぼう！</h2>
       <div class="game-buttons">
-        <a href="#uranai" class="game-box">🔮 今日のニコリ占い</a>
-        <a href="#renda" class="game-box">🖱️ ニコリヒト連打チャレンジ</a>
-        <a href="#block" class="game-box">🧱 ニコリブロック崩し</a>
-        <a href="#timer" class="game-box">⏱️ ニコリタイマー／SW</a>
+        <a href="uranai.html" class="game-box">🔮 今日のニコリ占い</a>
+        <a href="renda.html" class="game-box">🖱️ ニコリヒト連打チャレンジ</a>
+        <a href="kudusi.html" class="game-box">🧱 ニコリブロック崩し</a>
+        <a href="timer.html" class="game-box">⏱️ ニコリタイマー／SW</a>
       </div>
-    </section>
-
-    <!-- 各ミニゲームの本体（仮） -->
-    <section id="uranai">
-      <h2>🔮 今日のニコリ占い</h2>
-      <button onclick="showFortune()">占う！</button>
-      <p id="fortune-result"></p>
-    </section>
-
-    <section id="renda">
-      <h2>🖱️ ニコリヒト連打チャレンジ</h2>
-      <button onclick="startRenda()">スタート！</button>
-      <p id="renda-count">0</p>
-    </section>
-
-    <section id="block">
-      <h2>🧱 ニコリブロック崩し</h2>
-      <div id="block-game"></div>
-    </section>
-
-    <section id="timer">
-      <h2>⏱️ ニコリタイマー／ストップウォッチ</h2>
-      <button onclick="startTimer()">スタート</button>
-      <button onclick="stopTimer()">ストップ</button>
-      <button onclick="resetTimer()">リセット</button>
-      <p id="timer-display">0.00 秒</p>
     </section>
   </main>
 
   <footer>
     <p>&copy; 2025 こっぴー</p>
   </footer>
-
-  <script>
-    // 占い
-    function showFortune() {
-      const fortunes = ["超ラッキー！✨", "まあまあ😌", "注意して…😅", "今日はおとなしめで😶"];
-      document.getElementById("fortune-result").innerText = fortunes[Math.floor(Math.random() * fortunes.length)];
-    }
-
-    // 連打
-    let count = 0;
-    function startRenda() {
-      count = 0;
-      document.getElementById("renda-count").innerText = count;
-      const interval = setInterval(() => {
-        document.body.onclick = () => {
-          count++;
-          document.getElementById("renda-count").innerText = count;
-        };
-      }, 50);
-      setTimeout(() => {
-        clearInterval(interval);
-        document.body.onclick = null;
-      }, 5000);
-    }
-
-    // タイマー
-    let timerInterval, timerStart;
-    function startTimer() {
-      timerStart = Date.now();
-      timerInterval = setInterval(() => {
-        const elapsed = (Date.now() - timerStart) / 1000;
-        document.getElementById("timer-display").innerText = elapsed.toFixed(2) + " 秒";
-      }, 10);
-    }
-    function stopTimer() {
-      clearInterval(timerInterval);
-    }
-    function resetTimer() {
-      clearInterval(timerInterval);
-      document.getElementById("timer-display").innerText = "0.00 秒";
-    }
-
-    // ブロック崩し（仮）
-    const blockGame = document.getElementById("block-game");
-    for (let i = 0; i < 16; i++) {
-      const block = document.createElement("div");
-      block.textContent = "🟩";
-      block.style.display = "inline-block";
-      block.style.fontSize = "2rem";
-      block.style.margin = "5px";
-      block.style.cursor = "pointer";
-      block.onclick = () => block.remove();
-      blockGame.appendChild(block);
-    }
-  </script>
 </body>
 </html>
