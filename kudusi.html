@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ニコリブロック崩し</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="./favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <h2>🧱 ニコリブロック崩し</h2>
+    <p>すべてのブロックをクリックして消そう！</p>
+    <div id="game" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;"></div>
+    <p><a href="./index.html">← トップページに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+
+  <script>
+    const game = document.getElementById("game");
+    for (let i = 0; i < 16; i++) {
+      const block = document.createElement("div");
+      block.textContent = "🟩";
+      block.style.fontSize = "2rem";
+      block.style.cursor = "pointer";
+      block.onclick = () => block.remove();
+      game.appendChild(block);
+    }
+  </script>
+</body>
+</html>
