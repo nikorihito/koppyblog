@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ニコリヒト連打チャレンジ</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="./favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <h2>🖱️ ニコリヒト連打チャレンジ</h2>
+    <p>5秒間で何回クリックできるかチャレンジ！</p>
+    <div id="count" style="font-size: 2em; margin: 20px;">0</div>
+    <button id="start">スタート！</button>
+    <p><a href="./index.html">← トップページに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+
+  <script>
+    let count = 0;
+    let isRunning = false;
+    const countDisplay = document.getElementById("count");
+    const startButton = document.getElementById("start");
+
+    startButton.onclick = () => {
+      if (isRunning) return;
+      count = 0;
+      isRunning = true;
+      countDisplay.textContent = count;
+
+      document.body.onclick = () => {
+        if (isRunning) {
+          count++;
+          countDisplay.textContent = count;
+        }
+      };
+
+      setTimeout(() => {
+        isRunning = false;
+        document.body.onclick = null;
+        startButton.textContent = "もう一回やる！";
+      }, 5000);
+    };
+  </script>
+</body>
+</html>
