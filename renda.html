@@ -6,16 +6,47 @@
   <title>ニコリヒト連打チャレンジ</title>
   <link rel="stylesheet" href="../style.css" />
   <style>
-  .button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #4ec1f5;
-    color: white;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.3s;
-  }
+    body {
+      text-align: center;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #4ec1f5;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      margin-top: 20px;
+    }
+    .button:hover {
+      background-color: #38a3d1;
+    }
+    #click-area {
+      margin: 20px auto;
+      width: 200px;
+      height: 200px;
+      background-color: #f9f9f9;
+      border: 2px solid #999;
+      border-radius: 12px;
+      line-height: 200px;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+    #score {
+      font-size: 2em;
+      margin: 10px;
+    }
+    #countdown {
+      font-size: 3em;
+      color: red;
+      margin: 15px;
+    }
   </style>
 </head>
 <body>
@@ -30,8 +61,11 @@
   <main>
     <h2>🖱️ ニコリヒト連打チャレンジ</h2>
     <p>5秒間で何回クリックできるかチャレンジ！</p>
-    <div id="count" style="font-size: 2em; margin: 20px;">0</div>
-    <button id="start">スタート！</button>
+    <div id="score">スコア: 0</div>
+    <div id="countdown"></div>
+    <div id="click-area">ここを連打！</div>
+    <button id="start" class="button">スタート！</button>
+    <br />
     <a href="./index.html" class="button">← トップページに戻る</a>
   </main>
 
@@ -40,30 +74,48 @@
   </footer>
 
   <script>
-    let count = 0;
+    let score = 0;
     let isRunning = false;
-    const countDisplay = document.getElementById("count");
-    const startButton = document.getElementById("start");
+    const scoreDisplay = document.getElementById("score");
+    const clickArea = document.getElementById("click-area");
+    const startBtn = document.getElementById("start");
+    const countdown = document.getElementById("countdown");
 
-    startButton.onclick = () => {
+    clickArea.onclick = () => {
+      if (isRunning) {
+        score++;
+        scoreDisplay.textContent = `スコア: ${score}`;
+      }
+    };
+
+    startBtn.onclick = () => {
       if (isRunning) return;
-      count = 0;
-      isRunning = true;
-      countDisplay.textContent = count;
 
-      document.body.onclick = () => {
-        if (isRunning) {
-          count++;
-          countDisplay.textContent = count;
+      let count = 3;
+      countdown.textContent = count;
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdown.textContent = count;
+        } else {
+          clearInterval(countdownInterval);
+          countdown.textContent = "スタート！";
+          setTimeout(() => countdown.textContent = "", 1000);
+          runGame();
         }
-      };
+      }, 1000);
+    };
+
+    function runGame() {
+      score = 0;
+      isRunning = true;
+      scoreDisplay.textContent = "スコア: 0";
 
       setTimeout(() => {
         isRunning = false;
-        document.body.onclick = null;
-        startButton.textContent = "もう一回やる！";
+        startBtn.textContent = "もう一回やる！";
       }, 5000);
-    };
+    }
   </script>
 </body>
 </html>
