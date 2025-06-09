@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>今日のニコリ占い</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="./favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <h2>🔮 今日のニコリ占い</h2>
+    <p>今日の運勢を占ってみよう！</p>
+    <button onclick="uranau()">占う！</button>
+    <div id="result" style="margin-top: 20px; font-size: 1.5em;"></div>
+    <p><a href="./index.html">← トップページに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+
+  <script>
+    const results = ["超ラッキー！🎉", "まあまあいい感じ😊", "ふつう〜", "ちょっと注意⚠️", "だめかも…😢"];
+    function uranau() {
+      const r = results[Math.floor(Math.random() * results.length)];
+      document.getElementById("result").textContent = r;
+    }
+  </script>
+</body>
+</html>
