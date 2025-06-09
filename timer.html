@@ -6,20 +6,34 @@
   <title>ニコリタイマー／ストップウォッチ</title>
   <link rel="stylesheet" href="../style.css" />
   <style>
-  .button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #4ec1f5;
-    color: white;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.3s;
-  }
-  
-  .button:hover {
-    background-color: #38a3d1;
-  }
+    body {
+      text-align: center;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #4ec1f5;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      margin-top: 20px;
+    }
+    .button:hover {
+      background-color: #38a3d1;
+    }
+    #display {
+      font-size: 2em;
+      margin: 20px 0;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 1em;
+    }
   </style>
 </head>
 <body>
@@ -33,36 +47,9 @@
 
   <main>
     <h2>⏱️ ニコリタイマー／ストップウォッチ</h2>
-    <p id="display" style="font-size: 2em;">0.00 秒</p>
+    <p id="display">0.00 秒</p>
     <button onclick="start()">スタート</button>
     <button onclick="stop()">ストップ</button>
     <button onclick="reset()">リセット</button>
-    <a href="./index.html" class="button">← トップページに戻る</a>
-  </main>
-
-  <footer>
-    <p>&copy; 2025 こっぴー</p>
-  </footer>
-
-  <script>
-    let timer, startTime;
-
-    function start() {
-      startTime = Date.now();
-      timer = setInterval(() => {
-        const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-        document.getElementById("display").textContent = `${elapsed} 秒`;
-      }, 10);
-    }
-
-    function stop() {
-      clearInterval(timer);
-    }
-
-    function reset() {
-      clearInterval(timer);
-      document.getElementById("display").textContent = "0.00 秒";
-    }
-  </script>
-</body>
-</html>
+    <br />
+    <a href="./index.html"
