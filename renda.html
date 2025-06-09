@@ -93,6 +93,8 @@
 
       let count = 3;
       countdown.textContent = count;
+      startBtn.disabled = true;
+
       const countdownInterval = setInterval(() => {
         count--;
         if (count > 0) {
@@ -100,7 +102,7 @@
         } else {
           clearInterval(countdownInterval);
           countdown.textContent = "スタート！";
-          setTimeout(() => countdown.textContent = "", 1000);
+          setTimeout(() => countdown.textContent = "", 800);
           runGame();
         }
       }, 1000);
@@ -114,6 +116,7 @@
       setTimeout(() => {
         isRunning = false;
         startBtn.textContent = "もう一回やる！";
+        startBtn.disabled = false;
       }, 5000);
     }
   </script>
