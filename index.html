@@ -84,5 +84,26 @@
   <footer>
     <p>&copy; 2025 こっぴー</p>
   </footer>
+  <!-- 🕳️ボタン（bodyの一番最後、</body>の直前に入れてOK） -->
+<a href="lab.html" id="secret-hole" title="こっぴーの研究室へ...">🕳️</a>
+
+<style>
+  #secret-hole {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 1.8em;
+    text-decoration: none;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.3s, transform 0.2s;
+    z-index: 1000;
+  }
+
+  #secret-hole:hover {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+</style>
 </body>
 </html>
