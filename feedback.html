@@ -7,72 +7,112 @@
   <link rel="icon" href="https://nikorihito.github.io/koppyblog/favicon.png" type="image/png">
   <style>
     body {
-      background-color: #FFFFFF;
-      color: black;
-      font-family: sans-serif;
+      background-color: #ffffff;
+      color: #222;
+      font-family: 'Segoe UI', sans-serif;
       text-align: center;
       padding: 40px 20px;
     }
+
+    h2 {
+      font-size: 1.8em;
+      margin-bottom: 0.5em;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 2em;
+    }
+
     form {
-      max-width: 500px;
+      max-width: 520px;
       margin: auto;
+      background: #f9f9f9;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       text-align: left;
     }
+
     label {
       display: block;
       margin-top: 20px;
       font-weight: bold;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      background-color: #222;
-      color: white;
       font-size: 1em;
     }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      color: #333;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+
     textarea {
       resize: vertical;
       height: 120px;
     }
+
     .button {
-      margin-top: 20px;
-      padding: 10px 20px;
+      display: inline-block;
+      margin-top: 30px;
+      padding: 12px 24px;
       background-color: #4ec1f5;
       color: white;
       border-radius: 8px;
       border: none;
       font-weight: bold;
+      font-size: 1em;
       cursor: pointer;
       transition: background-color 0.3s;
+      text-decoration: none;
+      text-align: center;
     }
+
     .button:hover {
       background-color: #38a3d1;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-top: 20px;
+      background-color: #ccc;
+      color: #222;
+    }
+
+    .back-button:hover {
+      background-color: #aaa;
     }
   </style>
 </head>
 <body>
   <h2>📮 フィードバック送信</h2>
-  <p style="color:#ccc;">ブログの感想やご意見、エラー等を送ってください。匿名でもOKです。</p>
+  <p>ブログの感想やご意見、エラーなどあればお気軽に送ってください（匿名OK）</p>
 
   <form action="https://formspree.io/f/mdkzgoeb" method="POST" onsubmit="return formatMessage()">
     <label for="name">お名前（省略可）</label>
     <input type="text" id="name" name="name" placeholder="例：こっぴー" />
 
     <label for="message">フィードバック内容</label>
-    <textarea id="message" required></textarea>
+    <textarea id="message" required placeholder="内容を入力してください..."></textarea>
 
     <input type="hidden" name="message" id="fullMessage" />
-    <input type="hidden" name="_subject" value="こっぴーのマイクラひとやすみ フィードバック" />
+    <input type="hidden" name="_subject" value="📮 こっぴーのマイクラひとやすみ フィードバック" />
     <button type="submit" class="button">送信する</button>
   </form>
-  <a href="index.html" class="button">← トップページに戻る</a>
+
+  <a href="index.html" class="button back-button">← トップページに戻る</a>
+
   <script>
     function formatMessage() {
-      const name = document.getElementById("name").value.trim() || "匿名さん";
+      const name = document.getElementById("name").value.trim() || "匿名";
       const body = document.getElementById("message").value.trim();
-      const finalMessage = `${name}からのフィードバック\n\n${body}`;
+      const finalMessage = `${name}さんからのフィードバック\n\n${body}`;
       document.getElementById("fullMessage").value = finalMessage;
       return true;
     }
