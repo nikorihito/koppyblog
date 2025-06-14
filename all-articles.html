@@ -53,31 +53,6 @@
            list.appendChild(li);
          });
       });
-        data
-          .sort((a, b) => new Date(b.date) - new Date(a.date))
-          .slice(0, 3)
-          .forEach(article => {
-            const li = document.createElement("li");
-            const a = document.createElement("a");
-            a.href = article.url;
-            a.textContent = article.title + "（" + article.date + "）";
-            a.className = "article-button";
-        
-            // New!! バッジ（7日以内なら追加）
-            const now = new Date();
-            const postDate = new Date(article.date);
-            const diff = (now - postDate) / (1000 * 60 * 60 * 24); // 日数差
-        
-            if (diff <= 7) {
-              const badge = document.createElement("span");
-              badge.className = "new-badge";
-              badge.textContent = "New!!";
-              a.appendChild(badge);
-            }
-
-            li.appendChild(a);
-            list.appendChild(li);
-          });
   </script>
 </body>
 </html>
