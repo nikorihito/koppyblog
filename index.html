@@ -20,6 +20,55 @@
     body {
       text-align: center;
     }
+    .faq-section {
+      margin: 40px 20px;
+      text-align: center;
+    }
+    
+    .faq-list {
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    
+    .faq-item {
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      margin: 12px 0;
+      padding: 14px 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .faq-item:hover {
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    }
+    
+    .faq-item summary {
+      font-weight: bold;
+      font-size: 1.1em;
+      cursor: pointer;
+      outline: none;
+      list-style: none;
+      transition: color 0.2s;
+    }
+    
+    .faq-item[open] summary {
+      color: #4ec1f5;
+    }
+    
+    .faq-item p {
+      margin-top: 10px;
+      font-size: 1em;
+      color: #444;
+    }
+    
+    .faq-item a {
+      color: #4ec1f5;
+      text-decoration: underline;
+    }
+    
     .game-buttons {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
