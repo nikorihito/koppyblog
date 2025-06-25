@@ -68,6 +68,19 @@
       color: #4ec1f5;
       text-decoration: underline;
     }
+
+    .faq-item .content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      padding: 0 0;
+    }
+
+    .faq-item[open] .content {
+      max-height: 500px;
+      padding-top: 10px;
+    }
+
     
     .game-buttons {
       display: grid;
@@ -106,6 +119,7 @@
       font-weight: bold;
       transition: background-color 0.3s;
     }
+    
   </style>
 </head>
 <body>
@@ -149,31 +163,41 @@
       </div>
     </section>
 
+    <!-- よくあるご質問セクション -->
     <section class="faq-section">
       <h2>❓ よくあるご質問</h2>
     
       <div class="faq-list">
         <details class="faq-item">
           <summary>このサイトは何のサイトですか？</summary>
-          <p>こっぴーが運営している、マインクラフトのブログと配布物紹介のサイトです。</p>
-            </details>
+          <div class="content">
+            <p>こっぴーが運営している、マインクラフトのブログと配布物紹介のサイトです。</p>
+          </div>
+        </details>
     
         <details class="faq-item">
           <summary>配布物の利用は無料ですか？</summary>
-          <p>はい、基本的に無料で利用できます。利用規約は各ページをご確認ください。</p>
+          <div class="content">
+            <p>はい、基本的に無料で利用できます。利用規約は各ページをご確認ください。</p>
+          </div>
         </details>
-
+    
         <details class="faq-item">
           <summary>自作のMODやワールドを紹介してもいいですか？</summary>
-          <p>フィードバックページからご連絡ください。紹介できる場合があります。</p>
+          <div class="content">
+            <p>フィードバックページからご連絡ください。紹介できる場合があります。</p>
+          </div>
         </details>
     
         <details class="faq-item">
           <summary>こっぴーに質問したいときは？</summary>
-          <p><a href="feedback.html">フィードバックページ</a>からお気軽にどうぞ。</p>
+          <div class="content">
+            <p><a href="feedback.html">フィードバックページ</a>からお気軽にどうぞ。</p>
+          </div>
         </details>
       </div>
     </section>
+
 
 
   </main>
@@ -202,5 +226,23 @@
     transform: scale(1.2);
   }
 </style>
+  <script>
+    document.querySelectorAll('.faq-item').forEach((el) => {
+      const content = el.querySelector('.content');
+      // 初期状態で開いているものにも反映
+      if (el.open) {
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
+
+      el.addEventListener('toggle', () => {
+        if (el.open) {
+          content.style.maxHeight = content.scrollHeight + "px";
+        } else {
+          content.style.maxHeight = "0px";
+        }
+      });
+    });
+  </script>
+
 </body>
 </html>
