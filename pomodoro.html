@@ -54,7 +54,7 @@
     .button {
       display: inline-block;
       padding: 10px 20px;
-      margin-top: 20px;
+      margin: 10px;
       background-color: #4ec1f5;
       color: white;
       text-decoration: none;
@@ -65,7 +65,7 @@
 </head>
 <body>
   <header>
-    <a href="../index.html">
+    <a href="./index.html">
       <img src="./favicon.png" alt="サイトロゴ" class="logo" />
     </a>
     <h1>こっぴーのマイクラひとやすみ</h1>
@@ -81,6 +81,7 @@
       </div>
       <div>
         <a href="#" id="toggle" class="button">スタート</a>
+        <a href="#" id="reset" class="button">リセット</a>
       </div>
     </article>
 
@@ -95,6 +96,7 @@
     const left = document.getElementById('left');
     const right = document.getElementById('right');
     const toggle = document.getElementById('toggle');
+    const reset = document.getElementById('reset');
 
     let isWorking = true;
     let isRunning = false;
@@ -159,9 +161,19 @@
       startTimer();
     }
 
+    function resetTimer() {
+      clearInterval(interval);
+      clearTimeout(autoSwitchTimer);
+      isRunning = false;
+      isWorking = true;
+      duration = 25 * 60;
+      remaining = duration;
+      toggle.textContent = 'スタート';
+      updateDisplay();
+    }
+
     toggle.addEventListener('click', (e) => {
       e.preventDefault();
-
       if (!isRunning && remaining <= 0) {
         switchState();
       } else if (!isRunning) {
@@ -169,6 +181,11 @@
       } else {
         stopTimer();
       }
+    });
+
+    reset.addEventListener('click', (e) => {
+      e.preventDefault();
+      resetTimer();
     });
 
     updateDisplay();
