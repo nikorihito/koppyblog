@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ポモドーロタイマー - こっぴーのマイクラひとやすみ</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" href="https://nikorihito.github.io/koppyblog/favicon.png" type="image/png">
+  <style>
+    .timer-container {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      height: 300px;
+      margin: 40px auto;
+      max-width: 600px;
+      font-family: 'Segoe UI', sans-serif;
+      border: 2px solid #333;
+    }
+
+    .timer-half {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      font-size: 2.8em;
+      font-weight: bold;
+      color: white;
+      white-space: pre-line;
+      text-align: center;
+      opacity: 0.2;
+    }
+
+    .work-half {
+      background-color: red;
+      justify-content: flex-start;
+      padding-left: 20px;
+    }
+
+    .break-half {
+      background-color: blue;
+      justify-content: flex-end;
+      padding-right: 20px;
+    }
+
+    .active {
+      opacity: 1;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      margin-top: 20px;
+      background-color: #4ec1f5;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="../favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <article>
+      <h2>ポモドーロタイマー🍅</h2>
+      <div class="timer-container">
+        <div id="left" class="timer-half work-half active">作業時間\n25:00</div>
+        <div id="right" class="timer-half break-half">休憩時間\n05:00</div>
+      </div>
+      <div style="text-align: center;">
+        <a href="#" id="toggle" class="button">スタート</a>
+      </div>
+    </article>
+
+    <p><a href="./index.html" class="button">← トップページに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+
+  <script>
+    const left = document.getElementById('left');
+    const right = document.getElementById('right');
+    const toggle = document.getElementById('toggle');
+
+    let isWorking = true;
+    let isRunning = false;
+    let duration = 25 * 60;
+    let remaining = duration;
+    let interval;
+    let autoSwitchTimer;
+
+    function formatTime(sec) {
+      const m = String(Math.floor(sec / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function updateDisplay() {
+      if (isWorking) {
+        left.classList.add('active');
+        right.classList.remove('active');
+        left.textContent = `作業時間\n${formatTime(remaining)}`;
+        right.textContent = `休憩時間\n05:00`;
+      } else {
+        left.classList.remove('active');
+        right.classList.add('active');
+        right.textContent = `休憩時間\n${formatTime(remaining)}`;
+        left.textContent = `作業時間\n25:00`;
+      }
+    }
+
+    function startTimer() {
+      if (isRunning) return;
+      isRunning = true;
+      toggle.textContent = 'ストップ';
+
+      interval = setInterval(() => {
+        remaining--;
+        updateDisplay();
+
+        if (remaining <= 0) {
+          clearInterval(interval);
+          isRunning = false;
+          toggle.textContent = '▶ 切り替え';
+
+          autoSwitchTimer = setTimeout(() => {
+            switchState();
+          }, 10000);
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(interval);
+      isRunning = false;
+      toggle.textContent = 'スタート';
+    }
+
+    function switchState() {
+      clearTimeout(autoSwitchTimer);
+      isWorking = !isWorking;
+      duration = isWorking ? 25 * 60 : 5 * 60;
+      remaining = duration;
+      updateDisplay();
+      startTimer();
+    }
+
+    toggle.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      if (!isRunning && remaining <= 0) {
+        switchState();
+      } else if (!isRunning) {
+        startTimer();
+      } else {
+        stopTimer();
+      }
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>
