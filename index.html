@@ -150,17 +150,43 @@
     <a href="feedback.html" class="button">フィードバック送信</a>
     </section>
 
-    <section>
-      <a href="terms.html">
-        <img src="terms_button.png" alt="利用規約" style="width:160px; cursor:pointer;" />
-      </a>
-    </section>
+    <a href="terms.html" class="hover-button">
+        <img src="terms_button.png" alt="利用規約" />
+    </a>
+
+    <style>
+        .hover-button img {
+            width: 160px;
+            transition: transform 0.2s ease, filter 0.2s ease;
+            cursor: pointer;
+        }
+
+        .hover-button img:hover {
+            transform: scale(0.95); /* 少し小さく */
+            filter: brightness(80%); /* 暗くする */
+        }
+    </style>
+
 
     <section>
-      <a href="pomodoro.html">
-        <img src="pomodoro_button.png" alt="ポモドーロ" style="width:160px; cursor:pointer;" />
-      </a>
+        <a href="pomodoro.html" class="hover-button">
+            <img src="pomodoro_button.png" alt="ポモドーロ" />
+        </a>
     </section>
+
+    <style>
+        .hover-button img {
+            width: 160px;
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .hover-button img:hover {
+            transform: scale(0.95);     /* 少し小さく */
+            filter: brightness(80%);    /* 暗くなる */
+        }
+    </style>
+
 
     <!-- ミニゲームリンクボタン -->
     <section>
