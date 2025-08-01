@@ -4,17 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <meta name="description" content="ゆるっと気ままに、マイクラのことを書いてます。YouTubeの配布物も載せます。" />
+  <meta name="description" content="ゆるっと気ままに、マイクラのことを書いてます。YouTubeの配布物も載せます。" />
   <meta property="og:title" content="こっぴーのマイクラひとやすみ-研究室" />
   <meta property="og:description" content="ここでは、まだ公開していないひみつのツールや実験的なアイデアを紹介します。" />
   <meta property="og:image" content="https://nikorihito.github.io/koppyblog/lab_favicon.png" />
   <meta property="og:url" content="https://nikorihito.github.io/koppyblog/" />
   <meta property="og:type" content="website" />
   <meta name="keywords" content="こっぴー, マイクラ, Minecraft, こっぴーふーちゃんねる, 配布物, MOD, プログラミング, 日常, ブログ">
-  
+
   <title>こっぴーの研究室</title>
   <link rel="icon" href="https://nikorihito.github.io/koppyblog/lab_favicon.png" type="image/png">
-  <link rel="stylesheet" href="../style.css" />
   <style>
     body {
       background-color: #111;
@@ -29,6 +28,44 @@
       margin-bottom: 10px;
     }
 
+    p.subtitle {
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    .faq-section {
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .faq-list details {
+      background-color: #1e1e1e;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      padding: 12px;
+      cursor: pointer;
+      border: 1px solid #333;
+      transition: background 0.3s;
+    }
+
+    .faq-list details:hover {
+      background-color: #2c2c2c;
+    }
+
+    .faq-list summary {
+      font-weight: bold;
+      font-size: 1em;
+      color: #fff;
+      outline: none;
+    }
+
+    .faq-list .content {
+      margin-top: 8px;
+      font-size: 0.95em;
+      color: #ccc;
+    }
+
     .button {
       display: inline-block;
       padding: 10px 20px;
@@ -38,6 +75,7 @@
       text-decoration: none;
       font-weight: bold;
       transition: background-color 0.3s;
+      margin-top: 20px;
     }
 
     .button:hover {
@@ -48,11 +86,24 @@
 <body>
   <img src="./lab_favicon.png" alt="サイトロゴ" class="logo" />
   <h2>🧪 こっぴーの研究室</h2>
-  <p style="color: #ccc;">ここでは、まだ公開していないひみつのツールや実験的なアイデアを紹介します。</p> 
+  <p class="subtitle">ここでは、まだ公開していないひみつのツールや実験的なアイデアを紹介します。</p> 
 
-  <div class="lab-item">
-
+  <!-- 記事一覧（FAQ風） -->
+  <section class="faq-section">
+    <div class="faq-list">
+      <details>
+        <summary>【🧪研究記事1】discord鯖「Nikori・Craft Hub」</summary>
+        <div class="content">
+          <p>discordサーバーを作ってみました！年齢制限はありません。</p>
+          <p>初心者でも大丈夫です。上級者の人に教えてもらうこともできます！</p>
+          <p>マイクラのどんな分野の人でも入れるのでぜひ入ってみてください！</p>
+          <a href="https://discord.gg/2b8rbjTMvM" class="button">🧑🏻‍🔧Nikori・Craft Hubはこちら！</a>
+        </div>
+      </details>
+    </div>
+  </section>
 
   <a href="index.html" class="button">← トップページに戻る</a>
+  <a href="lab_pass.html" class="button">← パスワード入力画面に戻る</a>
 </body>
 </html>
