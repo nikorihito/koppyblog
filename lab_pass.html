@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta name="description" content="こっぴーの秘密の研究室へ入るためのパスワード入力ページです。" />
+  <meta property="og:title" content="こっぴーのマイクラひとやすみ-秘密の研究室" />
+  <meta property="og:description" content="パスワードを入力すると、まだ公開していないひみつのツールや実験的なアイデアが見られます。" />
+  <meta property="og:image" content="https://nikorihito.github.io/koppyblog/lab_favicon.png" />
+  <meta property="og:url" content="https://nikorihito.github.io/koppyblog/password.html" />
+  <meta property="og:type" content="website" />
+  <meta name="keywords" content="こっぴー, マイクラ, Minecraft, 研究室, 秘密, ツール, 実験, ブログ">
+
+  <title>秘密の研究室 - パスワード入力</title>
+  <link rel="icon" href="https://nikorihito.github.io/koppyblog/lab_favicon.png" type="image/png">
+
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 40px 20px;
+    }
+
+    .logo {
+      width: 80px;
+      margin-bottom: 15px;
+    }
+
+    h2 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    .input-box {
+      margin: 20px 0;
+    }
+
+    input[type="password"] {
+      padding: 10px;
+      width: 70%;
+      max-width: 300px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      outline: none;
+      text-align: center;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #4ec1f5;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      cursor: pointer;
+      border: none;
+      margin-top: 10px;
+    }
+
+    .button:hover {
+      background-color: #38a3d1;
+    }
+
+    .error {
+      color: #ff6b6b;
+      margin-top: 10px;
+      font-size: 0.9em;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <img src="./lab_favicon.png" alt="サイトロゴ" class="logo" />
+  <h2>🔒 秘密の研究室に入るにはパスワードが必要です</h2>
+  <p style="color: #ccc;">正しいパスワードを入力すると、未公開ツールや実験アイデアのページへ移動できます。</p> 
+
+  <div class="input-box">
+    <input type="password" id="passwordInput" placeholder="パスワードを入力..." />
+    <br>
+    <button class="button" onclick="checkPassword()">研究室に入る ▶</button>
+    <p id="errorMessage" class="error">パスワードが違います。</p>
+  </div>
+
+  <a href="index.html" class="button">← トップページに戻る</a>
+
+  <script>
+    function checkPassword() {
+      const password = document.getElementById("passwordInput").value;
+      const error = document.getElementById("errorMessage");
+
+      if (password === "nikori_saiko-") {
+        window.location.href = "lab.html";
+      } else {
+        error.style.display = "block";
+      }
+    }
+  </script>
+</body>
+</html>
