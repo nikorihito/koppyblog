@@ -51,11 +51,15 @@
       position: absolute;
       cursor: pointer;
       user-select: none;
-      font-weight: 900;
+
+      /* 太すぎ対策：軽めに */
+      font-weight: 400;           /* 300〜500あたりが無難 */
       font-size: 2rem;
-      transition: transform 0.08s ease, left 0.18s ease, top 0.18s ease;
+
+      /* クリック感だけ残す（動きは“文字自体”ではなく押した時のみ） */
+      transition: transform 0.08s ease;
     }
-    .hima:active { transform: scale(1.2); }
+    .hima:active { transform: scale(1.12); }
 
     .controls {
       margin: 12px 0 8px;
@@ -142,13 +146,11 @@
     const restartBtn = document.getElementById("restartBtn");
 
     // ===== 設定（好みで調整OK） =====
-    const COMBO_WINDOW_MS = 650;          // 連続判定（この時間内ならコンボ継続）
-    const MAX_COMBO = 10;                // コンボ上限
-    const BASE_MOVE_MS = 1500;           // 移動の基本間隔
-    const MIN_MOVE_MS  = 550;            // 最低移動間隔（難易度上昇で短くなる）
-    const BASE_FONT_PX = 36;             // 表示サイズ
-    const MIN_FONT_PX  = 22;             // 最小サイズ（難易度上昇で小さくする）
-    const BEST_KEY = "hima_best_score_v2";
+    const COMBO_WINDOW_MS = 650;   // 連続判定
+    const MAX_COMBO = 10;          // コンボ上限
+    const BASE_FONT_PX = 36;       // 表示サイズ
+    const MIN_FONT_PX  = 24;       // 最小サイズ
+    const BEST_KEY = "hima_best_score_v3";
 
     // ===== 状態 =====
     let score = 0;
@@ -158,33 +160,23 @@
     let best = Number(localStorage.getItem(BEST_KEY) || 0);
     bestEl.textContent = `ベスト: ${best}`;
 
-    // 生成した「暇」を管理
-    // id -> { el, moveTimer }
+    // 生成した「暇」を管理（動かさない版なのでタイマー不要）
     const himas = new Map();
     let nextId = 1;
 
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
     function calcLevel() {
-      // 伸びが実感しやすいように段階式
       return 1 + Math.floor(score / 25);
     }
 
     function targetCountByScore() {
-      // 同時出現数：スコアに応じて増加
-      // 例: 0-24:1, 25-49:2, 50-74:3...
+      // スコアが上がると同時出現数が増える（動かないのでストレス少なめ）
       return 1 + Math.floor(score / 25);
     }
 
-    function moveIntervalMs() {
-      // 難易度が上がるほど移動が速い
-      const lvl = calcLevel();
-      const ms = BASE_MOVE_MS - (lvl - 1) * 120;
-      return clamp(ms, MIN_MOVE_MS, BASE_MOVE_MS);
-    }
-
     function fontSizePx() {
-      // 難易度が上がるほど少し小さく
+      // 難易度が上がるほど少し小さく（嫌なら固定でもOK）
       const lvl = calcLevel();
       const px = BASE_FONT_PX - (lvl - 1) * 2;
       return clamp(px, MIN_FONT_PX, BASE_FONT_PX);
@@ -201,7 +193,6 @@
       const areaW = gameArea.clientWidth;
       const areaH = gameArea.clientHeight;
 
-      // 要素サイズぶんの余白をみてはみ出しを防ぐ
       const rect = el.getBoundingClientRect();
       const w = Math.max(24, rect.width);
       const h = Math.max(24, rect.height);
@@ -216,7 +207,6 @@
     function removeHima(id) {
       const item = himas.get(id);
       if (!item) return;
-      clearInterval(item.moveTimer);
       item.el.remove();
       himas.delete(id);
     }
@@ -228,16 +218,8 @@
       el.textContent = "暇";
       el.style.fontSize = `${fontSizePx()}px`;
 
-      // 初期位置
       gameArea.appendChild(el);
       randomPosition(el);
-
-      // 定期的に移動
-      const timer = setInterval(() => {
-        // 難易度変動に追従させたいので、サイズだけ更新
-        el.style.fontSize = `${fontSizePx()}px`;
-        randomPosition(el);
-      }, moveIntervalMs());
 
       el.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -251,7 +233,7 @@
         }
         lastHitAt = now;
 
-        // 得点：コンボ倍率分（分かりやすく）
+        // 得点：コンボ倍率分
         score += combo;
 
         // ベスト更新
@@ -266,16 +248,13 @@
         updateHUD();
       });
 
-      himas.set(id, { el, moveTimer: timer });
+      himas.set(id, { el });
     }
 
     function maintainPopulation() {
       const target = targetCountByScore();
-      while (himas.size < target) {
-        spawnOne();
-      }
+      while (himas.size < target) spawnOne();
 
-      // ターゲットより多い場合（リスタートなど）に削る
       while (himas.size > target) {
         const firstKey = himas.keys().next().value;
         removeHima(firstKey);
@@ -283,11 +262,7 @@
     }
 
     function resetGame() {
-      // 全削除
-      for (const id of Array.from(himas.keys())) {
-        removeHima(id);
-      }
-
+      for (const id of Array.from(himas.keys())) removeHima(id);
       score = 0;
       combo = 1;
       lastHitAt = 0;
@@ -296,7 +271,7 @@
       maintainPopulation();
     }
 
-    // リサイズ時に「暇」がはみ出しやすいので再配置
+    // リサイズ時に見切れ防止で再配置（動かないけど画面サイズ変わると必要）
     window.addEventListener("resize", () => {
       for (const { el } of himas.values()) {
         randomPosition(el);
