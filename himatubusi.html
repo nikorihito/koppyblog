@@ -30,7 +30,7 @@
       border-radius: 10px;
       padding: 10px 14px;
       min-width: 150px;
-      font-weight: 700;
+      font-weight: 600;
       box-shadow: 0 2px 10px rgba(0,0,0,0.06);
     }
 
@@ -51,35 +51,25 @@
       position: absolute;
       cursor: pointer;
       user-select: none;
-
-      /* 太すぎ対策：軽めに */
-      font-weight: 400;           /* 300〜500あたりが無難 */
+      font-weight: 400;
       font-size: 2rem;
-
-      /* クリック感だけ残す（動きは“文字自体”ではなく押した時のみ） */
       transition: transform 0.08s ease;
     }
     .hima:active { transform: scale(1.12); }
 
     .controls {
       margin: 12px 0 8px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
     }
 
     button {
       padding: 10px 16px;
       border: 0;
       border-radius: 10px;
-      font-weight: 800;
+      font-weight: 700;
       cursor: pointer;
       background: #4ec1f5;
       color: #fff;
-      transition: filter 0.2s;
     }
-    button:hover { filter: brightness(0.92); }
 
     .button {
       display: inline-block;
@@ -93,14 +83,6 @@
       margin-top: 10px;
     }
     .button:hover { background-color: #38a3d1; }
-
-    .note {
-      margin: 8px auto 0;
-      max-width: 720px;
-      color: #444;
-      opacity: 0.9;
-      font-size: 0.95rem;
-    }
   </style>
 </head>
 
@@ -114,12 +96,10 @@
 
   <main>
     <h2>🕹️ 『暇』つぶし</h2>
-    <p>出てくる「暇」をタップしてスコアを伸ばそう！</p>
+    <p>出てくる「暇」をタップするだけ。</p>
 
     <div class="hud">
       <div class="panel" id="score">スコア: 0</div>
-      <div class="panel" id="combo">コンボ: x1</div>
-      <div class="panel" id="level">難易度: 1</div>
       <div class="panel" id="best">ベスト: 0</div>
     </div>
 
@@ -127,8 +107,7 @@
       <button id="restartBtn">リスタート</button>
     </div>
 
-    <div id="game-area" aria-label="game area"></div>
-    <div class="note">連続でタップするとコンボ倍率が上がります。スコアが上がると同時に出る数が増えます。</div>
+    <div id="game-area"></div>
 
     <a href="./index.html" class="button">← トップページに戻る</a>
   </main>
@@ -140,53 +119,26 @@
   <script>
     const gameArea = document.getElementById("game-area");
     const scoreEl = document.getElementById("score");
-    const comboEl = document.getElementById("combo");
-    const levelEl = document.getElementById("level");
     const bestEl  = document.getElementById("best");
     const restartBtn = document.getElementById("restartBtn");
 
-    // ===== 設定（好みで調整OK） =====
-    const COMBO_WINDOW_MS = 650;   // 連続判定
-    const MAX_COMBO = 10;          // コンボ上限
-    const BASE_FONT_PX = 36;       // 表示サイズ
-    const MIN_FONT_PX  = 24;       // 最小サイズ
-    const BEST_KEY = "hima_best_score_v3";
+    const BEST_KEY = "hima_best_score_simple";
 
-    // ===== 状態 =====
     let score = 0;
-    let combo = 1;
-    let lastHitAt = 0;
-
     let best = Number(localStorage.getItem(BEST_KEY) || 0);
     bestEl.textContent = `ベスト: ${best}`;
 
-    // 生成した「暇」を管理（動かさない版なのでタイマー不要）
     const himas = new Map();
     let nextId = 1;
 
-    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
-
-    function calcLevel() {
-      return 1 + Math.floor(score / 25);
-    }
-
-    function targetCountByScore() {
-      // スコアが上がると同時出現数が増える（動かないのでストレス少なめ）
-      return 1 + Math.floor(score / 25);
-    }
-
-    function fontSizePx() {
-      // 難易度が上がるほど少し小さく（嫌なら固定でもOK）
-      const lvl = calcLevel();
-      const px = BASE_FONT_PX - (lvl - 1) * 2;
-      return clamp(px, MIN_FONT_PX, BASE_FONT_PX);
-    }
-
     function updateHUD() {
       scoreEl.textContent = `スコア: ${score}`;
-      comboEl.textContent = `コンボ: x${combo}`;
-      levelEl.textContent = `難易度: ${calcLevel()}`;
       bestEl.textContent  = `ベスト: ${best}`;
+    }
+
+    function targetCount() {
+      // スコアが上がると同時出現数が増える
+      return 1 + Math.floor(score / 30);
     }
 
     function randomPosition(el) {
@@ -194,8 +146,8 @@
       const areaH = gameArea.clientHeight;
 
       const rect = el.getBoundingClientRect();
-      const w = Math.max(24, rect.width);
-      const h = Math.max(24, rect.height);
+      const w = rect.width || 32;
+      const h = rect.height || 32;
 
       const x = Math.random() * Math.max(1, areaW - w - 4);
       const y = Math.random() * Math.max(1, areaH - h - 4);
@@ -216,33 +168,18 @@
       const el = document.createElement("div");
       el.className = "hima";
       el.textContent = "暇";
-      el.style.fontSize = `${fontSizePx()}px`;
 
       gameArea.appendChild(el);
       randomPosition(el);
 
-      el.addEventListener("click", (e) => {
-        e.stopPropagation();
+      el.addEventListener("click", () => {
+        score += 1;
 
-        // コンボ判定
-        const now = Date.now();
-        if (now - lastHitAt <= COMBO_WINDOW_MS) {
-          combo = Math.min(MAX_COMBO, combo + 1);
-        } else {
-          combo = 1;
-        }
-        lastHitAt = now;
-
-        // 得点：コンボ倍率分
-        score += combo;
-
-        // ベスト更新
         if (score > best) {
           best = score;
           localStorage.setItem(BEST_KEY, String(best));
         }
 
-        // 消して補充
         removeHima(id);
         maintainPopulation();
         updateHUD();
@@ -252,7 +189,7 @@
     }
 
     function maintainPopulation() {
-      const target = targetCountByScore();
+      const target = targetCount();
       while (himas.size < target) spawnOne();
 
       while (himas.size > target) {
@@ -264,18 +201,12 @@
     function resetGame() {
       for (const id of Array.from(himas.keys())) removeHima(id);
       score = 0;
-      combo = 1;
-      lastHitAt = 0;
-
       updateHUD();
       maintainPopulation();
     }
 
-    // リサイズ時に見切れ防止で再配置（動かないけど画面サイズ変わると必要）
     window.addEventListener("resize", () => {
-      for (const { el } of himas.values()) {
-        randomPosition(el);
-      }
+      for (const { el } of himas.values()) randomPosition(el);
     });
 
     restartBtn.addEventListener("click", resetGame);
