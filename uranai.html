@@ -6,32 +6,87 @@
   <title>今日のニコリ占い</title>
   <link rel="stylesheet" href="../style.css" />
   <link rel="icon" href="https://nikorihito.github.io/koppyblog/favicon.png" type="image/png">
+
   <style>
     body {
       text-align: center;
       font-family: sans-serif;
       padding: 20px;
     }
-    .button {
-      display: inline-block;
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       padding: 10px 20px;
       background-color: #4ec1f5;
-      color: white;
-      border-radius: 8px;
+      color: #fff;
+      border-radius: 10px;
       text-decoration: none;
-      font-weight: bold;
-      transition: background-color 0.3s;
-      margin-top: 20px;
+      font-weight: 700;
+      transition: transform 0.08s ease, background-color 0.3s;
+      margin-top: 16px;
+      border: none;
+      cursor: pointer;
     }
-    .button:hover {
-      background-color: #38a3d1;
+    .btn:hover { background-color: #38a3d1; }
+    .btn:active { transform: translateY(1px); }
+    .btn.secondary {
+      background-color: #e9f6ff;
+      color: #147aa3;
+      border: 1px solid #bfe7fb;
     }
+    .btn.secondary:hover { background-color: #d8f0ff; }
+
+    #resultBox {
+      margin-top: 18px;
+      padding: 14px 12px;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      background: #fafafa;
+      display: inline-block;
+      min-width: min(520px, 92vw);
+    }
+
     #result {
-      margin-top: 20px;
-      font-size: 1.5em;
+      font-size: 1.6em;
+      font-weight: 800;
+      margin: 6px 0 0;
     }
+
+    #meta {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.95em;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.9em;
+      font-weight: 700;
+    }
+    .tag.good { background: #e8fff1; color: #0b7a3a; border: 1px solid #bff2d2; }
+    .tag.ok   { background: #eaf7ff; color: #0b5d86; border: 1px solid #c8ebff; }
+    .tag.mid  { background: #f4f4f5; color: #3f3f46; border: 1px solid #e4e4e7; }
+    .tag.warn { background: #fff7e6; color: #8a5a00; border: 1px solid #ffe0a6; }
+    .tag.bad  { background: #ffecec; color: #a10000; border: 1px solid #ffc6c6; }
+
+    .actions {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .hidden { display: none; }
   </style>
 </head>
+
 <body>
   <header>
     <a href="../index.html">
@@ -44,9 +99,24 @@
   <main>
     <h2>🔮 今日のニコリ占い</h2>
     <p>今日の運勢を占ってみよう！</p>
-    <button onclick="uranau()" class="button">占う！</button>
-    <div id="result"></div>
-    <a href="./index.html" class="button">← トップページに戻る</a>
+
+    <button id="fortuneBtn" class="btn" type="button" onclick="uranau()">
+      占う！
+    </button>
+
+    <div id="resultBox" class="hidden" aria-live="polite" aria-atomic="true">
+      <p id="meta"></p>
+      <div id="tag" class="tag mid">---</div>
+      <p id="result"></p>
+
+      <div class="actions">
+        <button class="btn secondary" type="button" onclick="copyResult()">結果をコピー</button>
+        <a id="shareX" class="btn secondary" target="_blank" rel="noopener">Xで共有</a>
+        <button class="btn secondary" type="button" onclick="resetToday()">今日の結果をリセット</button>
+      </div>
+    </div>
+
+    <a href="./index.html" class="btn secondary">← トップページに戻る</a>
   </main>
 
   <footer>
@@ -54,17 +124,144 @@
   </footer>
 
   <script>
+    // 1) 結果リストを「テキスト＋ランク」で管理（見た目や共有文に使いやすい）
     const results = [
-      "超ラッキー！🎉",
-      "まあまあいい感じ😊",
-      "ふつう〜",
-      "ちょっと注意⚠️",
-      "だめかも…😢"
+      { text: "超ラッキー！🎉", rank: "good", label: "大吉" },
+      { text: "まあまあいい感じ😊", rank: "ok",   label: "吉" },
+      { text: "ふつう〜",         rank: "mid",  label: "中吉" },
+      { text: "ちょっと注意⚠️",   rank: "warn", label: "末吉" },
+      { text: "だめかも…😢",      rank: "bad",  label: "凶" }
     ];
-    function uranau() {
-      const r = results[Math.floor(Math.random() * results.length)];
-      document.getElementById("result").textContent = r;
+
+    const STORAGE_KEY = "nikori_fortune_v1";
+
+    function yyyyMMddJST(d = new Date()) {
+      // GitHub Pagesでもズレにくいように、日本時間で日付キーを作る
+      const jst = new Date(d.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" }));
+      const y = jst.getFullYear();
+      const m = String(jst.getMonth() + 1).padStart(2, "0");
+      const day = String(jst.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
     }
+
+    // 2) “今日の結果は固定”にするため、日付から擬似乱数で index を決める
+    // （同じ日なら同じindexになる）
+    function seededIndexByDate(dateKey, length) {
+      let h = 2166136261;
+      for (let i = 0; i < dateKey.length; i++) {
+        h ^= dateKey.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return Math.abs(h) % length;
+    }
+
+    function setUI(data, dateKey) {
+      const box = document.getElementById("resultBox");
+      const meta = document.getElementById("meta");
+      const tag = document.getElementById("tag");
+      const result = document.getElementById("result");
+
+      box.classList.remove("hidden");
+      meta.textContent = `📅 ${dateKey} の運勢`;
+      tag.className = `tag ${data.rank}`;
+      tag.textContent = data.label;
+      result.textContent = data.text;
+
+      // X共有リンク（テキストのみ。URLを載せたいなら location.href を入れてもOK）
+      const share = document.getElementById("shareX");
+      const shareText = `今日のニコリ占い：${data.label}（${data.text}） #こっぴーのマイクラひとやすみ`;
+      share.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+    }
+
+    function loadToday() {
+      const dateKey = yyyyMMddJST();
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return null;
+
+      try {
+        const obj = JSON.parse(saved);
+        if (obj.dateKey === dateKey && obj.index != null) {
+          return { dateKey, index: obj.index };
+        }
+      } catch (_) {}
+      return null;
+    }
+
+    function saveToday(index) {
+      const dateKey = yyyyMMddJST();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ dateKey, index }));
+      return dateKey;
+    }
+
+    // 3) 占う（ローディング演出→結果表示）
+    function uranau() {
+      const btn = document.getElementById("fortuneBtn");
+      btn.disabled = true;
+
+      const dateKey = yyyyMMddJST();
+      const today = loadToday();
+
+      // ローディングっぽく見せる
+      btn.textContent = "占い中…🔮";
+
+      setTimeout(() => {
+        let index;
+        if (today) {
+          index = today.index;
+        } else {
+          index = seededIndexByDate(dateKey, results.length);
+          saveToday(index);
+        }
+
+        setUI(results[index], dateKey);
+
+        btn.disabled = false;
+        btn.textContent = "もう一度見る（今日の結果は同じ）";
+      }, 450);
+    }
+
+    // 4) コピーボタン
+    async function copyResult() {
+      const dateKey = yyyyMMddJST();
+      const today = loadToday();
+      if (!today) return;
+
+      const data = results[today.index];
+      const text = `${dateKey} のニコリ占い：${data.label}（${data.text}）`;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("コピーしました！");
+      } catch (e) {
+        // clipboardが使えない環境向けのフォールバック
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("コピーしました！");
+      }
+    }
+
+    // 5) デバッグ/遊び用：今日の結果をリセット（本番では消してもOK）
+    function resetToday() {
+      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById("fortuneBtn").textContent = "占う！";
+      document.getElementById("resultBox").classList.add("hidden");
+    }
+
+    // 6) ページを開いた瞬間に「今日の結果」があれば表示（体験が良い）
+    window.addEventListener("DOMContentLoaded", () => {
+      const today = loadToday();
+      if (today) {
+        const dateKey = yyyyMMddJST();
+        setUI(results[today.index], dateKey);
+
+        const btn = document.getElementById("fortuneBtn");
+        btn.textContent = "もう一度見る（今日の結果は同じ）";
+      }
+    });
   </script>
 </body>
 </html>
