@@ -40,6 +40,13 @@
 
     .sub {
       font-size: 1.1rem;
+      margin-bottom: 12px;
+    }
+
+    .score {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #2d7d46;
       margin-bottom: 20px;
     }
 
@@ -91,6 +98,7 @@
 
     <div class="timer" id="timer">0.000</div>
     <div class="sub" id="status">準備OK！</div>
+    <div class="score" id="highScore">ハイスコア: まだありません</div>
 
     <img id="resultImage" class="result-image" src="ニコリヒト.png" alt="結果画像">
 
@@ -113,6 +121,7 @@
     const statusEl = document.getElementById("status");
     const resultEl = document.getElementById("result");
     const resultImage = document.getElementById("resultImage");
+    const highScoreEl = document.getElementById("highScore");
     const startStopButton = document.getElementById("startStopButton");
     const resetButton = document.getElementById("resetButton");
 
@@ -120,8 +129,50 @@
     let timerInterval = null;
     let running = false;
 
+    const HIGH_SCORE_KEY = "nikori_10seconds_highscore";
+
     function formatTime(ms) {
       return (ms / 1000).toFixed(3);
+    }
+
+    function updateHighScoreDisplay() {
+      const saved = localStorage.getItem(HIGH_SCORE_KEY);
+
+      if (!saved) {
+        highScoreEl.textContent = "ハイスコア: まだありません";
+        return;
+      }
+
+      const data = JSON.parse(saved);
+      highScoreEl.textContent =
+        `ハイスコア: ${data.time}秒（差 ${data.diff}秒）`;
+    }
+
+    function saveHighScore(elapsed, diff) {
+      const saved = localStorage.getItem(HIGH_SCORE_KEY);
+
+      if (!saved) {
+        localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify({
+          time: formatTime(elapsed),
+          diff: (diff / 1000).toFixed(3)
+        }));
+        updateHighScoreDisplay();
+        return true;
+      }
+
+      const data = JSON.parse(saved);
+      const savedDiffMs = Number(data.diff) * 1000;
+
+      if (diff < savedDiffMs) {
+        localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify({
+          time: formatTime(elapsed),
+          diff: (diff / 1000).toFixed(3)
+        }));
+        updateHighScoreDisplay();
+        return true;
+      }
+
+      return false;
     }
 
     function startGame() {
@@ -131,10 +182,16 @@
       statusEl.textContent = "10秒を狙って止めて！";
       resultEl.textContent = "";
       resultImage.src = "ニコリヒト.png";
+      timerEl.textContent = "0.000";
 
       timerInterval = setInterval(() => {
         const elapsed = Date.now() - startTime;
-        timerEl.textContent = formatTime(elapsed);
+
+        if (elapsed < 2000) {
+          timerEl.textContent = formatTime(elapsed);
+        } else {
+          timerEl.textContent = "?.???";
+        }
       }, 10);
     }
 
@@ -173,8 +230,12 @@
       }
 
       resultImage.src = imageName;
+
+      const isNewRecord = saveHighScore(elapsed, diff);
+
       resultEl.textContent =
-        `${formatTime(elapsed)}秒でストップ！ 10秒との差は ${(diff / 1000).toFixed(3)}秒。 ${rank}`;
+        `${formatTime(elapsed)}秒でストップ！ 10秒との差は ${(diff / 1000).toFixed(3)}秒。 ${rank}` +
+        (isNewRecord ? " ハイスコア更新！" : "");
     }
 
     function resetGame() {
@@ -200,6 +261,8 @@
     });
 
     resetButton.addEventListener("click", resetGame);
+
+    updateHighScoreDisplay();
   </script>
 </body>
 </html>
