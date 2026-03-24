@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ニコリヒト記憶力ゲーム</title>
-  <link rel="stylesheet" href="../style.css" />
+  <title>ニコリ10秒チャレンジ</title>
   <style>
     body {
       text-align: center;
@@ -32,49 +31,33 @@
       color: #555;
     }
 
-    .info {
-      margin: 20px 0;
-      font-size: 1.1em;
+    .timer {
+      font-size: 4rem;
       font-weight: bold;
+      color: #4ec1f5;
+      margin: 30px 0 10px;
     }
 
-    .board {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-top: 20px;
+    .sub {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
     }
 
-    .card {
-      aspect-ratio: 1 / 1;
-      border: none;
-      border-radius: 16px;
-      font-size: 2rem;
-      cursor: pointer;
-      background: #4ec1f5;
-      color: transparent;
-      transition: transform 0.2s, background 0.2s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    .result {
+      font-size: 1.2rem;
+      font-weight: bold;
+      min-height: 2em;
+      margin: 20px 0;
+      color: #333;
+      line-height: 1.8;
     }
 
-    .card:hover {
-      transform: scale(1.03);
-    }
-
-    .card.open,
-    .card.matched {
-      background: #ffffff;
-      color: #222;
-      border: 2px solid #4ec1f5;
-    }
-
-    .card.matched {
-      background: #dff6ff;
-      cursor: default;
-    }
-
-    .buttons {
-      margin-top: 20px;
+    .result-image {
+      width: 140px;
+      height: 140px;
+      object-fit: contain;
+      display: block;
+      margin: 14px auto 20px;
     }
 
     .button {
@@ -90,132 +73,133 @@
       margin: 6px;
     }
 
-    .message {
-      margin-top: 20px;
-      font-size: 1.2em;
-      font-weight: bold;
-      color: #2d7d46;
-      min-height: 1.5em;
-    }
-
-    @media (max-width: 600px) {
-      .board {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-      }
-
-      .card {
-        font-size: 1.5rem;
-      }
+    .guide {
+      background: #eef8ff;
+      border-radius: 14px;
+      padding: 16px;
+      margin: 20px auto;
+      max-width: 520px;
+      color: #444;
+      line-height: 1.8;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🧠 ニコリヒト記憶力ゲーム</h1>
-    <p>同じ絵文字のペアをそろえよう！</p>
+    <h1>⏱️ ニコリ10秒チャレンジ</h1>
+    <p>スタートを押したら、ちょうど10秒だと思うタイミングでもう一度止めてね！</p>
 
-    <div class="info">
-      手数: <span id="moves">0</span>　
-      そろった数: <span id="matchedCount">0</span> / 8
+    <div class="timer" id="timer">0.000</div>
+    <div class="sub" id="status">準備OK！</div>
+
+    <img id="resultImage" class="result-image" src="ニコリヒト.png" alt="結果画像">
+
+    <div class="result" id="result"></div>
+
+    <div class="guide">
+      1. 「スタート」を押す<br>
+      2. 体感で10秒を数える<br>
+      3. 「ストップ」を押す<br>
+      4. 10.000秒にどれだけ近いか勝負！
     </div>
 
-    <div class="board" id="board"></div>
-
-    <div class="message" id="message"></div>
-
-    <div class="buttons">
-      <button class="button" id="restartButton">もう一回遊ぶ</button>
-      <a href="index.html" class="button">トップへ戻る</a>
-    </div>
+    <button class="button" id="startStopButton">スタート</button>
+    <button class="button" id="resetButton">リセット</button>
+    <a href="index.html" class="button">トップへ戻る</a>
   </div>
 
   <script>
-    const symbols = ["😀","🐱","🎮","💎","🔥","🌟","🧱","🍀"];
-    const board = document.getElementById("board");
-    const movesEl = document.getElementById("moves");
-    const matchedCountEl = document.getElementById("matchedCount");
-    const messageEl = document.getElementById("message");
-    const restartButton = document.getElementById("restartButton");
+    const timerEl = document.getElementById("timer");
+    const statusEl = document.getElementById("status");
+    const resultEl = document.getElementById("result");
+    const resultImage = document.getElementById("resultImage");
+    const startStopButton = document.getElementById("startStopButton");
+    const resetButton = document.getElementById("resetButton");
 
-    let cards = [];
-    let openedCards = [];
-    let moves = 0;
-    let matchedPairs = 0;
-    let lockBoard = false;
+    let startTime = null;
+    let timerInterval = null;
+    let running = false;
 
-    function shuffle(array) {
-      return [...array].sort(() => Math.random() - 0.5);
+    function formatTime(ms) {
+      return (ms / 1000).toFixed(3);
     }
 
-    function createGame() {
-      const pairSymbols = shuffle([...symbols, ...symbols]);
-      board.innerHTML = "";
-      openedCards = [];
-      moves = 0;
-      matchedPairs = 0;
-      lockBoard = false;
-      messageEl.textContent = "";
-      movesEl.textContent = moves;
-      matchedCountEl.textContent = matchedPairs;
+    function startGame() {
+      startTime = Date.now();
+      running = true;
+      startStopButton.textContent = "ストップ";
+      statusEl.textContent = "10秒を狙って止めて！";
+      resultEl.textContent = "";
+      resultImage.src = "ニコリヒト.png";
 
-      cards = pairSymbols.map((symbol, index) => {
-        const button = document.createElement("button");
-        button.className = "card";
-        button.textContent = symbol;
-        button.dataset.symbol = symbol;
-        button.dataset.index = index;
-        button.addEventListener("click", () => openCard(button));
-        board.appendChild(button);
-        return button;
-      });
+      timerInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        timerEl.textContent = formatTime(elapsed);
+      }, 10);
     }
 
-    function openCard(card) {
-      if (lockBoard) return;
-      if (card.classList.contains("open")) return;
-      if (card.classList.contains("matched")) return;
-      if (openedCards.length >= 2) return;
+    function stopGame() {
+      clearInterval(timerInterval);
+      running = false;
 
-      card.classList.add("open");
-      openedCards.push(card);
+      const elapsed = Date.now() - startTime;
+      const diff = Math.abs(elapsed - 10000);
 
-      if (openedCards.length === 2) {
-        moves++;
-        movesEl.textContent = moves;
-        checkMatch();
-      }
-    }
+      timerEl.textContent = formatTime(elapsed);
+      startStopButton.textContent = "もう一回";
+      statusEl.textContent = "結果発表！";
 
-    function checkMatch() {
-      const [first, second] = openedCards;
+      let rank = "";
+      let imageName = "";
 
-      if (first.dataset.symbol === second.dataset.symbol) {
-        first.classList.remove("open");
-        second.classList.remove("open");
-        first.classList.add("matched");
-        second.classList.add("matched");
-        openedCards = [];
-        matchedPairs++;
-        matchedCountEl.textContent = matchedPairs;
-
-        if (matchedPairs === symbols.length) {
-          messageEl.textContent = `クリア！ 手数は ${moves} 回だったよ！`;
-        }
+      if (diff <= 100) {
+        rank = "神タイミング！";
+        imageName = "ニコリヒト.png";
+      } else if (diff <= 300) {
+        rank = "すごい！";
+        imageName = "ノリノリヒト.png";
+      } else if (diff <= 700) {
+        rank = "おしい！";
+        imageName = "カラフルヒト.png";
+      } else if (diff <= 1500) {
+        rank = "なかなか！";
+        imageName = "バタバタ君.png";
+      } else if (elapsed < 10000) {
+        rank = "早すぎた！";
+        imageName = "ぐるぐる君.png";
       } else {
-        lockBoard = true;
-        setTimeout(() => {
-          first.classList.remove("open");
-          second.classList.remove("open");
-          openedCards = [];
-          lockBoard = false;
-        }, 800);
+        rank = "遅すぎた！";
+        imageName = "すやすやヒト.png";
       }
+
+      resultImage.src = imageName;
+      resultEl.textContent =
+        `${formatTime(elapsed)}秒でストップ！ 10秒との差は ${(diff / 1000).toFixed(3)}秒。 ${rank}`;
     }
 
-    restartButton.addEventListener("click", createGame);
+    function resetGame() {
+      clearInterval(timerInterval);
+      running = false;
+      startTime = null;
+      timerEl.textContent = "0.000";
+      statusEl.textContent = "準備OK！";
+      resultEl.textContent = "";
+      resultImage.src = "ニコリヒト.png";
+      startStopButton.textContent = "スタート";
+    }
 
-    createGame();
+    startStopButton.addEventListener("click", () => {
+      if (!running && startStopButton.textContent === "スタート") {
+        startGame();
+      } else if (running) {
+        stopGame();
+      } else {
+        resetGame();
+        startGame();
+      }
+    });
+
+    resetButton.addEventListener("click", resetGame);
   </script>
 </body>
 </html>
