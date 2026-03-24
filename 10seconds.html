@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ニコリ10秒チャレンジ</title>
-  <link rel="stylesheet" href="../style.css" />
   <style>
     body {
       text-align: center;
@@ -45,11 +44,20 @@
     }
 
     .result {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       font-weight: bold;
       min-height: 2em;
       margin: 20px 0;
       color: #333;
+      line-height: 1.8;
+    }
+
+    .result-image {
+      width: 140px;
+      height: 140px;
+      object-fit: contain;
+      display: block;
+      margin: 14px auto 20px;
     }
 
     .button {
@@ -84,6 +92,8 @@
     <div class="timer" id="timer">0.000</div>
     <div class="sub" id="status">準備OK！</div>
 
+    <img id="resultImage" class="result-image" src="ニコリヒト.png" alt="結果画像">
+
     <div class="result" id="result"></div>
 
     <div class="guide">
@@ -102,6 +112,7 @@
     const timerEl = document.getElementById("timer");
     const statusEl = document.getElementById("status");
     const resultEl = document.getElementById("result");
+    const resultImage = document.getElementById("resultImage");
     const startStopButton = document.getElementById("startStopButton");
     const resetButton = document.getElementById("resetButton");
 
@@ -119,6 +130,7 @@
       startStopButton.textContent = "ストップ";
       statusEl.textContent = "10秒を狙って止めて！";
       resultEl.textContent = "";
+      resultImage.src = "ニコリヒト.png";
 
       timerInterval = setInterval(() => {
         const elapsed = Date.now() - startTime;
@@ -138,18 +150,29 @@
       statusEl.textContent = "結果発表！";
 
       let rank = "";
+      let imageName = "";
+
       if (diff <= 100) {
         rank = "神タイミング！";
+        imageName = "ニコリヒト.png";
       } else if (diff <= 300) {
         rank = "すごい！";
+        imageName = "ノリノリヒト.png";
       } else if (diff <= 700) {
         rank = "おしい！";
+        imageName = "カラフルヒト.png";
       } else if (diff <= 1500) {
         rank = "なかなか！";
+        imageName = "バタバタ君.png";
+      } else if (elapsed < 10000) {
+        rank = "早すぎた！";
+        imageName = "ぐるぐる君.png";
       } else {
-        rank = "もう一回挑戦！";
+        rank = "遅すぎた！";
+        imageName = "すやすやヒト.png";
       }
 
+      resultImage.src = imageName;
       resultEl.textContent =
         `${formatTime(elapsed)}秒でストップ！ 10秒との差は ${(diff / 1000).toFixed(3)}秒。 ${rank}`;
     }
@@ -161,6 +184,7 @@
       timerEl.textContent = "0.000";
       statusEl.textContent = "準備OK！";
       resultEl.textContent = "";
+      resultImage.src = "ニコリヒト.png";
       startStopButton.textContent = "スタート";
     }
 
