@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ニコリ10秒チャレンジ</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    body {
+      text-align: center;
+      background: #f8fbff;
+      margin: 0;
+      padding: 20px;
+      font-family: sans-serif;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #555;
+    }
+
+    .timer {
+      font-size: 4rem;
+      font-weight: bold;
+      color: #4ec1f5;
+      margin: 30px 0 10px;
+    }
+
+    .sub {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    .result {
+      font-size: 1.3rem;
+      font-weight: bold;
+      min-height: 2em;
+      margin: 20px 0;
+      color: #333;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 12px 22px;
+      background-color: #4ec1f5;
+      color: white;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      margin: 6px;
+    }
+
+    .guide {
+      background: #eef8ff;
+      border-radius: 14px;
+      padding: 16px;
+      margin: 20px auto;
+      max-width: 520px;
+      color: #444;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⏱️ ニコリ10秒チャレンジ</h1>
+    <p>スタートを押したら、ちょうど10秒だと思うタイミングでもう一度止めてね！</p>
+
+    <div class="timer" id="timer">0.000</div>
+    <div class="sub" id="status">準備OK！</div>
+
+    <div class="result" id="result"></div>
+
+    <div class="guide">
+      1. 「スタート」を押す<br>
+      2. 体感で10秒を数える<br>
+      3. 「ストップ」を押す<br>
+      4. 10.000秒にどれだけ近いか勝負！
+    </div>
+
+    <button class="button" id="startStopButton">スタート</button>
+    <button class="button" id="resetButton">リセット</button>
+    <a href="index.html" class="button">トップへ戻る</a>
+  </div>
+
+  <script>
+    const timerEl = document.getElementById("timer");
+    const statusEl = document.getElementById("status");
+    const resultEl = document.getElementById("result");
+    const startStopButton = document.getElementById("startStopButton");
+    const resetButton = document.getElementById("resetButton");
+
+    let startTime = null;
+    let timerInterval = null;
+    let running = false;
+
+    function formatTime(ms) {
+      return (ms / 1000).toFixed(3);
+    }
+
+    function startGame() {
+      startTime = Date.now();
+      running = true;
+      startStopButton.textContent = "ストップ";
+      statusEl.textContent = "10秒を狙って止めて！";
+      resultEl.textContent = "";
+
+      timerInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        timerEl.textContent = formatTime(elapsed);
+      }, 10);
+    }
+
+    function stopGame() {
+      clearInterval(timerInterval);
+      running = false;
+
+      const elapsed = Date.now() - startTime;
+      const diff = Math.abs(elapsed - 10000);
+
+      timerEl.textContent = formatTime(elapsed);
+      startStopButton.textContent = "もう一回";
+      statusEl.textContent = "結果発表！";
+
+      let rank = "";
+      if (diff <= 100) {
+        rank = "神タイミング！";
+      } else if (diff <= 300) {
+        rank = "すごい！";
+      } else if (diff <= 700) {
+        rank = "おしい！";
+      } else if (diff <= 1500) {
+        rank = "なかなか！";
+      } else {
+        rank = "もう一回挑戦！";
+      }
+
+      resultEl.textContent =
+        `${formatTime(elapsed)}秒でストップ！ 10秒との差は ${(diff / 1000).toFixed(3)}秒。 ${rank}`;
+    }
+
+    function resetGame() {
+      clearInterval(timerInterval);
+      running = false;
+      startTime = null;
+      timerEl.textContent = "0.000";
+      statusEl.textContent = "準備OK！";
+      resultEl.textContent = "";
+      startStopButton.textContent = "スタート";
+    }
+
+    startStopButton.addEventListener("click", () => {
+      if (!running && startStopButton.textContent === "スタート") {
+        startGame();
+      } else if (running) {
+        stopGame();
+      } else {
+        resetGame();
+        startGame();
+      }
+    });
+
+    resetButton.addEventListener("click", resetGame);
+  </script>
+</body>
+</html>
