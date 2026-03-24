@@ -144,9 +144,6 @@
     </section>
     <section>
       <a href="lasted-articles.html" class="button">ブログを見る</a>
-      <button class="button" id="blog-roulette-button" style="margin-left: 10px; border: none; cursor: pointer;">
-        🎰 ブログルーレット
-      </button>
     </section>
 
     <a href="terms.html" class="hover-button">
@@ -282,35 +279,6 @@
           content.style.maxHeight = "0px";
         }
       });
-    });
-    const express = require('express');
-    const fs = require('fs');
-    const path = require('path');
-    
-    const app = express();
-    
-    // 静的ファイル公開
-    app.use(express.static(__dirname));
-    
-    // blogフォルダ内のHTML一覧を返すAPI
-    app.get('/api/blog-files', (req, res) => {
-      const blogDir = path.join(__dirname, 'blog');
-    
-      fs.readdir(blogDir, (err, files) => {
-        if (err) {
-          return res.status(500).json({ error: 'blogフォルダを読み込めませんでした' });
-        }
-    
-        const blogFiles = files
-          .filter(file => file.endsWith('.html'))
-          .map(file => `./blog/${file}`);
-    
-        res.json(blogFiles);
-      });
-    });
-    
-    app.listen(3000, () => {
-      console.log('Server running on http://localhost:3000');
     });
   </script>
 
