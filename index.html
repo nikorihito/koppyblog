@@ -81,31 +81,156 @@
       padding-top: 10px;
     }
 
+		.bookshelf-section {
+		  margin: 50px 20px;
+		}
+
+		.bookshelf-section h2 {
+		  margin-bottom: 24px;
+		}
+
+		.game-buttons.bookshelf {
+		  display: grid;
+		  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+		  gap: 26px 18px;
+		  padding: 30px 20px 40px;
+		  max-width: 1000px;
+		  margin: 0 auto;
+		  position: relative;
+		}
+
+		/* 本棚の棚板っぽいライン */
+		.game-buttons.bookshelf::before,
+		.game-buttons.bookshelf::after {
+		  content: "";
+		  position: absolute;
+		  left: 10px;
+		  right: 10px;
+		  height: 14px;
+		  background: linear-gradient(to bottom, #9b6b3f 0%, #7a4f2a 100%);
+		  border-radius: 10px;
+		  box-shadow: 0 4px 8px rgba(0,0,0,0.18);
+		  z-index: 0;
+		}
+
+		.game-buttons.bookshelf::before {
+		  top: 190px;
+		}
+
+		.game-buttons.bookshelf::after {
+		  bottom: 0;
+		}
+
+		.book-item {
+		  position: relative;
+		  z-index: 1;
+		  display: flex;
+		  flex-direction: column;
+		  align-items: center;
+		  justify-content: flex-end;
+		  width: 100px;
+		  height: 180px;
+		  margin: 0 auto;
+		  padding: 14px 10px 16px;
+		  text-decoration: none;
+		  color: white;
+		  border-radius: 10px 10px 6px 6px;
+		  box-shadow: 6px 6px 12px rgba(0,0,0,0.16);
+		  transform-origin: bottom center;
+		  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+		  overflow: hidden;
+		}
+
+		/* 本の背表紙っぽさ */
+		.book-item::before {
+		  content: "";
+		  position: absolute;
+		  left: 0;
+		  top: 0;
+		  width: 10px;
+		  height: 100%;
+		  background: rgba(255,255,255,0.18);
+		}
+
+		.book-item::after {
+		  content: "";
+		  position: absolute;
+		  right: 0;
+		  top: 0;
+		  width: 6px;
+		  height: 100%;
+		  background: rgba(0,0,0,0.12);
+		}
+
+		.book-item:hover {
+		  transform: translateY(-10px) rotate(-2deg);
+		  box-shadow: 10px 12px 18px rgba(0,0,0,0.22);
+		  filter: brightness(1.05);
+		}
+
+		/* 本ごとに色を変える */
+		.book-item:nth-child(1) {
+		  background: linear-gradient(180deg, #9b59b6, #7d3c98);
+		}
+		.book-item:nth-child(2) {
+		  background: linear-gradient(180deg, #3498db, #21618c);
+		}
+		.book-item:nth-child(3) {
+		  background: linear-gradient(180deg, #95a5a6, #5d6d7e);
+		}
+		.book-item:nth-child(4) {
+		  background: linear-gradient(180deg, #2ecc71, #1e8449);
+		}
+		.book-item:nth-child(5) {
+		  background: linear-gradient(180deg, #f39c12, #ca6f1e);
+		}
+
+		.book-icon {
+		  font-size: 2rem;
+		  margin-bottom: 14px;
+		  line-height: 1;
+		}
+
+		.book-title {
+		  font-size: 0.95rem;
+		  line-height: 1.35;
+		  font-weight: bold;
+		  writing-mode: vertical-rl;
+		  text-orientation: mixed;
+		  letter-spacing: 0.05em;
+		  max-height: 110px;
+		}
+
+		/* スマホでは縦書きだと窮屈なので横書きに戻す */
+		@media (max-width: 700px) {
+		  .game-buttons.bookshelf {
+		    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+		    gap: 20px 12px;
+		    padding: 20px 12px 34px;
+		  }
+
+		  .game-buttons.bookshelf::before {
+		    top: 178px;
+		  }
+
+		  .book-item {
+		    width: 92px;
+		    height: 168px;
+		    padding: 12px 8px 14px;
+		  }
+
+		  .book-title {
+		    writing-mode: horizontal-tb;
+		    max-height: none;
+		    font-size: 0.8rem;
+		  }
+
+		  .book-icon {
+		    font-size: 1.6rem;
+		    margin-bottom: 10px;
+		  }
+		}
     
-    .game-buttons {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      padding: 20px;
-      justify-items: center;
-    }
-    .game-box {
-      display: block;
-      background-color: #f0f0f0;
-      border-radius: 16px;
-      padding: 20px;
-      text-align: center;
-      font-size: 1.2em;
-      text-decoration: none;
-      color: #333;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-      width: 90%;
-      max-width: 300px;
-    }
-    .game-box:hover {
-      transform: scale(1.05);
-    }
     section {
       margin: 40px 20px;
     }
@@ -185,14 +310,33 @@
 
 
     <!-- ミニゲームリンクボタン -->
-    <section>
-      <h2>🎮 ミニゲームで遊ぼう！</h2>
-      <div class="game-buttons">
-        <a href="uranai.html" class="game-box">🔮 今日のニコリ占い</a>
-        <a href="renda.html" class="game-box">🖱️ ニコリヒト連打チャレンジ</a>
-        <a href="himatubusi.html" class="game-box">😴 「暇」つぶしゲーム</a>
-        <a href="kiokuryoku.html" class="game-box">🧠 ニコリヒト記憶力ゲーム</a>
-        <a href="10seconds.html" class="game-box">⏱️ ニコリ10秒チャレンジ</a>
+    <section class="bookshelf-section">
+      <h2>📚 ミニゲーム本棚</h2>
+      <div class="game-buttons bookshelf">
+        <a href="uranai.html" class="game-box book-item">
+          <span class="book-icon">🔮</span>
+          <span class="book-title">今日のニコリ占い</span>
+        </a>
+    
+        <a href="renda.html" class="game-box book-item">
+          <span class="book-icon">🖱️</span>
+          <span class="book-title">ニコリヒト連打チャレンジ</span>
+        </a>
+    
+        <a href="himatubusi.html" class="game-box book-item">
+          <span class="book-icon">😴</span>
+          <span class="book-title">「暇」つぶしゲーム</span>
+        </a>
+    
+        <a href="kiokuryoku.html" class="game-box book-item">
+          <span class="book-icon">🧠</span>
+          <span class="book-title">ニコリヒト記憶力ゲーム</span>
+        </a>
+    
+        <a href="10seconds.html" class="game-box book-item">
+          <span class="book-icon">⏱️</span>
+          <span class="book-title">ニコリ10秒チャレンジ</span>
+        </a>
       </div>
     </section>
 
