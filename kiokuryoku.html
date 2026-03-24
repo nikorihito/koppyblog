@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ニコリヒト記憶力ゲーム</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    body {
+      text-align: center;
+      background: #f8fbff;
+      margin: 0;
+      padding: 20px;
+      font-family: sans-serif;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #555;
+    }
+
+    .info {
+      margin: 20px 0;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .card {
+      aspect-ratio: 1 / 1;
+      border: none;
+      border-radius: 16px;
+      font-size: 2rem;
+      cursor: pointer;
+      background: #4ec1f5;
+      color: transparent;
+      transition: transform 0.2s, background 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .card.open,
+    .card.matched {
+      background: #ffffff;
+      color: #222;
+      border: 2px solid #4ec1f5;
+    }
+
+    .card.matched {
+      background: #dff6ff;
+      cursor: default;
+    }
+
+    .buttons {
+      margin-top: 20px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 12px 22px;
+      background-color: #4ec1f5;
+      color: white;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      margin: 6px;
+    }
+
+    .message {
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #2d7d46;
+      min-height: 1.5em;
+    }
+
+    @media (max-width: 600px) {
+      .board {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+
+      .card {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 ニコリヒト記憶力ゲーム</h1>
+    <p>同じ絵文字のペアをそろえよう！</p>
+
+    <div class="info">
+      手数: <span id="moves">0</span>　
+      そろった数: <span id="matchedCount">0</span> / 8
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <div class="message" id="message"></div>
+
+    <div class="buttons">
+      <button class="button" id="restartButton">もう一回遊ぶ</button>
+      <a href="index.html" class="button">トップへ戻る</a>
+    </div>
+  </div>
+
+  <script>
+    const symbols = ["😀","🐱","🎮","💎","🔥","🌟","🧱","🍀"];
+    const board = document.getElementById("board");
+    const movesEl = document.getElementById("moves");
+    const matchedCountEl = document.getElementById("matchedCount");
+    const messageEl = document.getElementById("message");
+    const restartButton = document.getElementById("restartButton");
+
+    let cards = [];
+    let openedCards = [];
+    let moves = 0;
+    let matchedPairs = 0;
+    let lockBoard = false;
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function createGame() {
+      const pairSymbols = shuffle([...symbols, ...symbols]);
+      board.innerHTML = "";
+      openedCards = [];
+      moves = 0;
+      matchedPairs = 0;
+      lockBoard = false;
+      messageEl.textContent = "";
+      movesEl.textContent = moves;
+      matchedCountEl.textContent = matchedPairs;
+
+      cards = pairSymbols.map((symbol, index) => {
+        const button = document.createElement("button");
+        button.className = "card";
+        button.textContent = symbol;
+        button.dataset.symbol = symbol;
+        button.dataset.index = index;
+        button.addEventListener("click", () => openCard(button));
+        board.appendChild(button);
+        return button;
+      });
+    }
+
+    function openCard(card) {
+      if (lockBoard) return;
+      if (card.classList.contains("open")) return;
+      if (card.classList.contains("matched")) return;
+      if (openedCards.length >= 2) return;
+
+      card.classList.add("open");
+      openedCards.push(card);
+
+      if (openedCards.length === 2) {
+        moves++;
+        movesEl.textContent = moves;
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      const [first, second] = openedCards;
+
+      if (first.dataset.symbol === second.dataset.symbol) {
+        first.classList.remove("open");
+        second.classList.remove("open");
+        first.classList.add("matched");
+        second.classList.add("matched");
+        openedCards = [];
+        matchedPairs++;
+        matchedCountEl.textContent = matchedPairs;
+
+        if (matchedPairs === symbols.length) {
+          messageEl.textContent = `クリア！ 手数は ${moves} 回だったよ！`;
+        }
+      } else {
+        lockBoard = true;
+        setTimeout(() => {
+          first.classList.remove("open");
+          second.classList.remove("open");
+          openedCards = [];
+          lockBoard = false;
+        }, 800);
+      }
+    }
+
+    restartButton.addEventListener("click", createGame);
+
+    createGame();
+  </script>
+</body>
+</html>
