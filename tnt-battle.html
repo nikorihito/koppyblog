@@ -7,65 +7,99 @@
   <link rel="stylesheet" href="./style.css" />
   <link rel="icon" href="./favicon.png" type="image/png" />
   <style>
-    .tnt-wrap {
-      max-width: 920px;
+    .tnt-page {
+      max-width: 1200px;
       margin: 0 auto;
     }
 
     .tnt-card {
-      max-width: 860px;
+      max-width: 1100px;
       margin: 24px auto;
       padding: 28px 20px;
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
     }
 
-    .tnt-info {
+    .tnt-status-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
+      max-width: 960px;
       margin: 18px auto 20px;
-      max-width: 760px;
     }
 
-    .tnt-info-box {
-      background: rgba(255,255,255,0.82);
+    .tnt-status-box {
+      background: rgba(255,255,255,0.84);
       border: 1px solid var(--line);
       border-radius: 16px;
       padding: 12px;
       box-shadow: var(--shadow-soft);
       font-weight: bold;
+      color: var(--text);
     }
 
-    .tnt-stage {
-      display: flex;
-      justify-content: center;
-      margin: 18px 0;
+    .tnt-layout {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 20px;
+      align-items: start;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .tnt-board-wrap {
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: var(--shadow-soft);
+      overflow-x: auto;
     }
 
     canvas {
-      background: #f7efe7;
+      display: block;
+      margin: 0 auto;
+      background: #f6eee5;
       border: 3px solid #9a6238;
-      border-radius: 16px;
-      box-shadow: 0 10px 24px rgba(120, 80, 40, 0.14);
+      border-radius: 14px;
       image-rendering: pixelated;
       max-width: 100%;
       height: auto;
     }
 
-    .tnt-guide {
-      max-width: 760px;
-      margin: 18px auto 0;
-      padding: 16px;
+    .tnt-side {
+      display: grid;
+      gap: 14px;
+    }
+
+    .tnt-panel {
       background: linear-gradient(180deg, #fffaf5, #fff0e5);
       border: 1px solid var(--line);
-      border-radius: 16px;
-      color: var(--subtext);
-      line-height: 1.9;
-      text-align: left;
+      border-radius: 18px;
+      padding: 16px;
       box-shadow: var(--shadow-soft);
+      text-align: left;
+    }
+
+    .tnt-panel h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+    }
+
+    .tnt-panel p,
+    .tnt-panel li {
+      color: var(--subtext);
+      line-height: 1.8;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .tnt-panel ul {
+      margin: 0;
+      padding-left: 1.2em;
     }
 
     .tnt-buttons {
@@ -73,11 +107,55 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 12px;
-      margin-top: 20px;
+      margin-top: 18px;
+    }
+
+    .tnt-message {
+      min-height: 2.2em;
+      font-weight: bold;
+      color: var(--primary-dark);
+      margin: 12px 0 0;
+      line-height: 1.8;
+    }
+
+    .tnt-legend {
+      display: grid;
+      gap: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .legend-color {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.12);
+      flex-shrink: 0;
+    }
+
+    .legend-color.wall { background: #9a6238; }
+    .legend-color.player-bomb { background: #f08a4b; }
+    .legend-color.player-pos { background: #4ec1f5; }
+    .legend-color.safe { background: #f6eee5; }
+
+    @media (max-width: 900px) {
+      .tnt-status-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .tnt-layout {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 700px) {
-      .tnt-info {
+      .tnt-status-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -92,34 +170,57 @@
     <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。YouTubeの配布物も載せます。</p>
   </header>
 
-  <main class="tnt-wrap">
+  <main class="tnt-page">
     <section class="tnt-card">
       <h2>💣 つるつる君のTNTバトル</h2>
-      <p>まずはローカル専用の CP 対戦版！ TNTを置いて、爆風で相手を倒そう！</p>
+      <p>自分のTNTは見える。相手のTNTは見えない。3つ仕掛けて、読み合いで勝とう！</p>
 
-      <div class="tnt-info">
-        <div class="tnt-info-box">プレイヤー: <span id="playerStatus">生存中</span></div>
-        <div class="tnt-info-box">CP: <span id="cpStatus">生存中</span></div>
-        <div class="tnt-info-box">結果: <span id="resultText">対戦中</span></div>
+      <div class="tnt-status-grid">
+        <div class="tnt-status-box">プレイヤーライフ: <span id="playerLife">3</span></div>
+        <div class="tnt-status-box">CPライフ: <span id="cpuLife">3</span></div>
+        <div class="tnt-status-box">ラウンド: <span id="roundNumber">1</span></div>
+        <div class="tnt-status-box">フェーズ: <span id="phaseText">プレイヤーTNT設置</span></div>
       </div>
 
-      <div class="tnt-stage">
-        <canvas id="gameCanvas" width="640" height="480"></canvas>
+      <div class="tnt-layout">
+        <div class="tnt-board-wrap">
+          <canvas id="gameCanvas" width="800" height="800"></canvas>
+          <div class="tnt-message" id="messageText">プレイヤーのTNTを3個置いてください。</div>
+        </div>
+
+        <aside class="tnt-side">
+          <div class="tnt-panel">
+            <h3>ルール</h3>
+            <ul>
+              <li>毎ラウンド、プレイヤーもCPもTNTを3個ずつ設置します。</li>
+              <li>自分のTNTは見えますが、自分では被弾しません。</li>
+              <li>相手のTNTは見えず、爆風に入るとライフが1減ります。</li>
+              <li>爆風は中心を含む周囲±1の範囲です。</li>
+              <li>壁越しには爆風が届きません。</li>
+              <li>ライフが先に0になった方が負け。同時0なら draw です。</li>
+            </ul>
+          </div>
+
+          <div class="tnt-panel">
+            <h3>今の操作</h3>
+            <p id="controlsText">空いているマスをクリックして、TNTを3個置いてください。</p>
+          </div>
+
+          <div class="tnt-panel">
+            <h3>見えるもの</h3>
+            <div class="tnt-legend">
+              <div class="legend-item"><span class="legend-color wall"></span> 壁</div>
+              <div class="legend-item"><span class="legend-color player-bomb"></span> 自分のTNT</div>
+              <div class="legend-item"><span class="legend-color player-pos"></span> 自分の移動先</div>
+              <div class="legend-item"><span class="legend-color safe"></span> 通れるマス</div>
+            </div>
+          </div>
+        </aside>
       </div>
 
       <div class="tnt-buttons">
-        <button class="button" id="restartButton">もう一回遊ぶ</button>
+        <button class="button" id="restartButton">最初からやり直す</button>
         <a href="./index.html" class="button">トップへ戻る</a>
-      </div>
-
-      <div class="tnt-guide">
-        <strong>操作方法</strong><br>
-        移動: W A S D または 矢印キー<br>
-        TNT設置: スペースキー<br>
-        リスタート: Rキー<br><br>
-        <strong>ルール</strong><br>
-        TNTは少し時間がたつと爆発します。爆風に当たると負けです。<br>
-        まずはシンプルな1ラウンド制です。
       </div>
     </section>
   </main>
@@ -133,436 +234,485 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    const TILE = 40;
-    const COLS = 16;
-    const ROWS = 12;
-
-    const playerStatusEl = document.getElementById("playerStatus");
-    const cpStatusEl = document.getElementById("cpStatus");
-    const resultTextEl = document.getElementById("resultText");
+    const playerLifeEl = document.getElementById("playerLife");
+    const cpuLifeEl = document.getElementById("cpuLife");
+    const roundNumberEl = document.getElementById("roundNumber");
+    const phaseTextEl = document.getElementById("phaseText");
+    const messageTextEl = document.getElementById("messageText");
+    const controlsTextEl = document.getElementById("controlsText");
     const restartButton = document.getElementById("restartButton");
 
-    const keys = {};
-    let gameOver = false;
-    let resultText = "対戦中";
+    const playerImg = new Image();
+    playerImg.src = "./つるつる君.png";
 
-    const map = [
-      "################",
-      "#..............#",
-      "#..##....##....#",
-      "#..............#",
-      "#....##........#",
-      "#........##....#",
-      "#..............#",
-      "#..##......##..#",
-      "#..............#",
-      "#....##....##..#",
-      "#..............#",
-      "################"
-    ];
+    const cpuImg = new Image();
+    cpuImg.src = "./バタバタ君.png";
 
-    const player = {
-      x: 1.5,
-      y: 1.5,
-      color: "#4ec1f5",
-      alive: true,
-      bombCooldown: 0
-    };
+    const GRID_SIZE = 20;
+    const TILE_SIZE = 40;
+    const CANVAS_SIZE = GRID_SIZE * TILE_SIZE;
 
-    const cpu = {
-      x: 14.5,
-      y: 10.5,
-      color: "#f08a4b",
-      alive: true,
-      bombCooldown: 0,
-      thinkTimer: 0,
-      dirX: 0,
-      dirY: 0
-    };
+    canvas.width = CANVAS_SIZE;
+    canvas.height = CANVAS_SIZE;
 
-    let bombs = [];
-    let blasts = [];
+    const PHASE_PLAYER_BOMBS = "player_bombs";
+    const PHASE_PLAYER_MOVE = "player_move";
+    const PHASE_RESOLVE = "resolve";
+    const PHASE_GAME_OVER = "game_over";
 
-    function resetGame() {
-      player.x = 1.5;
-      player.y = 1.5;
-      player.alive = true;
-      player.bombCooldown = 0;
+    let roundNumber = 1;
+    let playerLife = 3;
+    let cpuLife = 3;
+    let phase = PHASE_PLAYER_BOMBS;
 
-      cpu.x = 14.5;
-      cpu.y = 10.5;
-      cpu.alive = true;
-      cpu.bombCooldown = 0;
-      cpu.thinkTimer = 0;
-      cpu.dirX = 0;
-      cpu.dirY = 0;
+    let playerBombs = [];
+    let cpuBombs = [];
+    let playerPos = null;
+    let cpuPos = null;
+    let lastRoundResult = null;
 
-      bombs = [];
-      blasts = [];
-      gameOver = false;
-      resultText = "対戦中";
-      updateStatus();
+    const map = createMap();
+
+    function createMap() {
+      const rows = [];
+      for (let y = 0; y < GRID_SIZE; y++) {
+        const row = [];
+        for (let x = 0; x < GRID_SIZE; x++) {
+          if (x === 0 || y === 0 || x === GRID_SIZE - 1 || y === GRID_SIZE - 1) {
+            row.push(1);
+            continue;
+          }
+
+          if (x % 4 === 0 && y >= 2 && y <= GRID_SIZE - 3) {
+            if (!(y === 3 || y === 8 || y === 13 || y === 17)) {
+              row.push(1);
+              continue;
+            }
+          }
+
+          if (y % 4 === 0 && x >= 2 && x <= GRID_SIZE - 3) {
+            if (!(x === 2 || x === 7 || x === 12 || x === 16)) {
+              row.push(1);
+              continue;
+            }
+          }
+
+          if (
+            (x === 9 && y >= 6 && y <= 14) ||
+            (y === 10 && x >= 6 && x <= 14)
+          ) {
+            if (!((x === 9 && y === 10) || (x === 10 && y === 10))) {
+              row.push(1);
+              continue;
+            }
+          }
+
+          row.push(0);
+        }
+        rows.push(row);
+      }
+      return rows;
     }
 
-    function updateStatus() {
-      playerStatusEl.textContent = player.alive ? "生存中" : "やられた";
-      cpStatusEl.textContent = cpu.alive ? "生存中" : "やられた";
-      resultTextEl.textContent = resultText;
+    function isWall(x, y) {
+      if (x < 0 || y < 0 || x >= GRID_SIZE || y >= GRID_SIZE) return true;
+      return map[y][x] === 1;
     }
 
-    function isWall(tx, ty) {
-      if (tx < 0 || ty < 0 || tx >= COLS || ty >= ROWS) return true;
-      return map[ty][tx] === "#";
+    function isSameCell(a, b) {
+      return a && b && a.x === b.x && a.y === b.y;
     }
 
-    function isBombAt(tx, ty) {
-      return bombs.some(b => b.tx === tx && b.ty === ty);
+    function hasBombAt(arr, x, y) {
+      return arr.some(b => b.x === x && b.y === y);
     }
 
-    function canMoveTo(x, y) {
-      const left = Math.floor(x - 0.3);
-      const right = Math.floor(x + 0.3);
-      const top = Math.floor(y - 0.3);
-      const bottom = Math.floor(y + 0.3);
+    function isWalkableCell(x, y) {
+      return !isWall(x, y);
+    }
 
-      if (isWall(left, top) || isWall(right, top) || isWall(left, bottom) || isWall(right, bottom)) {
+    function isCellReservedForPlayer(x, y) {
+      return hasBombAt(playerBombs, x, y);
+    }
+
+    function isCellBlockedForPlacement(x, y) {
+      return isWall(x, y) || hasBombAt(playerBombs, x, y);
+    }
+
+    function randomChoice(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function getAllWalkableCells() {
+      const cells = [];
+      for (let y = 0; y < GRID_SIZE; y++) {
+        for (let x = 0; x < GRID_SIZE; x++) {
+          if (!isWall(x, y)) {
+            cells.push({ x, y });
+          }
+        }
+      }
+      return cells;
+    }
+
+    function lineBlockedStraight(fromX, fromY, toX, toY) {
+      if (fromX === toX) {
+        const step = toY > fromY ? 1 : -1;
+        for (let y = fromY + step; y !== toY + step; y += step) {
+          if (isWall(toX, y)) return true;
+        }
         return false;
       }
+
+      if (fromY === toY) {
+        const step = toX > fromX ? 1 : -1;
+        for (let x = fromX + step; x !== toX + step; x += step) {
+          if (isWall(x, toY)) return true;
+        }
+        return false;
+      }
+
       return true;
     }
 
-    function placeBomb(character) {
-      if (character.bombCooldown > 0 || !character.alive || gameOver) return;
+    function isAffectedByBomb(bomb, targetX, targetY) {
+      const dx = targetX - bomb.x;
+      const dy = targetY - bomb.y;
 
-      const tx = Math.floor(character.x);
-      const ty = Math.floor(character.y);
+      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) return false;
+      if (isWall(targetX, targetY)) return false;
 
-      if (isBombAt(tx, ty)) return;
-
-      bombs.push({
-        tx,
-        ty,
-        timer: 120,
-        owner: character === player ? "player" : "cpu"
-      });
-
-      character.bombCooldown = 40;
-    }
-
-    function createBlast(tx, ty) {
-      const cells = [{ tx, ty }];
-      const dirs = [
-        { x: 1, y: 0 },
-        { x: -1, y: 0 },
-        { x: 0, y: 1 },
-        { x: 0, y: -1 }
-      ];
-
-      for (const dir of dirs) {
-        for (let i = 1; i <= 2; i++) {
-          const nx = tx + dir.x * i;
-          const ny = ty + dir.y * i;
-          if (isWall(nx, ny)) break;
-          cells.push({ tx: nx, ty: ny });
-        }
+      if (dx === 0 && dy === 0) {
+        return true;
       }
 
-      blasts.push({
-        cells,
-        timer: 28
-      });
-    }
-
-    function updateBombs() {
-      for (let i = bombs.length - 1; i >= 0; i--) {
-        bombs[i].timer--;
-
-        if (bombs[i].timer <= 0) {
-          createBlast(bombs[i].tx, bombs[i].ty);
-          bombs.splice(i, 1);
-        }
+      if (dx === 0 || dy === 0) {
+        return !lineBlockedStraight(bomb.x, bomb.y, targetX, targetY);
       }
+
+      const horizontalClear =
+        !isWall(bomb.x + dx, bomb.y) &&
+        !isWall(targetX, targetY);
+
+      const verticalClear =
+        !isWall(bomb.x, bomb.y + dy) &&
+        !isWall(targetX, targetY);
+
+      return horizontalClear && verticalClear;
     }
 
-    function updateBlasts() {
-      for (let i = blasts.length - 1; i >= 0; i--) {
-        blasts[i].timer--;
+    function isHitByEnemyBombs(target, enemyBombs) {
+      if (!target) return false;
+      return enemyBombs.some(bomb => isAffectedByBomb(bomb, target.x, target.y));
+    }
 
-        for (const cell of blasts[i].cells) {
-          const px = Math.floor(player.x);
-          const py = Math.floor(player.y);
-          const cx = Math.floor(cpu.x);
-          const cy = Math.floor(cpu.y);
+    function updateUI() {
+      playerLifeEl.textContent = playerLife;
+      cpuLifeEl.textContent = cpuLife;
+      roundNumberEl.textContent = roundNumber;
 
-          if (player.alive && cell.tx === px && cell.ty === py) {
-            player.alive = false;
-          }
-          if (cpu.alive && cell.tx === cx && cell.ty === cy) {
-            cpu.alive = false;
-          }
-        }
+      if (phase === PHASE_PLAYER_BOMBS) {
+        phaseTextEl.textContent = "プレイヤーTNT設置";
+        messageTextEl.textContent = `プレイヤーのTNTを3個置いてください。（${playerBombs.length}/3）`;
+        controlsTextEl.textContent = "空いているマスをクリックして、TNTを3個置いてください。";
+      } else if (phase === PHASE_PLAYER_MOVE) {
+        phaseTextEl.textContent = "移動先を選ぶ";
+        messageTextEl.textContent = "つるつる君を置くマスを1つ選んでください。";
+        controlsTextEl.textContent = "空いているマスをクリックすると、つるつる君の移動先を決めます。";
+      } else if (phase === PHASE_RESOLVE) {
+        phaseTextEl.textContent = "爆破判定";
+        controlsTextEl.textContent = "判定中です。";
+      } else if (phase === PHASE_GAME_OVER) {
+        phaseTextEl.textContent = "ゲーム終了";
+        controlsTextEl.textContent = "「最初からやり直す」で再挑戦できます。";
+      }
 
-        if (blasts[i].timer <= 0) {
-          blasts.splice(i, 1);
-        }
+      if (phase === PHASE_GAME_OVER && lastRoundResult) {
+        messageTextEl.textContent = lastRoundResult.finalText;
       }
     }
 
-    function updateResult() {
-      if (gameOver) return;
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (!player.alive && !cpu.alive) {
-        gameOver = true;
-        resultText = "引き分け！";
-      } else if (!player.alive) {
-        gameOver = true;
-        resultText = "CPの勝ち！";
-      } else if (!cpu.alive) {
-        gameOver = true;
-        resultText = "プレイヤーの勝ち！";
-      }
+      for (let y = 0; y < GRID_SIZE; y++) {
+        for (let x = 0; x < GRID_SIZE; x++) {
+          const px = x * TILE_SIZE;
+          const py = y * TILE_SIZE;
 
-      updateStatus();
-    }
-
-    function movePlayer() {
-      if (!player.alive || gameOver) return;
-
-      let dx = 0;
-      let dy = 0;
-      const speed = 0.08;
-
-      if (keys["ArrowLeft"] || keys["a"] || keys["A"]) dx -= speed;
-      if (keys["ArrowRight"] || keys["d"] || keys["D"]) dx += speed;
-      if (keys["ArrowUp"] || keys["w"] || keys["W"]) dy -= speed;
-      if (keys["ArrowDown"] || keys["s"] || keys["S"]) dy += speed;
-
-      if (dx !== 0 && dy !== 0) {
-        dx *= 0.707;
-        dy *= 0.707;
-      }
-
-      const nextX = player.x + dx;
-      const nextY = player.y + dy;
-
-      if (canMoveTo(nextX, player.y)) player.x = nextX;
-      if (canMoveTo(player.x, nextY)) player.y = nextY;
-
-      if (player.bombCooldown > 0) player.bombCooldown--;
-    }
-
-    function isDangerTile(tx, ty) {
-      for (const blast of blasts) {
-        for (const cell of blast.cells) {
-          if (cell.tx === tx && cell.ty === ty) return true;
-        }
-      }
-
-      for (const bomb of bombs) {
-        if (bomb.timer > 30) continue;
-
-        if (bomb.tx === tx && bomb.ty === ty) return true;
-        if (bomb.ty === ty && Math.abs(bomb.tx - tx) <= 2) {
-          let blocked = false;
-          const start = Math.min(bomb.tx, tx);
-          const end = Math.max(bomb.tx, tx);
-          for (let x = start + 1; x < end; x++) {
-            if (isWall(x, ty)) blocked = true;
-          }
-          if (!blocked) return true;
-        }
-
-        if (bomb.tx === tx && Math.abs(bomb.ty - ty) <= 2) {
-          let blocked = false;
-          const start = Math.min(bomb.ty, ty);
-          const end = Math.max(bomb.ty, ty);
-          for (let y = start + 1; y < end; y++) {
-            if (isWall(tx, y)) blocked = true;
-          }
-          if (!blocked) return true;
-        }
-      }
-
-      return false;
-    }
-
-    function updateCpu() {
-      if (!cpu.alive || gameOver) return;
-
-      if (cpu.bombCooldown > 0) cpu.bombCooldown--;
-
-      const cpx = Math.floor(cpu.x);
-      const cpy = Math.floor(cpu.y);
-      const px = Math.floor(player.x);
-      const py = Math.floor(player.y);
-
-      const inDanger = isDangerTile(cpx, cpy);
-
-      cpu.thinkTimer--;
-      if (cpu.thinkTimer <= 0) {
-        cpu.thinkTimer = 18 + Math.floor(Math.random() * 20);
-
-        const dirs = [
-          { x: 1, y: 0 },
-          { x: -1, y: 0 },
-          { x: 0, y: 1 },
-          { x: 0, y: -1 },
-          { x: 0, y: 0 }
-        ];
-
-        let candidates = dirs.filter(dir => {
-          const nx = cpu.x + dir.x * 0.6;
-          const ny = cpu.y + dir.y * 0.6;
-          return canMoveTo(nx, ny);
-        });
-
-        if (inDanger) {
-          candidates = candidates.filter(dir => {
-            const ntx = Math.floor(cpu.x + dir.x);
-            const nty = Math.floor(cpu.y + dir.y);
-            return !isDangerTile(ntx, nty);
-          });
-        }
-
-        if (candidates.length === 0) {
-          candidates = dirs;
-        }
-
-        candidates.sort((a, b) => {
-          const ad = Math.hypot((cpx + a.x) - px, (cpy + a.y) - py);
-          const bd = Math.hypot((cpx + b.x) - px, (cpy + b.y) - py);
-
-          if (inDanger) {
-            return bd - ad;
-          }
-          return ad - bd;
-        });
-
-        const selected = candidates[0] || { x: 0, y: 0 };
-        cpu.dirX = selected.x;
-        cpu.dirY = selected.y;
-      }
-
-      const speed = 0.055;
-      const nextX = cpu.x + cpu.dirX * speed;
-      const nextY = cpu.y + cpu.dirY * speed;
-
-      if (canMoveTo(nextX, cpu.y)) cpu.x = nextX;
-      if (canMoveTo(cpu.x, nextY)) cpu.y = nextY;
-
-      const distance = Math.hypot(cpx - px, cpy - py);
-      const aligned = cpx === px || cpy === py;
-
-      if (!inDanger && distance <= 3.2 && aligned && cpu.bombCooldown <= 0) {
-        placeBomb(cpu);
-      }
-    }
-
-    function drawMap() {
-      for (let y = 0; y < ROWS; y++) {
-        for (let x = 0; x < COLS; x++) {
-          if (map[y][x] === "#") {
+          if (isWall(x, y)) {
             ctx.fillStyle = "#9a6238";
-            ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
             ctx.fillStyle = "#b27a4d";
-            ctx.fillRect(x * TILE + 4, y * TILE + 4, TILE - 8, TILE - 8);
+            ctx.fillRect(px + 4, py + 4, TILE_SIZE - 8, TILE_SIZE - 8);
           } else {
-            ctx.fillStyle = (x + y) % 2 === 0 ? "#f7efe7" : "#f2e7dc";
-            ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+            ctx.fillStyle = (x + y) % 2 === 0 ? "#f6eee5" : "#f2e7dc";
+            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
           }
+
+          ctx.strokeStyle = "rgba(120, 80, 40, 0.12)";
+          ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
         }
       }
+
+      drawPlayerBombs();
+      drawPlayerPosition();
+      drawCpuPositionIfNeeded();
+      drawHighlightsIfNeeded();
     }
 
-    function drawBombs() {
-      for (const bomb of bombs) {
-        const x = bomb.tx * TILE + TILE / 2;
-        const y = bomb.ty * TILE + TILE / 2;
-        ctx.fillStyle = "#3b2c25";
+    function drawPlayerBombs() {
+      for (const bomb of playerBombs) {
+        const px = bomb.x * TILE_SIZE;
+        const py = bomb.y * TILE_SIZE;
+
+        ctx.fillStyle = "rgba(240, 138, 75, 0.92)";
         ctx.beginPath();
-        ctx.arc(x, y, 12, 0, Math.PI * 2);
+        ctx.arc(px + TILE_SIZE / 2, py + TILE_SIZE / 2, 11, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = "#d96c75";
-        ctx.fillRect(x + 6, y - 14, 4, 8);
+        ctx.fillStyle = "#7a3e18";
+        ctx.fillRect(px + TILE_SIZE / 2 + 5, py + TILE_SIZE / 2 - 13, 4, 8);
       }
     }
 
-    function drawBlasts() {
-      for (const blast of blasts) {
-        for (const cell of blast.cells) {
-          ctx.fillStyle = "rgba(255, 180, 60, 0.75)";
-          ctx.fillRect(cell.tx * TILE, cell.ty * TILE, TILE, TILE);
+    function drawPlayerPosition() {
+      if (!playerPos) return;
+      drawImageInCell(playerImg, playerPos.x, playerPos.y, "#4ec1f5");
+    }
 
-          ctx.fillStyle = "rgba(255, 110, 30, 0.7)";
-          ctx.fillRect(cell.tx * TILE + 6, cell.ty * TILE + 6, TILE - 12, TILE - 12);
+    function drawCpuPositionIfNeeded() {
+      if (!cpuPos) return;
+      drawImageInCell(cpuImg, cpuPos.x, cpuPos.y, "#d96c75");
+    }
+
+    function drawImageInCell(img, x, y, fallbackColor) {
+      const px = x * TILE_SIZE;
+      const py = y * TILE_SIZE;
+
+      if (img.complete && img.naturalWidth > 0) {
+        ctx.drawImage(img, px + 4, py + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+      } else {
+        ctx.fillStyle = fallbackColor;
+        ctx.beginPath();
+        ctx.arc(px + TILE_SIZE / 2, py + TILE_SIZE / 2, 12, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawHighlightsIfNeeded() {
+      if (phase === PHASE_PLAYER_BOMBS || phase === PHASE_PLAYER_MOVE) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(240, 138, 75, 0.15)";
+        for (let y = 0; y < GRID_SIZE; y++) {
+          for (let x = 0; x < GRID_SIZE; x++) {
+            if (!isWall(x, y)) {
+              ctx.strokeRect(x * TILE_SIZE + 2, y * TILE_SIZE + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+            }
+          }
+        }
+        ctx.restore();
+      }
+    }
+
+    function getCellFromEvent(event) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = Math.floor((event.clientX - rect.left) * scaleX / TILE_SIZE);
+      const y = Math.floor((event.clientY - rect.top) * scaleY / TILE_SIZE);
+
+      if (x < 0 || y < 0 || x >= GRID_SIZE || y >= GRID_SIZE) return null;
+      return { x, y };
+    }
+
+    function generateCpuBombs() {
+      const walkable = getAllWalkableCells().filter(cell => {
+        return !hasBombAt(cpuBombs, cell.x, cell.y) &&
+               !hasBombAt(playerBombs, cell.x, cell.y);
+      });
+
+      cpuBombs = [];
+      const preferred = [];
+
+      for (const cell of walkable) {
+        const nearCenter = Math.abs(cell.x - 10) + Math.abs(cell.y - 10);
+        const score = Math.max(0, 20 - nearCenter);
+        preferred.push({ ...cell, score });
+      }
+
+      preferred.sort((a, b) => b.score - a.score + (Math.random() - 0.5));
+
+      for (const cell of preferred) {
+        if (cpuBombs.length >= 3) break;
+        if (!hasBombAt(cpuBombs, cell.x, cell.y)) {
+          cpuBombs.push({ x: cell.x, y: cell.y });
+        }
+      }
+
+      while (cpuBombs.length < 3) {
+        const cell = randomChoice(walkable);
+        if (!hasBombAt(cpuBombs, cell.x, cell.y)) {
+          cpuBombs.push({ x: cell.x, y: cell.y });
         }
       }
     }
 
-    function drawCharacter(chara) {
-      if (!chara.alive) return;
+    function chooseCpuPosition() {
+      const walkable = getAllWalkableCells().filter(cell => {
+        return !hasBombAt(playerBombs, cell.x, cell.y) &&
+               !hasBombAt(cpuBombs, cell.x, cell.y);
+      });
 
-      const cx = chara.x * TILE;
-      const cy = chara.y * TILE;
+      const safeCells = walkable.filter(cell => !isHitByEnemyBombs(cell, playerBombs));
 
-      ctx.fillStyle = chara.color;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 13, 0, Math.PI * 2);
-      ctx.fill();
+      const pool = safeCells.length > 0 ? safeCells : walkable;
 
-      ctx.fillStyle = "#ffffff";
-      ctx.beginPath();
-      ctx.arc(cx - 4, cy - 3, 2, 0, Math.PI * 2);
-      ctx.arc(cx + 4, cy - 3, 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
+      let bestCell = pool[0];
+      let bestScore = -Infinity;
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawMap();
-      drawBlasts();
-      drawBombs();
-      drawCharacter(player);
-      drawCharacter(cpu);
-    }
+      for (const cell of pool) {
+        let score = 0;
 
-    function update() {
-      movePlayer();
-      updateCpu();
-      updateBombs();
-      updateBlasts();
-      updateResult();
-      updateStatus();
-    }
+        for (const bomb of cpuBombs) {
+          const dist = Math.abs(cell.x - bomb.x) + Math.abs(cell.y - bomb.y);
+          score += Math.min(dist, 6) * 0.6;
+        }
 
-    function loop() {
-      update();
-      draw();
-      requestAnimationFrame(loop);
-    }
+        for (const bomb of playerBombs) {
+          const dist = Math.abs(cell.x - bomb.x) + Math.abs(cell.y - bomb.y);
+          score += dist * 0.2;
+        }
 
-    window.addEventListener("keydown", (e) => {
-      keys[e.key] = true;
+        score += Math.random() * 0.6;
 
-      if (e.key === " " || e.code === "Space") {
-        e.preventDefault();
-        placeBomb(player);
+        if (score > bestScore) {
+          bestScore = score;
+          bestCell = cell;
+        }
       }
 
-      if (e.key === "r" || e.key === "R") {
-        resetGame();
-      }
-    });
+      cpuPos = bestCell;
+    }
 
-    window.addEventListener("keyup", (e) => {
-      keys[e.key] = false;
+    function resolveRound() {
+      phase = PHASE_RESOLVE;
+      updateUI();
+      drawBoard();
+
+      const playerHit = isHitByEnemyBombs(playerPos, cpuBombs);
+      const cpuHit = isHitByEnemyBombs(cpuPos, playerBombs);
+
+      if (playerHit) playerLife = Math.max(0, playerLife - 1);
+      if (cpuHit) cpuLife = Math.max(0, cpuLife - 1);
+
+      let text = "";
+      if (playerHit && cpuHit) {
+        text = "お互い爆破された！";
+      } else if (playerHit) {
+        text = "つるつる君が爆破された！";
+      } else if (cpuHit) {
+        text = "バタバタ君が爆破された！";
+      } else {
+        text = "このラウンドは両者セーフ！";
+      }
+
+      const playerDead = playerLife <= 0;
+      const cpuDead = cpuLife <= 0;
+
+      if (playerDead && cpuDead) {
+        phase = PHASE_GAME_OVER;
+        lastRoundResult = { finalText: `${text} 結果: draw` };
+      } else if (playerDead) {
+        phase = PHASE_GAME_OVER;
+        lastRoundResult = { finalText: `${text} 結果: CPの勝ち！` };
+      } else if (cpuDead) {
+        phase = PHASE_GAME_OVER;
+        lastRoundResult = { finalText: `${text} 結果: プレイヤーの勝ち！` };
+      } else {
+        lastRoundResult = { finalText: text };
+      }
+
+      updateUI();
+
+      if (phase === PHASE_GAME_OVER) {
+        drawBoard();
+        return;
+      }
+
+      messageTextEl.textContent = `${text} 次のラウンドへ進みます...`;
+      drawBoard();
+
+      setTimeout(() => {
+        startNextRound();
+      }, 1200);
+    }
+
+    function startNextRound() {
+      roundNumber += 1;
+      playerBombs = [];
+      cpuBombs = [];
+      playerPos = null;
+      cpuPos = null;
+      phase = PHASE_PLAYER_BOMBS;
+      updateUI();
+      drawBoard();
+    }
+
+    function resetGame() {
+      roundNumber = 1;
+      playerLife = 3;
+      cpuLife = 3;
+      phase = PHASE_PLAYER_BOMBS;
+      playerBombs = [];
+      cpuBombs = [];
+      playerPos = null;
+      cpuPos = null;
+      lastRoundResult = null;
+      updateUI();
+      drawBoard();
+    }
+
+    canvas.addEventListener("click", (event) => {
+      if (phase === PHASE_GAME_OVER) return;
+
+      const cell = getCellFromEvent(event);
+      if (!cell) return;
+
+      if (phase === PHASE_PLAYER_BOMBS) {
+        if (isCellBlockedForPlacement(cell.x, cell.y)) return;
+
+        playerBombs.push({ x: cell.x, y: cell.y });
+        drawBoard();
+        updateUI();
+
+        if (playerBombs.length >= 3) {
+          generateCpuBombs();
+          phase = PHASE_PLAYER_MOVE;
+          updateUI();
+          drawBoard();
+        }
+        return;
+      }
+
+      if (phase === PHASE_PLAYER_MOVE) {
+        if (!isWalkableCell(cell.x, cell.y)) return;
+        if (hasBombAt(playerBombs, cell.x, cell.y)) return;
+        if (hasBombAt(cpuBombs, cell.x, cell.y)) return;
+
+        playerPos = { x: cell.x, y: cell.y };
+        chooseCpuPosition();
+        drawBoard();
+        resolveRound();
+      }
     });
 
     restartButton.addEventListener("click", resetGame);
 
+    playerImg.onload = drawBoard;
+    cpuImg.onload = drawBoard;
+
     resetGame();
-    loop();
   </script>
 </body>
 </html>
