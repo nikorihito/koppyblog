@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>つるつる君のTNTバトル</title>
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="icon" href="./favicon.png" type="image/png" />
+  <style>
+    .tnt-wrap {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .tnt-card {
+      max-width: 860px;
+      margin: 24px auto;
+      padding: 28px 20px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .tnt-info {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 18px auto 20px;
+      max-width: 760px;
+    }
+
+    .tnt-info-box {
+      background: rgba(255,255,255,0.82);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: var(--shadow-soft);
+      font-weight: bold;
+    }
+
+    .tnt-stage {
+      display: flex;
+      justify-content: center;
+      margin: 18px 0;
+    }
+
+    canvas {
+      background: #f7efe7;
+      border: 3px solid #9a6238;
+      border-radius: 16px;
+      box-shadow: 0 10px 24px rgba(120, 80, 40, 0.14);
+      image-rendering: pixelated;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .tnt-guide {
+      max-width: 760px;
+      margin: 18px auto 0;
+      padding: 16px;
+      background: linear-gradient(180deg, #fffaf5, #fff0e5);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--subtext);
+      line-height: 1.9;
+      text-align: left;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .tnt-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 700px) {
+      .tnt-info {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="./index.html">
+      <img src="./favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。YouTubeの配布物も載せます。</p>
+  </header>
+
+  <main class="tnt-wrap">
+    <section class="tnt-card">
+      <h2>💣 つるつる君のTNTバトル</h2>
+      <p>まずはローカル専用の CP 対戦版！ TNTを置いて、爆風で相手を倒そう！</p>
+
+      <div class="tnt-info">
+        <div class="tnt-info-box">プレイヤー: <span id="playerStatus">生存中</span></div>
+        <div class="tnt-info-box">CP: <span id="cpStatus">生存中</span></div>
+        <div class="tnt-info-box">結果: <span id="resultText">対戦中</span></div>
+      </div>
+
+      <div class="tnt-stage">
+        <canvas id="gameCanvas" width="640" height="480"></canvas>
+      </div>
+
+      <div class="tnt-buttons">
+        <button class="button" id="restartButton">もう一回遊ぶ</button>
+        <a href="./index.html" class="button">トップへ戻る</a>
+      </div>
+
+      <div class="tnt-guide">
+        <strong>操作方法</strong><br>
+        移動: W A S D または 矢印キー<br>
+        TNT設置: スペースキー<br>
+        リスタート: Rキー<br><br>
+        <strong>ルール</strong><br>
+        TNTは少し時間がたつと爆発します。爆風に当たると負けです。<br>
+        まずはシンプルな1ラウンド制です。
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴーのマイクラひとやすみ</p>
+    <p><a href="./terms.html">利用規約</a></p>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const TILE = 40;
+    const COLS = 16;
+    const ROWS = 12;
+
+    const playerStatusEl = document.getElementById("playerStatus");
+    const cpStatusEl = document.getElementById("cpStatus");
+    const resultTextEl = document.getElementById("resultText");
+    const restartButton = document.getElementById("restartButton");
+
+    const keys = {};
+    let gameOver = false;
+    let resultText = "対戦中";
+
+    const map = [
+      "################",
+      "#..............#",
+      "#..##....##....#",
+      "#..............#",
+      "#....##........#",
+      "#........##....#",
+      "#..............#",
+      "#..##......##..#",
+      "#..............#",
+      "#....##....##..#",
+      "#..............#",
+      "################"
+    ];
+
+    const player = {
+      x: 1.5,
+      y: 1.5,
+      color: "#4ec1f5",
+      alive: true,
+      bombCooldown: 0
+    };
+
+    const cpu = {
+      x: 14.5,
+      y: 10.5,
+      color: "#f08a4b",
+      alive: true,
+      bombCooldown: 0,
+      thinkTimer: 0,
+      dirX: 0,
+      dirY: 0
+    };
+
+    let bombs = [];
+    let blasts = [];
+
+    function resetGame() {
+      player.x = 1.5;
+      player.y = 1.5;
+      player.alive = true;
+      player.bombCooldown = 0;
+
+      cpu.x = 14.5;
+      cpu.y = 10.5;
+      cpu.alive = true;
+      cpu.bombCooldown = 0;
+      cpu.thinkTimer = 0;
+      cpu.dirX = 0;
+      cpu.dirY = 0;
+
+      bombs = [];
+      blasts = [];
+      gameOver = false;
+      resultText = "対戦中";
+      updateStatus();
+    }
+
+    function updateStatus() {
+      playerStatusEl.textContent = player.alive ? "生存中" : "やられた";
+      cpStatusEl.textContent = cpu.alive ? "生存中" : "やられた";
+      resultTextEl.textContent = resultText;
+    }
+
+    function isWall(tx, ty) {
+      if (tx < 0 || ty < 0 || tx >= COLS || ty >= ROWS) return true;
+      return map[ty][tx] === "#";
+    }
+
+    function isBombAt(tx, ty) {
+      return bombs.some(b => b.tx === tx && b.ty === ty);
+    }
+
+    function canMoveTo(x, y) {
+      const left = Math.floor(x - 0.3);
+      const right = Math.floor(x + 0.3);
+      const top = Math.floor(y - 0.3);
+      const bottom = Math.floor(y + 0.3);
+
+      if (isWall(left, top) || isWall(right, top) || isWall(left, bottom) || isWall(right, bottom)) {
+        return false;
+      }
+      return true;
+    }
+
+    function placeBomb(character) {
+      if (character.bombCooldown > 0 || !character.alive || gameOver) return;
+
+      const tx = Math.floor(character.x);
+      const ty = Math.floor(character.y);
+
+      if (isBombAt(tx, ty)) return;
+
+      bombs.push({
+        tx,
+        ty,
+        timer: 120,
+        owner: character === player ? "player" : "cpu"
+      });
+
+      character.bombCooldown = 40;
+    }
+
+    function createBlast(tx, ty) {
+      const cells = [{ tx, ty }];
+      const dirs = [
+        { x: 1, y: 0 },
+        { x: -1, y: 0 },
+        { x: 0, y: 1 },
+        { x: 0, y: -1 }
+      ];
+
+      for (const dir of dirs) {
+        for (let i = 1; i <= 2; i++) {
+          const nx = tx + dir.x * i;
+          const ny = ty + dir.y * i;
+          if (isWall(nx, ny)) break;
+          cells.push({ tx: nx, ty: ny });
+        }
+      }
+
+      blasts.push({
+        cells,
+        timer: 28
+      });
+    }
+
+    function updateBombs() {
+      for (let i = bombs.length - 1; i >= 0; i--) {
+        bombs[i].timer--;
+
+        if (bombs[i].timer <= 0) {
+          createBlast(bombs[i].tx, bombs[i].ty);
+          bombs.splice(i, 1);
+        }
+      }
+    }
+
+    function updateBlasts() {
+      for (let i = blasts.length - 1; i >= 0; i--) {
+        blasts[i].timer--;
+
+        for (const cell of blasts[i].cells) {
+          const px = Math.floor(player.x);
+          const py = Math.floor(player.y);
+          const cx = Math.floor(cpu.x);
+          const cy = Math.floor(cpu.y);
+
+          if (player.alive && cell.tx === px && cell.ty === py) {
+            player.alive = false;
+          }
+          if (cpu.alive && cell.tx === cx && cell.ty === cy) {
+            cpu.alive = false;
+          }
+        }
+
+        if (blasts[i].timer <= 0) {
+          blasts.splice(i, 1);
+        }
+      }
+    }
+
+    function updateResult() {
+      if (gameOver) return;
+
+      if (!player.alive && !cpu.alive) {
+        gameOver = true;
+        resultText = "引き分け！";
+      } else if (!player.alive) {
+        gameOver = true;
+        resultText = "CPの勝ち！";
+      } else if (!cpu.alive) {
+        gameOver = true;
+        resultText = "プレイヤーの勝ち！";
+      }
+
+      updateStatus();
+    }
+
+    function movePlayer() {
+      if (!player.alive || gameOver) return;
+
+      let dx = 0;
+      let dy = 0;
+      const speed = 0.08;
+
+      if (keys["ArrowLeft"] || keys["a"] || keys["A"]) dx -= speed;
+      if (keys["ArrowRight"] || keys["d"] || keys["D"]) dx += speed;
+      if (keys["ArrowUp"] || keys["w"] || keys["W"]) dy -= speed;
+      if (keys["ArrowDown"] || keys["s"] || keys["S"]) dy += speed;
+
+      if (dx !== 0 && dy !== 0) {
+        dx *= 0.707;
+        dy *= 0.707;
+      }
+
+      const nextX = player.x + dx;
+      const nextY = player.y + dy;
+
+      if (canMoveTo(nextX, player.y)) player.x = nextX;
+      if (canMoveTo(player.x, nextY)) player.y = nextY;
+
+      if (player.bombCooldown > 0) player.bombCooldown--;
+    }
+
+    function isDangerTile(tx, ty) {
+      for (const blast of blasts) {
+        for (const cell of blast.cells) {
+          if (cell.tx === tx && cell.ty === ty) return true;
+        }
+      }
+
+      for (const bomb of bombs) {
+        if (bomb.timer > 30) continue;
+
+        if (bomb.tx === tx && bomb.ty === ty) return true;
+        if (bomb.ty === ty && Math.abs(bomb.tx - tx) <= 2) {
+          let blocked = false;
+          const start = Math.min(bomb.tx, tx);
+          const end = Math.max(bomb.tx, tx);
+          for (let x = start + 1; x < end; x++) {
+            if (isWall(x, ty)) blocked = true;
+          }
+          if (!blocked) return true;
+        }
+
+        if (bomb.tx === tx && Math.abs(bomb.ty - ty) <= 2) {
+          let blocked = false;
+          const start = Math.min(bomb.ty, ty);
+          const end = Math.max(bomb.ty, ty);
+          for (let y = start + 1; y < end; y++) {
+            if (isWall(tx, y)) blocked = true;
+          }
+          if (!blocked) return true;
+        }
+      }
+
+      return false;
+    }
+
+    function updateCpu() {
+      if (!cpu.alive || gameOver) return;
+
+      if (cpu.bombCooldown > 0) cpu.bombCooldown--;
+
+      const cpx = Math.floor(cpu.x);
+      const cpy = Math.floor(cpu.y);
+      const px = Math.floor(player.x);
+      const py = Math.floor(player.y);
+
+      const inDanger = isDangerTile(cpx, cpy);
+
+      cpu.thinkTimer--;
+      if (cpu.thinkTimer <= 0) {
+        cpu.thinkTimer = 18 + Math.floor(Math.random() * 20);
+
+        const dirs = [
+          { x: 1, y: 0 },
+          { x: -1, y: 0 },
+          { x: 0, y: 1 },
+          { x: 0, y: -1 },
+          { x: 0, y: 0 }
+        ];
+
+        let candidates = dirs.filter(dir => {
+          const nx = cpu.x + dir.x * 0.6;
+          const ny = cpu.y + dir.y * 0.6;
+          return canMoveTo(nx, ny);
+        });
+
+        if (inDanger) {
+          candidates = candidates.filter(dir => {
+            const ntx = Math.floor(cpu.x + dir.x);
+            const nty = Math.floor(cpu.y + dir.y);
+            return !isDangerTile(ntx, nty);
+          });
+        }
+
+        if (candidates.length === 0) {
+          candidates = dirs;
+        }
+
+        candidates.sort((a, b) => {
+          const ad = Math.hypot((cpx + a.x) - px, (cpy + a.y) - py);
+          const bd = Math.hypot((cpx + b.x) - px, (cpy + b.y) - py);
+
+          if (inDanger) {
+            return bd - ad;
+          }
+          return ad - bd;
+        });
+
+        const selected = candidates[0] || { x: 0, y: 0 };
+        cpu.dirX = selected.x;
+        cpu.dirY = selected.y;
+      }
+
+      const speed = 0.055;
+      const nextX = cpu.x + cpu.dirX * speed;
+      const nextY = cpu.y + cpu.dirY * speed;
+
+      if (canMoveTo(nextX, cpu.y)) cpu.x = nextX;
+      if (canMoveTo(cpu.x, nextY)) cpu.y = nextY;
+
+      const distance = Math.hypot(cpx - px, cpy - py);
+      const aligned = cpx === px || cpy === py;
+
+      if (!inDanger && distance <= 3.2 && aligned && cpu.bombCooldown <= 0) {
+        placeBomb(cpu);
+      }
+    }
+
+    function drawMap() {
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          if (map[y][x] === "#") {
+            ctx.fillStyle = "#9a6238";
+            ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+            ctx.fillStyle = "#b27a4d";
+            ctx.fillRect(x * TILE + 4, y * TILE + 4, TILE - 8, TILE - 8);
+          } else {
+            ctx.fillStyle = (x + y) % 2 === 0 ? "#f7efe7" : "#f2e7dc";
+            ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+          }
+        }
+      }
+    }
+
+    function drawBombs() {
+      for (const bomb of bombs) {
+        const x = bomb.tx * TILE + TILE / 2;
+        const y = bomb.ty * TILE + TILE / 2;
+        ctx.fillStyle = "#3b2c25";
+        ctx.beginPath();
+        ctx.arc(x, y, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#d96c75";
+        ctx.fillRect(x + 6, y - 14, 4, 8);
+      }
+    }
+
+    function drawBlasts() {
+      for (const blast of blasts) {
+        for (const cell of blast.cells) {
+          ctx.fillStyle = "rgba(255, 180, 60, 0.75)";
+          ctx.fillRect(cell.tx * TILE, cell.ty * TILE, TILE, TILE);
+
+          ctx.fillStyle = "rgba(255, 110, 30, 0.7)";
+          ctx.fillRect(cell.tx * TILE + 6, cell.ty * TILE + 6, TILE - 12, TILE - 12);
+        }
+      }
+    }
+
+    function drawCharacter(chara) {
+      if (!chara.alive) return;
+
+      const cx = chara.x * TILE;
+      const cy = chara.y * TILE;
+
+      ctx.fillStyle = chara.color;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 13, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(cx - 4, cy - 3, 2, 0, Math.PI * 2);
+      ctx.arc(cx + 4, cy - 3, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawMap();
+      drawBlasts();
+      drawBombs();
+      drawCharacter(player);
+      drawCharacter(cpu);
+    }
+
+    function update() {
+      movePlayer();
+      updateCpu();
+      updateBombs();
+      updateBlasts();
+      updateResult();
+      updateStatus();
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener("keydown", (e) => {
+      keys[e.key] = true;
+
+      if (e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        placeBomb(player);
+      }
+
+      if (e.key === "r" || e.key === "R") {
+        resetGame();
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      keys[e.key] = false;
+    });
+
+    restartButton.addEventListener("click", resetGame);
+
+    resetGame();
+    loop();
+  </script>
+</body>
+</html>
