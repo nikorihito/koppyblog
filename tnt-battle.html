@@ -8,12 +8,12 @@
   <link rel="icon" href="./favicon.png" type="image/png" />
   <style>
     .tnt-page {
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
     }
 
     .tnt-card {
-      max-width: 1100px;
+      max-width: 1180px;
       margin: 24px auto;
       padding: 28px 20px;
       background: var(--card);
@@ -25,9 +25,9 @@
 
     .tnt-status-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 12px;
-      max-width: 960px;
+      max-width: 1100px;
       margin: 18px auto 20px;
     }
 
@@ -43,10 +43,10 @@
 
     .tnt-layout {
       display: grid;
-      grid-template-columns: 1fr 280px;
+      grid-template-columns: 1fr 320px;
       gap: 20px;
       align-items: start;
-      max-width: 1040px;
+      max-width: 1120px;
       margin: 0 auto;
     }
 
@@ -111,7 +111,7 @@
     }
 
     .tnt-message {
-      min-height: 2.2em;
+      min-height: 2.4em;
       font-weight: bold;
       color: var(--primary-dark);
       margin: 12px 0 0;
@@ -142,9 +142,51 @@
     .legend-color.wall { background: #9a6238; }
     .legend-color.player-bomb { background: #f08a4b; }
     .legend-color.player-pos { background: #4ec1f5; }
+    .legend-color.item { background: #d96c75; }
     .legend-color.safe { background: #f6eee5; }
 
-    @media (max-width: 900px) {
+    .item-stock {
+      display: grid;
+      gap: 10px;
+    }
+
+    .item-button {
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.86);
+      color: var(--text);
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    .item-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 18px rgba(140, 90, 50, 0.14);
+    }
+
+    .item-button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .item-button.active {
+      border: 2px solid var(--accent);
+      background: #fff0ef;
+    }
+
+    .small-note {
+      font-size: 0.82rem;
+      color: var(--subtext);
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 980px) {
       .tnt-status-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -173,13 +215,14 @@
   <main class="tnt-page">
     <section class="tnt-card">
       <h2>💣 つるつる君のTNTバトル</h2>
-      <p>自分のTNTは見える。相手のTNTは見えない。3つ仕掛けて、読み合いで勝とう！</p>
+      <p>見えるのは自分のTNTだけ。アイテムを拾って、読み合いで勝とう！</p>
 
       <div class="tnt-status-grid">
         <div class="tnt-status-box">プレイヤーライフ: <span id="playerLife">3</span></div>
         <div class="tnt-status-box">CPライフ: <span id="cpuLife">3</span></div>
         <div class="tnt-status-box">ラウンド: <span id="roundNumber">1</span></div>
         <div class="tnt-status-box">フェーズ: <span id="phaseText">プレイヤーTNT設置</span></div>
+        <div class="tnt-status-box">拾えるアイテム: <span id="itemOnBoardText">なし</span></div>
       </div>
 
       <div class="tnt-layout">
@@ -195,7 +238,7 @@
               <li>毎ラウンド、プレイヤーもCPもTNTを3個ずつ設置します。</li>
               <li>自分のTNTは見えますが、自分では被弾しません。</li>
               <li>相手のTNTは見えず、爆風に入るとライフが1減ります。</li>
-              <li>爆風は中心を含む周囲±1の範囲です。</li>
+              <li>爆風は通常、中心を含む周囲±1です。</li>
               <li>壁越しには爆風が届きません。</li>
               <li>ライフが先に0になった方が負け。同時0なら draw です。</li>
             </ul>
@@ -207,11 +250,23 @@
           </div>
 
           <div class="tnt-panel">
+            <h3>アイテムストック</h3>
+            <div class="item-stock">
+              <button class="item-button" id="itemMeganeBtn">先読みメガネ × <span id="stockMegane">0</span></button>
+              <button class="item-button" id="itemTsubasaBtn">回避のつばさ × <span id="stockTsubasa">0</span></button>
+              <button class="item-button" id="itemGlassBtn">魔法のガラス × <span id="stockGlass">0</span></button>
+              <button class="item-button" id="itemControllerBtn">魔人コントローラー × <span id="stockController">0</span></button>
+            </div>
+            <p class="small-note">使いたいアイテムを押して選択します。もう一度押すと解除します。1回使うと消費されます。</p>
+          </div>
+
+          <div class="tnt-panel">
             <h3>見えるもの</h3>
             <div class="tnt-legend">
               <div class="legend-item"><span class="legend-color wall"></span> 壁</div>
               <div class="legend-item"><span class="legend-color player-bomb"></span> 自分のTNT</div>
               <div class="legend-item"><span class="legend-color player-pos"></span> 自分の移動先</div>
+              <div class="legend-item"><span class="legend-color item"></span> 落ちているアイテム</div>
               <div class="legend-item"><span class="legend-color safe"></span> 通れるマス</div>
             </div>
           </div>
@@ -238,9 +293,20 @@
     const cpuLifeEl = document.getElementById("cpuLife");
     const roundNumberEl = document.getElementById("roundNumber");
     const phaseTextEl = document.getElementById("phaseText");
+    const itemOnBoardTextEl = document.getElementById("itemOnBoardText");
     const messageTextEl = document.getElementById("messageText");
     const controlsTextEl = document.getElementById("controlsText");
     const restartButton = document.getElementById("restartButton");
+
+    const stockMeganeEl = document.getElementById("stockMegane");
+    const stockTsubasaEl = document.getElementById("stockTsubasa");
+    const stockGlassEl = document.getElementById("stockGlass");
+    const stockControllerEl = document.getElementById("stockController");
+
+    const itemMeganeBtn = document.getElementById("itemMeganeBtn");
+    const itemTsubasaBtn = document.getElementById("itemTsubasaBtn");
+    const itemGlassBtn = document.getElementById("itemGlassBtn");
+    const itemControllerBtn = document.getElementById("itemControllerBtn");
 
     const playerImg = new Image();
     playerImg.src = "./つるつる君.png";
@@ -260,6 +326,18 @@
     const PHASE_RESOLVE = "resolve";
     const PHASE_GAME_OVER = "game_over";
 
+    const ITEM_MEGANE = "megane";
+    const ITEM_TSUBASA = "tsubasa";
+    const ITEM_GLASS = "glass";
+    const ITEM_CONTROLLER = "controller";
+
+    const ITEM_LABELS = {
+      [ITEM_MEGANE]: "先読みメガネ",
+      [ITEM_TSUBASA]: "回避のつばさ",
+      [ITEM_GLASS]: "魔法のガラス",
+      [ITEM_CONTROLLER]: "魔人コントローラー"
+    };
+
     let roundNumber = 1;
     let playerLife = 3;
     let cpuLife = 3;
@@ -270,6 +348,20 @@
     let playerPos = null;
     let cpuPos = null;
     let lastRoundResult = null;
+
+    let boardItem = null;
+    let playerItems = {
+      [ITEM_MEGANE]: 0,
+      [ITEM_TSUBASA]: 0,
+      [ITEM_GLASS]: 0,
+      [ITEM_CONTROLLER]: 0
+    };
+
+    let selectedItem = null;
+    let usedItemThisRound = null;
+
+    let previewCpuPos = null;
+    let playerExplosionRadius = 1;
 
     const map = createMap();
 
@@ -319,20 +411,12 @@
       return map[y][x] === 1;
     }
 
-    function isSameCell(a, b) {
-      return a && b && a.x === b.x && a.y === b.y;
-    }
-
     function hasBombAt(arr, x, y) {
       return arr.some(b => b.x === x && b.y === y);
     }
 
     function isWalkableCell(x, y) {
       return !isWall(x, y);
-    }
-
-    function isCellReservedForPlayer(x, y) {
-      return hasBombAt(playerBombs, x, y);
     }
 
     function isCellBlockedForPlacement(x, y) {
@@ -355,6 +439,10 @@
       return cells;
     }
 
+    function cellKey(x, y) {
+      return `${x},${y}`;
+    }
+
     function lineBlockedStraight(fromX, fromY, toX, toY) {
       if (fromX === toX) {
         const step = toY > fromY ? 1 : -1;
@@ -375,41 +463,60 @@
       return true;
     }
 
-    function isAffectedByBomb(bomb, targetX, targetY) {
+    function isAffectedByBomb(bomb, targetX, targetY, radius = 1) {
       const dx = targetX - bomb.x;
       const dy = targetY - bomb.y;
 
-      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) return false;
+      if (Math.abs(dx) > radius || Math.abs(dy) > radius) return false;
       if (isWall(targetX, targetY)) return false;
 
-      if (dx === 0 && dy === 0) {
-        return true;
-      }
+      if (dx === 0 && dy === 0) return true;
 
       if (dx === 0 || dy === 0) {
         return !lineBlockedStraight(bomb.x, bomb.y, targetX, targetY);
       }
 
       const horizontalClear =
-        !isWall(bomb.x + dx, bomb.y) &&
+        !isWall(bomb.x + Math.sign(dx), bomb.y) &&
         !isWall(targetX, targetY);
 
       const verticalClear =
-        !isWall(bomb.x, bomb.y + dy) &&
+        !isWall(bomb.x, bomb.y + Math.sign(dy)) &&
         !isWall(targetX, targetY);
 
       return horizontalClear && verticalClear;
     }
 
-    function isHitByEnemyBombs(target, enemyBombs) {
+    function isHitByEnemyBombs(target, enemyBombs, radius = 1) {
       if (!target) return false;
-      return enemyBombs.some(bomb => isAffectedByBomb(bomb, target.x, target.y));
+      return enemyBombs.some(bomb => isAffectedByBomb(bomb, target.x, target.y, radius));
+    }
+
+    function updateItemButtons() {
+      stockMeganeEl.textContent = playerItems[ITEM_MEGANE];
+      stockTsubasaEl.textContent = playerItems[ITEM_TSUBASA];
+      stockGlassEl.textContent = playerItems[ITEM_GLASS];
+      stockControllerEl.textContent = playerItems[ITEM_CONTROLLER];
+
+      const canUse = phase === PHASE_PLAYER_MOVE;
+
+      setItemButtonState(itemMeganeBtn, ITEM_MEGANE, canUse);
+      setItemButtonState(itemTsubasaBtn, ITEM_TSUBASA, canUse);
+      setItemButtonState(itemGlassBtn, ITEM_GLASS, canUse);
+      setItemButtonState(itemControllerBtn, ITEM_CONTROLLER, canUse);
+    }
+
+    function setItemButtonState(button, itemType, canUse) {
+      const hasStock = playerItems[itemType] > 0;
+      button.disabled = !(canUse && hasStock);
+      button.classList.toggle("active", selectedItem === itemType);
     }
 
     function updateUI() {
       playerLifeEl.textContent = playerLife;
       cpuLifeEl.textContent = cpuLife;
       roundNumberEl.textContent = roundNumber;
+      itemOnBoardTextEl.textContent = boardItem ? ITEM_LABELS[boardItem.type] : "なし";
 
       if (phase === PHASE_PLAYER_BOMBS) {
         phaseTextEl.textContent = "プレイヤーTNT設置";
@@ -417,8 +524,12 @@
         controlsTextEl.textContent = "空いているマスをクリックして、TNTを3個置いてください。";
       } else if (phase === PHASE_PLAYER_MOVE) {
         phaseTextEl.textContent = "移動先を選ぶ";
-        messageTextEl.textContent = "つるつる君を置くマスを1つ選んでください。";
-        controlsTextEl.textContent = "空いているマスをクリックすると、つるつる君の移動先を決めます。";
+        if (selectedItem) {
+          messageTextEl.textContent = `「${ITEM_LABELS[selectedItem]}」を選択中。移動先をクリックすると使用されます。`;
+        } else {
+          messageTextEl.textContent = "つるつる君を置くマスを1つ選んでください。";
+        }
+        controlsTextEl.textContent = "空いているマスをクリックすると、つるつる君の移動先を決めます。必要なら右のアイテムを選んで使ってください。";
       } else if (phase === PHASE_RESOLVE) {
         phaseTextEl.textContent = "爆破判定";
         controlsTextEl.textContent = "判定中です。";
@@ -430,6 +541,8 @@
       if (phase === PHASE_GAME_OVER && lastRoundResult) {
         messageTextEl.textContent = lastRoundResult.finalText;
       }
+
+      updateItemButtons();
     }
 
     function drawBoard() {
@@ -455,10 +568,26 @@
         }
       }
 
+      drawBoardItem();
       drawPlayerBombs();
+      drawPreviewCpuPosition();
       drawPlayerPosition();
       drawCpuPositionIfNeeded();
-      drawHighlightsIfNeeded();
+    }
+
+    function drawBoardItem() {
+      if (!boardItem) return;
+      const px = boardItem.x * TILE_SIZE;
+      const py = boardItem.y * TILE_SIZE;
+
+      ctx.fillStyle = "#d96c75";
+      ctx.fillRect(px + 9, py + 9, TILE_SIZE - 18, TILE_SIZE - 18);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(boardItem.short, px + TILE_SIZE / 2, py + TILE_SIZE / 2);
     }
 
     function drawPlayerBombs() {
@@ -486,6 +615,19 @@
       drawImageInCell(cpuImg, cpuPos.x, cpuPos.y, "#d96c75");
     }
 
+    function drawPreviewCpuPosition() {
+      if (!previewCpuPos) return;
+
+      const px = previewCpuPos.x * TILE_SIZE;
+      const py = previewCpuPos.y * TILE_SIZE;
+
+      ctx.save();
+      ctx.strokeStyle = "#d96c75";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(px + 4, py + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+      ctx.restore();
+    }
+
     function drawImageInCell(img, x, y, fallbackColor) {
       const px = x * TILE_SIZE;
       const py = y * TILE_SIZE;
@@ -497,21 +639,6 @@
         ctx.beginPath();
         ctx.arc(px + TILE_SIZE / 2, py + TILE_SIZE / 2, 12, 0, Math.PI * 2);
         ctx.fill();
-      }
-    }
-
-    function drawHighlightsIfNeeded() {
-      if (phase === PHASE_PLAYER_BOMBS || phase === PHASE_PLAYER_MOVE) {
-        ctx.save();
-        ctx.strokeStyle = "rgba(240, 138, 75, 0.15)";
-        for (let y = 0; y < GRID_SIZE; y++) {
-          for (let x = 0; x < GRID_SIZE; x++) {
-            if (!isWall(x, y)) {
-              ctx.strokeRect(x * TILE_SIZE + 2, y * TILE_SIZE + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-            }
-          }
-        }
-        ctx.restore();
       }
     }
 
@@ -533,66 +660,111 @@
       });
 
       cpuBombs = [];
-      const preferred = [];
-
-      for (const cell of walkable) {
-        const nearCenter = Math.abs(cell.x - 10) + Math.abs(cell.y - 10);
-        const score = Math.max(0, 20 - nearCenter);
-        preferred.push({ ...cell, score });
-      }
-
-      preferred.sort((a, b) => b.score - a.score + (Math.random() - 0.5));
-
-      for (const cell of preferred) {
-        if (cpuBombs.length >= 3) break;
-        if (!hasBombAt(cpuBombs, cell.x, cell.y)) {
-          cpuBombs.push({ x: cell.x, y: cell.y });
-        }
-      }
-
       while (cpuBombs.length < 3) {
         const cell = randomChoice(walkable);
-        if (!hasBombAt(cpuBombs, cell.x, cell.y)) {
+        if (!hasBombAt(cpuBombs, cell.x, cell.y) && !hasBombAt(playerBombs, cell.x, cell.y)) {
           cpuBombs.push({ x: cell.x, y: cell.y });
         }
       }
     }
 
-    function chooseCpuPosition() {
+    function chooseCpuPositionRandom() {
       const walkable = getAllWalkableCells().filter(cell => {
         return !hasBombAt(playerBombs, cell.x, cell.y) &&
                !hasBombAt(cpuBombs, cell.x, cell.y);
       });
 
-      const safeCells = walkable.filter(cell => !isHitByEnemyBombs(cell, playerBombs));
+      cpuPos = randomChoice(walkable);
+    }
 
-      const pool = safeCells.length > 0 ? safeCells : walkable;
+    function maybePickupItem() {
+      if (!boardItem || !playerPos) return;
+      if (playerPos.x === boardItem.x && playerPos.y === boardItem.y) {
+        playerItems[boardItem.type] += 1;
+        messageTextEl.textContent = `${ITEM_LABELS[boardItem.type]} を拾った！`;
+        boardItem = null;
+      }
+    }
 
-      let bestCell = pool[0];
-      let bestScore = -Infinity;
+    function generateBoardItem() {
+      const types = [ITEM_MEGANE, ITEM_TSUBASA, ITEM_GLASS, ITEM_CONTROLLER];
+      const shorts = {
+        [ITEM_MEGANE]: "目",
+        [ITEM_TSUBASA]: "翼",
+        [ITEM_GLASS]: "硝",
+        [ITEM_CONTROLLER]: "操"
+      };
 
-      for (const cell of pool) {
-        let score = 0;
+      const walkable = getAllWalkableCells().filter(cell => {
+        return !hasBombAt(playerBombs, cell.x, cell.y) &&
+               !hasBombAt(cpuBombs, cell.x, cell.y);
+      });
 
-        for (const bomb of cpuBombs) {
-          const dist = Math.abs(cell.x - bomb.x) + Math.abs(cell.y - bomb.y);
-          score += Math.min(dist, 6) * 0.6;
-        }
+      const cell = randomChoice(walkable);
+      const type = randomChoice(types);
 
-        for (const bomb of playerBombs) {
-          const dist = Math.abs(cell.x - bomb.x) + Math.abs(cell.y - bomb.y);
-          score += dist * 0.2;
-        }
+      boardItem = {
+        type,
+        short: shorts[type],
+        x: cell.x,
+        y: cell.y
+      };
+    }
 
-        score += Math.random() * 0.6;
+    function useSelectedItemIfNeeded() {
+      if (!selectedItem) return;
 
-        if (score > bestScore) {
-          bestScore = score;
-          bestCell = cell;
+      usedItemThisRound = selectedItem;
+      playerItems[selectedItem] = Math.max(0, playerItems[selectedItem] - 1);
+
+      if (selectedItem === ITEM_GLASS) {
+        playerExplosionRadius = 2;
+      }
+
+      selectedItem = null;
+    }
+
+    function applyMeganePreview() {
+      previewCpuPos = null;
+      if (usedItemThisRound === ITEM_MEGANE && cpuPos) {
+        previewCpuPos = { x: cpuPos.x, y: cpuPos.y };
+        drawBoard();
+        messageTextEl.textContent = `先読みメガネ発動！ CPの移動先は (${cpuPos.x + 1}, ${cpuPos.y + 1})`;
+      }
+    }
+
+    function applyControllerEffect() {
+      if (usedItemThisRound !== ITEM_CONTROLLER || !cpuPos) return;
+
+      const candidates = [];
+      for (let y = cpuPos.y - 2; y <= cpuPos.y + 2; y++) {
+        for (let x = cpuPos.x - 2; x <= cpuPos.x + 2; x++) {
+          if (!isWalkableCell(x, y)) continue;
+          if (hasBombAt(playerBombs, x, y)) continue;
+          if (hasBombAt(cpuBombs, x, y)) continue;
+          candidates.push({ x, y });
         }
       }
 
-      cpuPos = bestCell;
+      if (candidates.length > 0) {
+        cpuPos = randomChoice(candidates);
+      }
+    }
+
+    function applyTsubasaEffect(playerHit) {
+      if (!playerHit) return false;
+      if (usedItemThisRound !== ITEM_TSUBASA) return false;
+
+      const walkable = getAllWalkableCells().filter(cell => {
+        if (hasBombAt(playerBombs, cell.x, cell.y)) return false;
+        if (hasBombAt(cpuBombs, cell.x, cell.y)) return false;
+        return !isHitByEnemyBombs(cell, cpuBombs, 1);
+      });
+
+      if (walkable.length === 0) return false;
+
+      playerPos = randomChoice(walkable);
+      return true;
     }
 
     function resolveRound() {
@@ -600,14 +772,24 @@
       updateUI();
       drawBoard();
 
-      const playerHit = isHitByEnemyBombs(playerPos, cpuBombs);
-      const cpuHit = isHitByEnemyBombs(cpuPos, playerBombs);
+      let playerHit = isHitByEnemyBombs(playerPos, cpuBombs, 1);
+      const cpuHit = isHitByEnemyBombs(cpuPos, playerBombs, playerExplosionRadius);
+
+      const dodged = applyTsubasaEffect(playerHit);
+      if (dodged) {
+        playerHit = false;
+      }
 
       if (playerHit) playerLife = Math.max(0, playerLife - 1);
       if (cpuHit) cpuLife = Math.max(0, cpuLife - 1);
 
       let text = "";
-      if (playerHit && cpuHit) {
+
+      if (dodged && cpuHit) {
+        text = "回避のつばさで助かって、バタバタ君は爆破された！";
+      } else if (dodged) {
+        text = "回避のつばさでつるつる君は危機一髪セーフ！";
+      } else if (playerHit && cpuHit) {
         text = "お互い爆破された！";
       } else if (playerHit) {
         text = "つるつる君が爆破された！";
@@ -645,7 +827,7 @@
 
       setTimeout(() => {
         startNextRound();
-      }, 1200);
+      }, 1300);
     }
 
     function startNextRound() {
@@ -654,7 +836,11 @@
       cpuBombs = [];
       playerPos = null;
       cpuPos = null;
+      previewCpuPos = null;
+      usedItemThisRound = null;
+      playerExplosionRadius = 1;
       phase = PHASE_PLAYER_BOMBS;
+      generateBoardItem();
       updateUI();
       drawBoard();
     }
@@ -668,10 +854,35 @@
       cpuBombs = [];
       playerPos = null;
       cpuPos = null;
+      previewCpuPos = null;
       lastRoundResult = null;
+      boardItem = null;
+      playerItems = {
+        [ITEM_MEGANE]: 0,
+        [ITEM_TSUBASA]: 0,
+        [ITEM_GLASS]: 0,
+        [ITEM_CONTROLLER]: 0
+      };
+      selectedItem = null;
+      usedItemThisRound = null;
+      playerExplosionRadius = 1;
+      generateBoardItem();
       updateUI();
       drawBoard();
     }
+
+    function handleItemButtonClick(type) {
+      if (phase !== PHASE_PLAYER_MOVE) return;
+      if (playerItems[type] <= 0) return;
+
+      selectedItem = selectedItem === type ? null : type;
+      updateUI();
+    }
+
+    itemMeganeBtn.addEventListener("click", () => handleItemButtonClick(ITEM_MEGANE));
+    itemTsubasaBtn.addEventListener("click", () => handleItemButtonClick(ITEM_TSUBASA));
+    itemGlassBtn.addEventListener("click", () => handleItemButtonClick(ITEM_GLASS));
+    itemControllerBtn.addEventListener("click", () => handleItemButtonClick(ITEM_CONTROLLER));
 
     canvas.addEventListener("click", (event) => {
       if (phase === PHASE_GAME_OVER) return;
@@ -701,9 +912,16 @@
         if (hasBombAt(cpuBombs, cell.x, cell.y)) return;
 
         playerPos = { x: cell.x, y: cell.y };
-        chooseCpuPosition();
+        maybePickupItem();
+        useSelectedItemIfNeeded();
+        chooseCpuPositionRandom();
+        applyMeganePreview();
+        applyControllerEffect();
         drawBoard();
-        resolveRound();
+
+        setTimeout(() => {
+          resolveRound();
+        }, usedItemThisRound === ITEM_MEGANE ? 1000 : 200);
       }
     });
 
