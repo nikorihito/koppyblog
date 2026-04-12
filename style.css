@@ -825,3 +825,18 @@ footer a:hover {
     gap: 10px;
   }
 }
+code {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0.2em 0.45em;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 0.95em;
+  line-height: 1.6;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  vertical-align: middle;
+}
