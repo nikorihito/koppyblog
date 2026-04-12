@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>まるで3Dプリンター？！たった1コマンドで自動建築の家！！</title>
+  <title>まるで３Dプリンター？！たった1コマンドで自動建築の家！！</title>
   <link rel="stylesheet" href="../style.css" />
   <link rel="icon" href="https://nikorihito.github.io/koppyblog/favicon.png" type="image/png">
 </head>
@@ -18,11 +18,11 @@
 
   <main>
     <article>
-      <h2>まるで3Dプリンター？！たった1コマンドで自動建築の家！！</h2>
+      <h2>まるで３Dプリンター？！たった1コマンドで自動建築の家！！</h2>
       <img src="thumbnail/jidokentiku.png" alt="自動建築の家のサムネイル" style="max-width: 85%; border-radius: 12px;" />
 
       <p>
-        こんにちは！今回は、まるで3Dプリンターみたいに家が自動で建つ、
+        こんにちは！今回は、まるで３Dプリンターみたいに家が自動で建つ、
         ちょっとすごい1コマンドを紹介します！
       </p>
 
@@ -46,7 +46,12 @@
         実際の動きは、こちらのYouTube動画でも見られます！
       </p>
       <p><a href="https://www.youtube.com/watch?v=tZONbxxNQ6g&t=1s" class="button" target="_blank" rel="noopener noreferrer">▶ 動画を見る</a></p>
+
       <h3>使うコマンド</h3>
+      <p>
+        なお、<strong>この2つのコマンドはどちらも「反復・無条件・常に実行」</strong>の
+        コマンドブロックに入れて使ってください！
+      </p>
       <p>こちらが自動建築用のコマンドです！</p>
 
       <pre><code>execute as @a at @s if block ~~-2~ stone_bricks if block ~~-1~ crafting_table if block ~~~ stone_button ["button_pressed_bit"=true,"facing_direction"=1] run structure load house ~~-2~ 0_degrees none block_by_block 7</code></pre>
@@ -75,6 +80,7 @@
       <h3>念のため壊す用のコマンドも貼っておきます！</h3>
       <p>
         建てたあとに元に戻したい時のために、削除用のコマンドもあります。
+        こちらも同じく、<strong>反復・無条件・常に実行</strong>のコマンドブロックに入れて使ってください！
       </p>
 
       <pre><code>execute as @a at @s if block ~~-2~ smooth_stone if block ~~-1~ furnace if block ~~~ stone_button ["button_pressed_bit"=true,"facing_direction"=1] run fill ~~-2~ ~14~8~13 air destroy</code></pre>
