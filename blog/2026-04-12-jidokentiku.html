@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>まるで３Dプリンター？！たった1コマンドで自動建築の家！！</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" href="https://nikorihito.github.io/koppyblog/favicon.png" type="image/png">
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="../favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <article>
+      <h2>まるで３Dプリンター？！たった1コマンドで自動建築の家！！</h2>
+      <img src="thumbnail/jidokentiku.png" alt="自動建築の家のサムネイル" style="max-width: 85%; border-radius: 12px;" />
+
+      <p>
+        こんにちは！今回は、まるで３Dプリンターみたいに家が自動で建つ、
+        ちょっとすごい1コマンドを紹介します！
+      </p>
+
+      <p>
+        ボタンを押すだけで、保存しておいた家のストラクチャーがその場に出現します。
+        配布ワールドやコマンド紹介ワールドでも映えるので、インパクト重視の演出にもぴったりです！
+      </p>
+
+      <p>
+        まず大事なのが、<strong>「house」 という名前で家のストラクチャーを事前に保存しておくこと</strong>です。
+        このコマンドは、保存済みのストラクチャーを読み込んで建築する仕組みになっています。
+      </p>
+
+      <p>
+        つまり、先に好きな家を作ってから、ストラクチャーブロックなどを使って
+        <strong>house</strong> という名前で保存しておいてください！
+      </p>
+
+      <h3>使うコマンド</h3>
+      <p>こちらが自動建築用のコマンドです！</p>
+
+      <pre><code>execute as @a at @s if block ~~-2~ stone_bricks if block ~~-1~ crafting_table if block ~~~ stone_button ["button_pressed_bit"=true,"facing_direction"=1] run structure load house ~~-2~ 0_degrees none block_by_block 7</code></pre>
+
+      <p>
+        このコマンドは、特定の位置に置かれたブロックとボタンの状態を判定して、
+        条件がそろったときに <strong>house</strong> を読み込みます。
+      </p>
+
+      <p>
+        <strong>下から石レンガ、その上に作業台、さらにボタン</strong> という形でセットして、
+        ボタンを押すと家が建つイメージです。
+      </p>
+
+      <h3>ポイント</h3>
+      <p>
+        <strong>structure load</strong> を使っているので、自分で作った建物をそのまま呼び出せるのが魅力です。
+        いろいろな家を保存しておけば、別バージョンの自動建築装置も作れます！
+      </p>
+
+      <p>
+        また、<strong>block_by_block 7</strong> になっているので、一気に出るというより
+        少しずつ建っていく感じがあって、見た目も楽しいです。
+      </p>
+
+      <h3>念のため壊す用のコマンドも貼っておきます！</h3>
+      <p>
+        建てたあとに元に戻したい時のために、削除用のコマンドもあります。
+      </p>
+
+      <pre><code>execute as @a at @s if block ~~-2~ smooth_stone if block ~~-1~ furnace if block ~~~ stone_button ["button_pressed_bit"=true,"facing_direction"=1] run fill ~~-2~ ~14~8~13 air destroy</code></pre>
+
+      <p>
+        こちらは範囲内を air にして壊すコマンドです。
+        実際に使う時は、<strong>消したい建物の大きさに合わせて範囲を調整</strong>してください！
+      </p>
+
+      <p>
+        自動建築と削除の両方を用意しておくと、動画撮影やワールド紹介でもかなり便利です。
+        気になった方はぜひ試してみてください！
+      </p>
+    </article>
+
+    <p><a href="../lasted-articles.html" class="button">← 最新のブログに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+</body>
+</html>
