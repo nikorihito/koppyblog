@@ -840,3 +840,84 @@ code {
   word-break: break-word;
   vertical-align: middle;
 }
+/* =========================
+   最近のグルメ写真
+========================= */
+
+.gourmet-section {
+  margin: 24px 0;
+}
+
+.gourmet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  max-width: 980px;
+  margin: 22px auto 0;
+}
+
+.gourmet-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,244,236,0.92));
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  text-align: left;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.gourmet-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 24px rgba(140, 90, 50, 0.16);
+  filter: brightness(1.02);
+}
+
+.gourmet-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  background: #fff8f3;
+}
+
+.gourmet-body {
+  padding: 14px 14px 16px;
+}
+
+.gourmet-date {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(135deg, var(--primary), #ffb36b);
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+
+.gourmet-title {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.gourmet-place {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: var(--primary-dark);
+  font-weight: bold;
+}
+
+.gourmet-comment {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--subtext);
+  line-height: 1.75;
+}
+
+.gourmet-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--subtext);
+}
