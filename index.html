@@ -181,10 +181,10 @@
       });
     });
 
-    fetch("./food.json")
+    fetch("./food/food.json")
       .then(res => {
         if (!res.ok) {
-          throw new Error("food.json の読み込みに失敗しました");
+          throw new Error("food/food.json の読み込みに失敗しました");
         }
         return res.json();
       })
