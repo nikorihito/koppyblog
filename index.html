@@ -15,7 +15,7 @@
 
   <title>こっぴーのマイクラひとやすみ</title>
   <link rel="stylesheet" href="./style.css" />
-  <link rel="icon" href="./favicon.png" type="image/png" />
+  <link rel="icon" href="https://nikorihito.github.io/koppyblog/favicon.png" type="image/png" />
 
   <style>
     .gourmet-carousel-wrap {
@@ -100,17 +100,6 @@
       filter: brightness(1.02);
     }
 
-    .gourmet-image-link {
-      display: block;
-      text-decoration: none;
-    }
-
-    .gourmet-image-link:focus-visible {
-      outline: 3px solid var(--accent);
-      outline-offset: 4px;
-      border-radius: 20px;
-    }
-
     .gourmet-image {
       width: 100%;
       aspect-ratio: 4 / 3;
@@ -160,10 +149,6 @@
       text-align: center;
       width: 100%;
       min-width: 220px;
-    }
-
-    .gourmet-more {
-      margin-top: 18px;
     }
 
     @media (max-width: 700px) {
@@ -307,10 +292,6 @@
 
         <button class="gourmet-arrow right" id="gourmetNext" aria-label="次へ">›</button>
       </div>
-
-      <div class="gourmet-more">
-        <a href="./food/food.html" class="button">グルメ画像一覧を見る</a>
-      </div>
     </section>
 
     <section>
@@ -383,7 +364,6 @@
 
         data
           .sort((a, b) => new Date(b.date) - new Date(a.date))
-          .slice(0, 7)
           .forEach(item => {
             const card = document.createElement("article");
             card.className = "gourmet-card";
@@ -391,9 +371,7 @@
             const imageSrc = `./food/${item.file}`;
 
             card.innerHTML = `
-              <a href="./food/food.html" class="gourmet-image-link">
-                <img src="${imageSrc}" alt="${item.title || "グルメ写真"}" class="gourmet-image">
-              </a>
+              <img src="${imageSrc}" alt="${item.title || "グルメ写真"}" class="gourmet-image">
               <div class="gourmet-body">
                 <div class="gourmet-date">${item.date || ""}</div>
                 <h3 class="gourmet-title">${item.title || "タイトル未設定"}</h3>
@@ -409,13 +387,17 @@
         const nextBtn = document.getElementById("gourmetNext");
         const scrollAmount = 240;
 
-        prevBtn.addEventListener("click", () => {
-          list.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-        });
+        if (prevBtn) {
+          prevBtn.addEventListener("click", () => {
+            list.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+          });
+        }
 
-        nextBtn.addEventListener("click", () => {
-          list.scrollBy({ left: scrollAmount, behavior: "smooth" });
-        });
+        if (nextBtn) {
+          nextBtn.addEventListener("click", () => {
+            list.scrollBy({ left: scrollAmount, behavior: "smooth" });
+          });
+        }
       })
       .catch(error => {
         const list = document.getElementById("gourmet-list");
