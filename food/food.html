@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>グルメ画像一覧 - こっぴーのマイクラひとやすみ</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" href="../favicon.png" type="image/png" />
+
+  <style>
+    .food-page {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      max-width: 1000px;
+      margin: 24px auto 0;
+    }
+
+    .food-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,244,236,0.92));
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      text-align: left;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    }
+
+    .food-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 24px rgba(140, 90, 50, 0.16);
+      filter: brightness(1.02);
+    }
+
+    .food-image {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      display: block;
+      background: #fff8f3;
+    }
+
+    .food-body {
+      padding: 14px 14px 16px;
+    }
+
+    .food-date {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, var(--primary), #ffb36b);
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .food-title {
+      margin: 0 0 6px;
+      font-size: 1.05rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .food-place {
+      margin: 0 0 8px;
+      font-size: 0.9rem;
+      color: var(--primary-dark);
+      font-weight: bold;
+    }
+
+    .food-comment {
+      margin: 0;
+      font-size: 0.92rem;
+      color: var(--subtext);
+      line-height: 1.75;
+    }
+
+    .food-empty {
+      text-align: center;
+      color: var(--subtext);
+      max-width: 900px;
+      margin: 18px auto 0;
+    }
+
+    .food-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="../favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">
+      最近食べたおいしいものを、写真つきでまとめています。
+    </p>
+  </header>
+
+  <main class="food-page">
+    <section>
+      <h2>🍽️ グルメ画像一覧</h2>
+      <p>最近のグルメ写真をまとめて見られます。</p>
+
+      <div id="food-list" class="food-grid">
+        <p class="food-empty">読み込み中...</p>
+      </div>
+
+      <div class="food-buttons">
+        <a href="../index.html" class="button">トップページに戻る</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴーのマイクラひとやすみ</p>
+  </footer>
+
+  <script>
+    fetch("../food/food.json")
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("../food/food.json の読み込みに失敗しました");
+        }
+        return res.json();
+      })
+      .then(data => {
+        const list = document.getElementById("food-list");
+        if (!list) return;
+
+        if (!Array.isArray(data) || data.length === 0) {
+          list.innerHTML = '<p class="food-empty">まだグルメ写真はありません。</p>';
+          return;
+        }
+
+        list.innerHTML = "";
+
+        data
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .forEach(item => {
+            const card = document.createElement("article");
+            card.className = "food-card";
+
+            const imageSrc = `../food/${item.file}`;
+
+            card.innerHTML = `
+              <img src="${imageSrc}" alt="${item.title || "グルメ写真"}" class="food-image">
+              <div class="food-body">
+                <div class="food-date">${item.date || ""}</div>
+                <h3 class="food-title">${item.title || "タイトル未設定"}</h3>
+                <p class="food-place">${item.place || ""}</p>
+                <p class="food-comment">${item.comment || ""}</p>
+              </div>
+            `;
+
+            list.appendChild(card);
+          });
+      })
+      .catch(error => {
+        const list = document.getElementById("food-list");
+        if (list) {
+          list.innerHTML = '<p class="food-empty">グルメ写真の読み込みに失敗しました。</p>';
+        }
+        console.error(error);
+      });
+  </script>
+</body>
+</html>
