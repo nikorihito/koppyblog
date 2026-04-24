@@ -16,6 +16,114 @@
   <title>こっぴーのマイクラひとやすみ</title>
   <link rel="stylesheet" href="./style.css" />
   <link rel="icon" href="https://nikorihito.github.io/koppyblog/favicon.png" type="image/png" />
+
+  <style>
+    .gourmet-carousel-wrap {
+      position: relative;
+      max-width: 1040px;
+      margin: 22px auto 0;
+      padding: 0 52px;
+    }
+
+    .gourmet-carousel {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(220px, 220px);
+      gap: 18px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 6px 2px 10px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary) rgba(0,0,0,0.08);
+    }
+
+    .gourmet-carousel::-webkit-scrollbar {
+      height: 10px;
+    }
+
+    .gourmet-carousel::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.06);
+      border-radius: 999px;
+    }
+
+    .gourmet-carousel::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, var(--primary), #ffb36b);
+      border-radius: 999px;
+    }
+
+    .gourmet-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--primary), #ffb36b);
+      color: white;
+      font-size: 1.4rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(240, 138, 75, 0.24);
+      z-index: 2;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    .gourmet-arrow:hover {
+      transform: translateY(-50%) scale(1.05);
+      filter: brightness(1.03);
+    }
+
+    .gourmet-arrow.left {
+      left: 0;
+    }
+
+    .gourmet-arrow.right {
+      right: 0;
+    }
+
+    .gourmet-card {
+      width: 220px;
+      min-width: 220px;
+    }
+
+    .gourmet-image-link {
+      display: block;
+      text-decoration: none;
+    }
+
+    .gourmet-image-link:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: 20px;
+    }
+
+    .gourmet-more {
+      margin-top: 18px;
+    }
+
+    @media (max-width: 700px) {
+      .gourmet-carousel-wrap {
+        padding: 0 40px;
+      }
+
+      .gourmet-carousel {
+        grid-auto-columns: minmax(200px, 200px);
+        gap: 14px;
+      }
+
+      .gourmet-card {
+        width: 200px;
+        min-width: 200px;
+      }
+
+      .gourmet-arrow {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -126,8 +234,18 @@
       <h2>🍽️ 最近のグルメ写真</h2>
       <p>最近食べたおいしいものをゆるっと記録しています。</p>
 
-      <div id="gourmet-list" class="gourmet-grid">
-        <p class="gourmet-empty">読み込み中...</p>
+      <div class="gourmet-carousel-wrap">
+        <button class="gourmet-arrow left" id="gourmetPrev" aria-label="前へ">‹</button>
+
+        <div id="gourmet-list" class="gourmet-carousel">
+          <p class="gourmet-empty">読み込み中...</p>
+        </div>
+
+        <button class="gourmet-arrow right" id="gourmetNext" aria-label="次へ">›</button>
+      </div>
+
+      <div class="gourmet-more">
+        <a href="./food.html" class="button">グルメ画像一覧を見る</a>
       </div>
     </section>
 
@@ -201,7 +319,7 @@
 
         data
           .sort((a, b) => new Date(b.date) - new Date(a.date))
-          .slice(0, 6)
+          .slice(0, 7)
           .forEach(item => {
             const card = document.createElement("article");
             card.className = "gourmet-card";
@@ -209,7 +327,9 @@
             const imageSrc = `./food/${item.file}`;
 
             card.innerHTML = `
-              <img src="${imageSrc}" alt="${item.title || "グルメ写真"}" class="gourmet-image">
+              <a href="./food.html" class="gourmet-image-link">
+                <img src="${imageSrc}" alt="${item.title || "グルメ写真"}" class="gourmet-image">
+              </a>
               <div class="gourmet-body">
                 <div class="gourmet-date">${item.date || ""}</div>
                 <h3 class="gourmet-title">${item.title || "タイトル未設定"}</h3>
@@ -220,6 +340,18 @@
 
             list.appendChild(card);
           });
+
+        const prevBtn = document.getElementById("gourmetPrev");
+        const nextBtn = document.getElementById("gourmetNext");
+        const scrollAmount = 240;
+
+        prevBtn.addEventListener("click", () => {
+          list.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+        });
+
+        nextBtn.addEventListener("click", () => {
+          list.scrollBy({ left: scrollAmount, behavior: "smooth" });
+        });
       })
       .catch(error => {
         const list = document.getElementById("gourmet-list");
