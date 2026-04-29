@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>アーマースタンドで自動橋かけコマンド！</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" href="https://nikorihito.github.io/koppyblog/favicon.png" type="image/png">
+</head>
+<body>
+  <header>
+    <a href="../index.html">
+      <img src="../favicon.png" alt="サイトロゴ" class="logo" />
+    </a>
+    <h1>こっぴーのマイクラひとやすみ</h1>
+    <p class="subtitle">ゆるっと気ままに、マイクラのことを書いてます。youtubeの配布物も載せます。</p>
+  </header>
+
+  <main>
+    <article>
+      <h2>アーマースタンドで自動橋かけコマンド！</h2>
+      <img src="thumbnail/bridge.png" alt="サムネイル" style="max-width: 100%; border-radius: 12px;" />
+
+      <p>今回は、アーマースタンドを使って自動で橋を作るコマンドを紹介します。</p>
+
+      <p>この仕組みでは、ダイヤのヘルメットをかぶったアーマースタンドが前に進みながら、足元が空気だった場合に橋のストラクチャーを読み込みます。</p>
+
+      <p>まず、橋として使う形を保存するために、銅のヘルメットをかぶったアーマースタンドを使います。</p>
+
+      <p>以下のコマンドで、アーマースタンドの周りにある橋の形を「bridge」という名前で保存できます。</p>
+
+      <pre><code>execute as @e[type=armor_stand,hasitem={item=copper_helmet,location=slot.armor.head}] at @s run structure save bridge ~-2~-1~ ~2~1~ false</code></pre>
+
+      <p>次に、ダイヤのヘルメットをかぶったアーマースタンドを前に進ませます。</p>
+
+      <pre><code>execute as @e[type=armor_stand,hasitem={item=diamond_helmet,location=slot.armor.head}] at @s run tp @s ^^^1</code></pre>
+
+      <p>このコマンドでは、アーマースタンドが向いている方向に1ブロックずつ進みます。</p>
+
+      <p>そして、アーマースタンドの足元が空気だった場合、保存しておいた橋のストラクチャーを読み込みます。</p>
+
+      <pre><code>execute as @e[type=armor_stand,hasitem={item=diamond_helmet,location=slot.armor.head}] at @s if block ~~-1~ air run structure load bridge ~-2~-1~</code></pre>
+
+      <p>これで、アーマースタンドが進むたびに、足元が空いていれば橋が自動で作られます。</p>
+
+      <p>最後に、足元が草ブロックだった場合はアーマースタンドを消します。</p>
+
+      <pre><code>execute as @e[type=armor_stand,hasitem={item=diamond_helmet,location=slot.armor.head}] at @s if block ~~-1~ grass_block run kill</code></pre>
+
+      <p>このコマンドを使うことで、橋が地面に到着したときに自動で停止するようになります。</p>
+
+      <p>使い方の流れは、まず銅のヘルメットをかぶったアーマースタンドで橋の形を保存し、そのあとダイヤのヘルメットをかぶったアーマースタンドを動かして橋を作っていく、という感じです。</p>
+
+      <p>コマンドブロックに入れる場合は、前進コマンドとストラクチャー読み込みコマンドをリピート実行にすると、自動でどんどん橋が伸びていきます。</p>
+
+      <p>マイクラ統合版で、アスレチックや自動建築ギミックを作りたいときにかなり便利な仕組みです。</p>
+    </article>
+
+    <p><a href="../lasted-articles.html" class="button">← 最新のブログに戻る</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 こっぴー</p>
+  </footer>
+</body>
+</html>
