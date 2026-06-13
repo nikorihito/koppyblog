@@ -6,6 +6,7 @@
   <title>ポモドーロタイマー - こっぴーのマイクラひとやすみ</title>
   <link rel="stylesheet" href="./style.css" />
   <link rel="icon" href="https://nikorihito.github.io/koppyblog/favicon.png" type="image/png">
+
   <style>
     body {
       text-align: center;
@@ -60,9 +61,48 @@
       text-decoration: none;
       border-radius: 8px;
       font-weight: bold;
+      border: none;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    .setting-box {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 18px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      background: #f9f9f9;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .setting-box h3 {
+      margin-top: 0;
+    }
+
+    .setting-row {
+      margin: 12px 0;
+      font-weight: bold;
+    }
+
+    .setting-row input {
+      width: 80px;
+      padding: 8px;
+      font-size: 1em;
+      text-align: center;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      margin: 0 6px;
+    }
+
+    .setting-note {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 8px;
     }
   </style>
 </head>
+
 <body>
   <header>
     <a href="./index.html">
@@ -75,10 +115,34 @@
   <main>
     <article>
       <h2>ポモドーロタイマー🍅</h2>
+
+      <div class="setting-box">
+        <h3>タイマー設定</h3>
+
+        <div class="setting-row">
+          作業時間：
+          <input type="number" id="workMinutes" value="25" min="1" max="180">
+          分
+        </div>
+
+        <div class="setting-row">
+          休憩時間：
+          <input type="number" id="breakMinutes" value="5" min="1" max="180">
+          分
+        </div>
+
+        <button id="applySetting" class="button">設定を反映</button>
+
+        <p class="setting-note">
+          初期設定は「25分作業・5分休憩」です。設定を反映するとタイマーはリセットされます。
+        </p>
+      </div>
+
       <div class="timer-container">
         <div id="left" class="timer-half work-half active">作業時間\n25:00</div>
         <div id="right" class="timer-half break-half">休憩時間\n05:00</div>
       </div>
+
       <div>
         <a href="#" id="toggle" class="button">スタート</a>
         <a href="#" id="reset" class="button">リセット</a>
@@ -92,7 +156,6 @@
     <p>&copy; 2025 こっぴー</p>
   </footer>
 
-  <!-- 🔔 ベル音の読み込み -->
   <audio id="bell" src="pomodoro_bell.mp3" preload="auto"></audio>
 
   <script>
@@ -102,10 +165,17 @@
     const reset = document.getElementById('reset');
     const bell = document.getElementById('bell');
 
+    const workMinutesInput = document.getElementById('workMinutes');
+    const breakMinutesInput = document.getElementById('breakMinutes');
+    const applySetting = document.getElementById('applySetting');
+
+    // 初期設定：25分作業、5分休憩
+    let workDuration = 25 * 60;
+    let breakDuration = 5 * 60;
+
     let isWorking = true;
     let isRunning = false;
-    let duration = 25 * 60;
-    let remaining = duration;
+    let remaining = workDuration;
     let interval;
     let autoSwitchTimer;
 
@@ -119,18 +189,21 @@
       if (isWorking) {
         left.classList.add('active');
         right.classList.remove('active');
+
         left.textContent = `作業時間\n${formatTime(remaining)}`;
-        right.textContent = `休憩時間\n05:00`;
+        right.textContent = `休憩時間\n${formatTime(breakDuration)}`;
       } else {
         left.classList.remove('active');
         right.classList.add('active');
+
         right.textContent = `休憩時間\n${formatTime(remaining)}`;
-        left.textContent = `作業時間\n25:00`;
+        left.textContent = `作業時間\n${formatTime(workDuration)}`;
       }
     }
 
     function startTimer() {
       if (isRunning) return;
+
       isRunning = true;
       toggle.textContent = 'ストップ';
 
@@ -143,7 +216,6 @@
           isRunning = false;
           toggle.textContent = '▶ 切り替え';
 
-          // 🔔 ベルを鳴らす
           bell.currentTime = 0;
           bell.play();
 
@@ -156,15 +228,17 @@
 
     function stopTimer() {
       clearInterval(interval);
+      clearTimeout(autoSwitchTimer);
       isRunning = false;
       toggle.textContent = 'スタート';
     }
 
     function switchState() {
       clearTimeout(autoSwitchTimer);
+
       isWorking = !isWorking;
-      duration = isWorking ? 25 * 60 : 5 * 60;
-      remaining = duration;
+      remaining = isWorking ? workDuration : breakDuration;
+
       updateDisplay();
       startTimer();
     }
@@ -172,16 +246,33 @@
     function resetTimer() {
       clearInterval(interval);
       clearTimeout(autoSwitchTimer);
+
       isRunning = false;
       isWorking = true;
-      duration = 25 * 60;
-      remaining = duration;
+      remaining = workDuration;
+
       toggle.textContent = 'スタート';
       updateDisplay();
     }
 
+    function applyTimerSetting() {
+      const workMinutes = Number(workMinutesInput.value);
+      const breakMinutes = Number(breakMinutesInput.value);
+
+      if (workMinutes < 1 || breakMinutes < 1) {
+        alert('作業時間と休憩時間は1分以上にしてください。');
+        return;
+      }
+
+      workDuration = workMinutes * 60;
+      breakDuration = breakMinutes * 60;
+
+      resetTimer();
+    }
+
     toggle.addEventListener('click', (e) => {
       e.preventDefault();
+
       if (!isRunning && remaining <= 0) {
         switchState();
       } else if (!isRunning) {
@@ -194,6 +285,11 @@
     reset.addEventListener('click', (e) => {
       e.preventDefault();
       resetTimer();
+    });
+
+    applySetting.addEventListener('click', (e) => {
+      e.preventDefault();
+      applyTimerSetting();
     });
 
     updateDisplay();
