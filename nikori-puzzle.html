@@ -103,11 +103,11 @@ function generateLevel(number){
  const turns=[];
  for(let i=1;i<path.length-1;i++){
   const [px,py]=path[i-1],[cx,cy]=path[i],[nx,ny]=path[i+1];
-  const incoming=[cx-px[0],cy-px[1]].join(",");
+  const incoming=[cx-px,cy-py].join(",");
   const outgoing=[nx-cx,ny-cy].join(",");
   if(incoming!==outgoing){
    const wanted=DIRS.findIndex(d=>d[0]===nx-cx&&d[1]===ny-cy);
-   turns.push([cx,cy,(wanted+1+Math.floor(Math.random()*3))%4]);
+   turns.push([cx,cy,(wanted+1+Math.floor(Math.random()*7))%8]);
   }
  }
  const turnsSet=new Set(turns.map(([tx,ty])=>key(tx,ty)));
@@ -122,7 +122,13 @@ function generateLevel(number){
   return null;
  }
  const positions=plan(0);
- if(positions===null)return generateLevel(number);
+ if(positions===null){
+  // 安全策：複雑な道で回復地点を置けない場合は直線盤面に切り替える。
+  const y=3;
+  return {name:"エンドレス",w,h,start:[0,y],goal:[w-1,y],
+    clouds:[[4,y],[8,y]],heat:[],swirl:[],ice:[],split:[],mirrors:[],turns:[],walls:[],
+    hint:"スリープ雲を通って、湯気をつるつる君へ届けよう！"};
+ }
  const clouds=positions.map(i=>path[i]);
  // 雲の一部をアチアチ君の熱気に変更（回復効果は同じ）。
  const heat=(number>=3 && clouds.length)?[clouds.pop()]:[];
