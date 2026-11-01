@@ -28,6 +28,17 @@
 .puzzle-characters .mascot{display:flex;align-items:center;gap:8px;font-size:.88rem;font-weight:bold}
 .puzzle-rule{font-size:.92rem;color:var(--subtext);line-height:1.7}
 @media(max-width:540px){.puzzle-card{padding:10px}.puzzle-board{gap:2px;border-width:4px}.puzzle-characters img{width:50px;height:50px}.puzzle-cell .marker{font-size:8px}}
+.puzzle-board{position:relative}.puzzle-cell{overflow:hidden}.puzzle-cell img{width:96%;height:96%;object-fit:contain;pointer-events:none}
+.puzzle-characters #stew-preview{width:76px;height:76px}
+.puzzle-cell.swirl{background:#eee3ff}.puzzle-cell.ice{background:#cdeaff}.puzzle-cell.heat{background:#ffd0b2}
+.smoke{position:relative;display:block;width:75%;height:75%;filter:drop-shadow(0 1px 2px #6c718366)}
+.smoke i{position:absolute;background:radial-gradient(circle at 40% 35%,#fff,#d5e1e5 65%,#8799a9);border-radius:50%;width:43%;height:43%;animation:smokefloat 1.1s ease-in-out infinite alternate;opacity:.89}
+.smoke i:nth-child(1){left:10%;top:43%}.smoke i:nth-child(2){left:38%;top:23%;animation-delay:.25s}.smoke i:nth-child(3){left:53%;top:6%;animation-delay:.5s}
+@keyframes smokefloat{to{transform:translate(4px,-7px) scale(1.15);opacity:.55}}
+.eating-mascot{position:absolute;width:calc(100% / var(--cols));height:calc(100% / 7);z-index:8;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.eating-mascot img{width:90%;height:90%;object-fit:contain;animation:chomp .35s infinite alternate}
+@keyframes chomp{to{transform:rotate(-8deg) scale(1.1)}}
+@media(prefers-reduced-motion:reduce){.smoke i,.eating-mascot img{animation:none}}
 </style>
 </head>
 <body>
@@ -36,7 +47,7 @@
 <h2>ニコリパズル 〜つるつる君に届け！〜</h2>
 <p>ニコリヒトのビーフシチューから出る湯気を、つるつる君まで届けよう！</p>
 <div class="puzzle-characters">
-<div class="mascot"><img src="./ニコリヒト.png" alt="ニコリヒト"><span>ニコリヒト<br>ビーフシチュー</span></div>
+<div class="mascot"><img src="./ニコリヒト.png" alt="ニコリヒト"><span>ニコリヒト<br>特製ビーフシチュー</span><img id="stew-preview" alt="特製ビーフシチュー"></div>
 <div class="mascot"><span>おなかすいた！<br>つるつる君</span><img src="./つるつる君.png" alt="つるつる君"></div>
 </div>
 <div class="puzzle-card">
@@ -48,7 +59,7 @@
 <button id="reset" type="button" class="secondary">やり直す</button>
 <button id="next" type="button" hidden>次のステージへ</button>
 </div>
-<p class="puzzle-rule">エンドレスモード：クリアするたび新しいステージが登場！ 湯気は<strong>5マス進むと消える</strong>。スリープ雲（☁）に入ると残り5マスに回復！ オレンジの矢印パネルはタップするたびに回転するよ。</p>
+<p class="puzzle-rule">エンドレスモード：旋風・冷気・熱気などの仕掛けも登場！ クリアするたび新しいステージが登場！ 湯気は<strong>5マス進むと消える</strong>。スリープ雲（☁）に入ると残り5マスに回復！ オレンジの矢印パネルはタップするたびに回転するよ。</p>
 <p id="hint" class="puzzle-rule"></p>
 </div>
 </section><a class="button" href="./index.html">トップページに戻る</a></main>
@@ -57,6 +68,8 @@
 "use strict";
 const DIRS=[[1,0],[0,1],[-1,0],[0,-1]];
 const ARROWS=["→","↓","←","↑"];
+const STEW_IMAGE="data:image/webp;base64,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";
+document.getElementById("stew-preview").src=STEW_IMAGE;
 const board=document.getElementById("board");
 const message=document.getElementById("message");
 const remaining=document.getElementById("remaining");
@@ -104,6 +117,39 @@ function generateLevel(number){
  const positions=plan(0);
  if(positions===null)return generateLevel(number);
  const clouds=positions.map(i=>path[i]);
+ // 雲の一部をアチアチ君の熱気に変更（回復効果は同じ）。
+ const heat=(number>=3 && clouds.length)?[clouds.pop()]:[];
+ // ぐるぐる君の旋風：時計回りに曲がる角を自動回転に変更。
+ const swirl=[];
+ if(number>=4){
+  for(let i=1;i<path.length-1;i++){
+   const [px,py]=path[i-1],[cx,cy]=path[i],[nx,ny]=path[i+1];
+   const incoming=DIRS.findIndex(d=>d[0]===cx-px&&d[1]===cy-py);
+   const outgoing=DIRS.findIndex(d=>d[0]===nx-cx&&d[1]===ny-cy);
+   if((incoming+1)%4===outgoing && turns.some(t=>t[0]===cx&&t[1]===cy)){
+    swirl.push([cx,cy]);turns.splice(turns.findIndex(t=>t[0]===cx&&t[1]===cy),1);break;
+   }
+  }
+ }
+ // 冷気：通過で残りマスが2減る。正解経路をシミュレートして安全な場所だけ採用。
+ const ice=[];
+ if(number>=2){
+  const recharge=new Set([...clouds,...heat].map(p=>key(...p)));
+  const turnsAt=new Set([...turns,...swirl].map(p=>key(p[0],p[1])));
+  const candidates=path.slice(1,-1).filter(p=>!recharge.has(key(...p))&&!turnsAt.has(key(...p)));
+  for(const candidate of candidates){
+   let life=5,valid=true;
+   const test=new Set([...ice.map(p=>key(...p)),key(...candidate)]);
+   for(let i=1;i<path.length;i++){
+    life--;
+    const at=key(...path[i]);
+    if(recharge.has(at))life=5;
+    if(test.has(at))life-=2;
+    if(life<0||(life===0&&i<path.length-1)){valid=false;break;}
+   }
+   if(valid){ice.push(candidate);break;}
+  }
+ }
  const used=new Set(path.map(p=>key(...p)));
  const walls=[];
  const count=Math.min(12,number+1);
@@ -113,7 +159,7 @@ function generateLevel(number){
   if(!used.has(k)&&!walls.some(p=>key(...p)===k)){walls.push([wx,wy]);}
  }
  return {name:"エンドレス",w,h,start:path[0],goal:path[path.length-1],
-  clouds,turns,walls,hint:"スリープ雲で湯気の残りを5マスに回復！ 回転パネルを正しい向きにしよう。"};
+  clouds,heat,swirl,ice,turns,walls,hint:"スリープ雲で湯気の残りを5マスに回復！ 回転パネルを正しい向きにしよう。"};
 }
 
 let levelIndex=0,level,turns,visited,current,running=false,serial=0,completed=false;
@@ -122,10 +168,14 @@ function draw(){
  board.replaceChildren();board.style.setProperty("--cols",level.w);
  const cloudSet=new Set(level.clouds.map(p=>key(...p)));
  const wallSet=new Set(level.walls.map(p=>key(...p)));
+ const heatSet=new Set(level.heat.map(p=>key(...p)));
+ const iceSet=new Set(level.ice.map(p=>key(...p)));
+ const swirlSet=new Set(level.swirl.map(p=>key(...p)));
  const startKey=key(...level.start),goalKey=key(...level.goal);
  for(let y=0;y<level.h;y++)for(let x=0;x<level.w;x++){
   const k=key(x,y),turn=turns.get(k);
   const cell=document.createElement(turn!==undefined?"button":"div");
+  cell.dataset.pos=k;
   cell.className="puzzle-cell";
   if(turn!==undefined){
    cell.type="button";cell.classList.add("turn");
@@ -133,12 +183,15 @@ function draw(){
    cell.setAttribute("aria-label",`(${x+1},${y+1})の方向パネル。現在${ARROWS[turn]}。押すと時計回りに回転`);
    cell.disabled=running||completed;
    cell.onclick=()=>{turns.set(k,(turns.get(k)+1)%4);draw();};
-  }else if(k===startKey){cell.classList.add("source");cell.textContent="🍲";}
-  else if(k===goalKey){cell.classList.add("goal");cell.textContent="🍽";}
+  }else if(k===startKey){cell.classList.add("source");const img=document.createElement("img");img.src=STEW_IMAGE;img.alt="ビーフシチュー";cell.append(img);}
+  else if(k===goalKey){cell.classList.add("goal");const img=document.createElement("img");img.src="./つるつる君.png";img.alt="つるつる君";cell.append(img);}
   else if(cloudSet.has(k)){cell.classList.add("cloud");cell.textContent="☁";}
+  else if(heatSet.has(k)){cell.classList.add("heat");cell.textContent="🔥";}
+  else if(iceSet.has(k)){cell.classList.add("ice");cell.textContent="❄️";}
+  else if(swirlSet.has(k)){cell.classList.add("swirl");cell.textContent="🌀";}
   else if(wallSet.has(k)){cell.textContent="🧱";}
   if(visited.has(k))cell.classList.add("visited");
-  if(current===k)cell.classList.add("current");
+  if(current===k){cell.classList.add("current");const smoke=document.createElement("span");smoke.className="smoke";smoke.setAttribute("aria-label","進行中の湯気");for(let i=0;i<3;i++)smoke.append(document.createElement("i"));cell.append(smoke);}
   board.append(cell);
  }
 }
@@ -162,6 +215,9 @@ async function play(){
  setMessage("もくもく……湯気が進んでいるよ！");
  const cloudSet=new Set(level.clouds.map(p=>key(...p)));
  const wallSet=new Set(level.walls.map(p=>key(...p)));
+ const heatSet=new Set(level.heat.map(p=>key(...p)));
+ const iceSet=new Set(level.ice.map(p=>key(...p)));
+ const swirlSet=new Set(level.swirl.map(p=>key(...p)));
  const seen=new Set();
  let success=false,failure="";
  while(steps<150){
@@ -174,8 +230,10 @@ async function play(){
   }
   current=key(x,y);visited.add(current);
   if(key(x,y)===key(...level.goal)){success=true;remaining.textContent="つるつる君に到着！";draw();break;}
-  if(cloudSet.has(current))life=5;
+  if(cloudSet.has(current)||heatSet.has(current))life=5;
+  if(iceSet.has(current))life=Math.max(0,life-2);
   if(turns.has(current))dir=turns.get(current);
+  if(swirlSet.has(current))dir=(dir+1)%4;
   remaining.textContent="湯気の残り："+life+"マス";
   draw();
   const state=current+":"+dir+":"+life;
@@ -187,7 +245,23 @@ async function play(){
  running=false;
  if(success){
   completed=true;
-  setMessage("クリア！ つるつる君がビーフシチューを食べた！ 次のステージへ進もう！");
+  setMessage("湯気が届いた！ つるつる君がシチューを食べに行くよ！");
+  draw();
+  const goalCell=board.querySelector('[data-pos="'+key(...level.goal)+'"]');
+  const startCell=board.querySelector('[data-pos="'+key(...level.start)+'"]');
+  if(goalCell&&startCell){
+   const actor=document.createElement("div");actor.className="eating-mascot";
+   const img=document.createElement("img");img.src="./つるつる君.png";img.alt="食べに行くつるつる君";actor.append(img);
+   actor.style.left=goalCell.offsetLeft+"px";actor.style.top=goalCell.offsetTop+"px";
+   actor.style.width=goalCell.offsetWidth+"px";actor.style.height=goalCell.offsetHeight+"px";
+   board.append(actor);
+   const dx=startCell.offsetLeft-goalCell.offsetLeft,dy=startCell.offsetTop-goalCell.offsetTop;
+   const animation=actor.animate([{transform:"translate(0,0)"},{transform:"translate("+dx+"px,"+dy+"px)"}],{duration:850,easing:"ease-in-out",fill:"forwards"});
+   await animation.finished.catch(()=>{});
+   if(token!==serial)return;
+   await pause(600);if(token!==serial)return;
+  }
+  setMessage("もぐもぐ……おいしい！ クリア！ 次のステージへ進もう！");
   nextButton.hidden=false;
   runButton.disabled=true;
  }else{
