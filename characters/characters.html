@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>キャラクター図鑑＆性格診断 | こっぴーのマイクラひとやすみ</title>
+<link rel="stylesheet" href="../style.css"><link rel="icon" href="../favicon.png">
+<style>
+.tabs{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.tabs button,.answer,.quiz-action{font:inherit;font-weight:700;border:0;border-radius:14px;padding:13px 18px;cursor:pointer}
+.tabs button{background:#ffdfc9;color:#613c23}.tabs button.active,.quiz-action{background:var(--primary);color:#fff}
+[hidden]{display:none!important}
+.character-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px}
+.character-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 10px}
+.character-card img{width:100%;height:116px;object-fit:contain}
+.character-card h3{margin:9px 0}.character-card p{font-size:.9rem;color:var(--subtext);margin:0}
+.quiz-panel{background:#fff;max-width:690px;margin:auto;padding:24px;border-radius:20px}
+.answers{display:grid;gap:10px}.answer{background:#fff1e6;color:var(--text);text-align:left}
+.answer:hover,.answer:focus-visible{outline:2px solid var(--primary)}
+.progress{background:#f4e5d9;height:9px;border-radius:12px;overflow:hidden}.progress>div{height:100%;background:var(--primary)}
+.result-img{width:175px;height:175px;object-fit:contain}
+.quiz-action{margin:8px}.note{color:var(--subtext);font-size:.9rem}
+@media(max-width:480px){.character-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.character-card img{height:90px}.quiz-panel{padding:16px}}
+</style>
+</head>
+<body>
+<header><a href="../index.html"><img class="logo" src="../favicon.png" alt="サイトロゴ"></a><h1>こっぴーのマイクラひとやすみ</h1></header>
+<main><section><h2>キャラクター図鑑＆性格診断</h2>
+<p>ゆかいな仲間たちのプロフィールを見たり、自分に似たキャラを診断したりしよう！</p>
+<div class="tabs"><button id="tab-book" class="active" type="button">キャラクター図鑑</button><button id="tab-quiz" type="button">性格診断</button></div>
+<div id="book"><div id="character-grid" class="character-grid"></div></div>
+<div id="quiz" hidden><div class="quiz-panel" id="quiz-panel" aria-live="polite"></div><p class="note">※遊びのための診断です。心理学的な検査ではありません。</p></div>
+</section><a href="../index.html" class="button">トップページに戻る</a></main>
+<footer><p>&copy; こっぴー</p></footer>
+<script>
+"use strict";
+const characters=[{"name":"カラフルヒト","desc":"にぎやかで冒険好き。カラフルな建築をするけど、上手とは言えない。"},{"name":"ノリノリヒト","desc":"いつもハイテンションで、踊りながら掘る。"},{"name":"ヒヤヒヤヒト","desc":"冷静沈着だけど面倒くさがり。体が冷たく、水を凍らせる。"},{"name":"ゴロゴロ君","desc":"転がるのが大好き。落下事故が多い。"},{"name":"ぐるぐる君","desc":"回転が命。宇宙でも回転できる。"},{"name":"アチアチ君","desc":"火属性で体温が高い。よく燃えるし、肉も焼ける。"},{"name":"すやすやヒト","desc":"いつも寝ている。寝言で神建築を作るが起きると忘れる。ベッドなしでも眠れる。"},{"name":"バタバタ君","desc":"常に走っていて、足音が大きい。"},{"name":"モノクロ君","desc":"白黒の世界が好き。カラフルヒトとよく喧嘩する。"},{"name":"つるつる君","desc":"TNTが大好きで爆発を頻繁に起こす。"},{"name":"もやもやヒト","desc":"よく迷子になり考えすぎる。時々哲学的なことを言う。"}];
+const questions=[["マイクラの世界で最初にしたいことは？",[["探検してみる",0],["思いきり走り回る",7],["ひとまず寝る",6],["TNTで遊ぶ",9]]],["好きな建築は？",[["カラフルなお城",0],["白黒のシンプルな家",8],["夢の中の超大作",6],["回転する建物",4]]],["友達がピンチ！",[["大急ぎで駆けつける",7],["冷静に作戦を考える",2],["踊って励ます",1],["なぜピンチなのか考え込む",10]]],["移動するなら？",[["転がって進む",3],["ぐるぐる回って進む",4],["全力疾走",7],["動かずに済ませたい",2]]],["得意そうな作業は？",[["踊りながら採掘",1],["TNTで整地",9],["火で料理する",5],["寝言で建築",6]]],["大勢で遊ぶときは？",[["みんなを盛り上げる",0],["静かに様子を見る",2],["ずっと踊る",1],["考えごとをして迷子になる",10]]],["手に入れたい能力は？",[["水を凍らせる",2],["火を操る",5],["宇宙でも回転する",4],["寝ながら建築する",6]]],["ハプニングが発生！",[["勢いで突っ込む",3],["原因を深く考える",10],["爆発でなんとかする",9],["ノリで乗り越える",1]]],["好きな景色は？",[["カラフルな街",0],["白黒の世界",8],["溶岩だらけの洞窟",5],["静かな雪原",2]]],["自分に近いのは？",[["とにかく元気",7],["マイペース",6],["考えすぎる",10],["面白いことを試したい",3]]]];
+const imageSrc=(c)=>"../"+encodeURIComponent(c.name)+".png";
+const grid=document.getElementById("character-grid"),panel=document.getElementById("quiz-panel");
+characters.forEach(c=>{
+  const card=document.createElement("article");card.className="character-card";
+  const image=document.createElement("img");image.src=imageSrc(c);image.alt=c.name;image.loading="lazy";
+  image.onerror=()=>{image.style.display="none";const p=document.createElement("p");p.textContent="画像準備中";card.prepend(p)};
+  const title=document.createElement("h3");title.textContent=c.name;
+  const details=document.createElement("p");details.textContent=c.desc;
+  card.append(image,title,details);grid.append(card);
+});
+function tab(which){
+  document.getElementById("book").hidden=which!=="book";
+  document.getElementById("quiz").hidden=which!=="quiz";
+  document.getElementById("tab-book").classList.toggle("active",which==="book");
+  document.getElementById("tab-quiz").classList.toggle("active",which==="quiz");
+}
+document.getElementById("tab-book").onclick=()=>tab("book");
+document.getElementById("tab-quiz").onclick=()=>tab("quiz");
+let step=0,scores=[];
+function button(label,callback,css="answer"){
+ const b=document.createElement("button");b.type="button";b.className=css;b.textContent=label;b.addEventListener("click",callback);return b;
+}
+function reset(){step=0;scores=Array(characters.length).fill(0);render();}
+function render(){
+ panel.replaceChildren();
+ if(step===questions.length){
+  const high=Math.max(...scores);
+  const choices=characters.map((_,i)=>i).filter(i=>scores[i]===high);
+  const winner=characters[choices[Math.floor(Math.random()*choices.length)]];
+  const h=document.createElement("h2");h.textContent="あなたは「"+winner.name+"」タイプ！";
+  const img=document.createElement("img");img.className="result-img";img.src=imageSrc(winner);img.alt=winner.name;
+  const p=document.createElement("p");p.textContent=winner.desc;
+  panel.append(h,img,p,button("もう一度診断する",reset,"quiz-action"),button("図鑑を見る",()=>tab("book"),"quiz-action"));
+  return;
+ }
+ const q=questions[step],count=document.createElement("p");count.textContent="質問 "+(step+1)+" / "+questions.length;
+ const progress=document.createElement("div");progress.className="progress";
+ const fill=document.createElement("div");fill.style.width=(step/questions.length*100)+"%";progress.append(fill);
+ const h=document.createElement("h3");h.textContent=q[0];const answers=document.createElement("div");answers.className="answers";
+ q[1].forEach(([label,id])=>answers.append(button(label,()=>{scores[id]++;step++;render()})));
+ panel.append(count,progress,h,answers);
+}
+reset();tab("book");
+</script></body></html>
