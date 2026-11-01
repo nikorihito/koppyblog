@@ -2,7 +2,7 @@
 <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ノリノリ掘り掘り！ | こっぴーのマイクラひとやすみ</title><link rel="icon" href="./favicon.png"><link rel="stylesheet" href="./style.css">
 <style>
-.rh-wrap{max-width:890px;margin:auto}.rh-card{background:#fffaf3;border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow-soft)}
+[hidden]{display:none!important}.rh-wrap{max-width:890px;margin:auto}.rh-card{background:#fffaf3;border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow-soft)}
 .rh-status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-weight:bold;margin-bottom:14px}.rh-status strong{color:var(--primary-dark)}
 .rh-scene{height:300px;position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(#383b46 0%,#41434d 70%,#504c44 70%);border:5px solid #5a504a}
 .rh-scene::before{content:"";position:absolute;inset:0;background-image:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:42px 42px}
@@ -23,7 +23,7 @@
 .rh-hitbox{width:172px;height:172px;position:relative;display:grid;place-items:center;touch-action:none}
 .rh-pickaxe{width:108px;height:108px;position:relative;z-index:2;border:4px solid #a65c27;border-radius:50%;background:linear-gradient(140deg,#ffdc9d,#f49c52);color:#523017;cursor:pointer;font-size:52px;box-shadow:0 6px 0 #a55c2c,0 8px 18px #a5683970;touch-action:none;user-select:none;display:grid;place-items:center}
 .rh-pickaxe:active,.rh-pickaxe.holding{transform:translateY(4px);box-shadow:0 2px 0 #a55c2c}
-.rh-ring{position:absolute;inset:0;border:5px solid #ffe494;border-radius:50%;pointer-events:none;z-index:3;opacity:0;box-shadow:0 0 10px #ffcf64b0}
+.rh-ring{position:absolute;left:32px;top:32px;width:108px;height:108px;border:5px solid #ffe494;border-radius:50%;pointer-events:none;z-index:3;opacity:0;box-shadow:0 0 10px #ffcf64b0}
 .rh-ring.second{border-color:#76e7f1;box-shadow:0 0 11px #7de8f1aa}
 .rh-hold{height:8px;width:172px;border-radius:8px;background:#e7d7c3;overflow:hidden}.rh-hold-fill{width:0;height:100%;background:#f19a46}
 .rh-action{font-weight:bold;color:var(--primary-dark);min-height:1.6em}
@@ -111,7 +111,7 @@ function press(){
  if(state!=="active"||held)return;
  held=true;pickaxe.classList.add("holding");
  const now=performance.now(),type=sequence[index],next=hit.length;
- if(next>=cues.length)return;
+ if(next>=cues.length){held=false;pickaxe.classList.remove("holding");return;}
  const delta=Math.abs(now-cues[next]);
  if(delta>goodWindow){held=false;pickaxe.classList.remove("holding");fail("タイミングがちがう！");return;}
  const judgement=delta<=perfectWindow?"PERFECT":"GOOD";
