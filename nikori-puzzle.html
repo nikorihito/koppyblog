@@ -40,7 +40,7 @@
 @keyframes chomp{to{transform:rotate(-8deg) scale(1.1)}}
 @media(prefers-reduced-motion:reduce){.smoke i,.eating-mascot img{animation:none}}
 .puzzle-cell.mirror{background:#e4e4e4;color:#283444;font-weight:900}.puzzle-cell.split{background:#e5e5ed;color:#23324b;font-weight:900}
-</style>
+.puzzle-cell .puzzle-eater{position:absolute;inset:2%;width:70%;height:70%;margin:auto;animation:chomp .35s infinite alternate}</style>
 </head>
 <body>
 <header><a href="./index.html"><img src="./favicon.png" alt="サイトロゴ" class="logo"></a><h1>こっぴーのマイクラひとやすみ</h1></header>
@@ -190,7 +190,7 @@ function generateLevel(number){
   clouds,heat,swirl,ice,split,mirrors,turns,walls,hint:"スリープ雲で湯気の残りを5マスに回復！ 回転パネルを正しい向きにしよう。"};
 }
 
-let levelIndex=0,level,turns,mirrors,splitMirrors,visited,current,running=false,serial=0,completed=false,activeSmoke=new Set();
+let levelIndex=0,level,turns,mirrors,splitMirrors,visited,current,running=false,serial=0,completed=false,activeSmoke=new Set(),eatingAtStart=false;
 function setMessage(text){message.textContent=text;}
 function draw(){
  board.replaceChildren();board.style.setProperty("--cols",level.w);
@@ -218,8 +218,8 @@ function draw(){
    cell.disabled=running||completed;
    cell.setAttribute("aria-label",(isSplit?"分裂鏡":"反射鏡")+" "+(orientation===0?"/":"バックスラッシュ")+"。タップで鏡面を回転");
    cell.onclick=()=>{const map=isSplit?splitMirrors:mirrors;map.set(k,1-map.get(k));draw();};
-  }else if(k===startKey){cell.classList.add("source");const img=document.createElement("img");img.src=STEW_IMAGE;img.alt="ビーフシチュー";cell.append(img);}
-  else if(k===goalKey){cell.classList.add("goal");const img=document.createElement("img");img.src="./つるつる君.png";img.alt="つるつる君";cell.append(img);}
+  }else if(k===startKey){cell.classList.add("source");const img=document.createElement("img");img.src=STEW_IMAGE;img.alt="ビーフシチュー";cell.append(img);if(eatingAtStart){const eater=document.createElement("img");eater.src="./つるつる君.png";eater.alt="シチューを食べるつるつる君";eater.className="puzzle-eater";cell.append(eater);}}
+  else if(k===goalKey){cell.classList.add("goal");if(!eatingAtStart){const img=document.createElement("img");img.src="./つるつる君.png";img.alt="つるつる君";cell.append(img);}}
   else if(cloudSet.has(k)){cell.classList.add("cloud");cell.textContent="☁";}
   else if(heatSet.has(k)){cell.classList.add("heat");cell.textContent="🔥";}
   else if(iceSet.has(k)){cell.classList.add("ice");cell.textContent="❄️";}
@@ -232,7 +232,7 @@ function draw(){
  }
 }
 function setup(i){
- serial++;levelIndex=i;level=generateLevel(i+1);running=false;completed=false;
+ serial++;levelIndex=i;level=generateLevel(i+1);running=false;completed=false;eatingAtStart=false;
  turns=new Map(level.turns.map(([x,y,d])=>[key(x,y),d]));
  mirrors=new Map(level.mirrors.map(([x,y,side])=>[key(x,y),side]));
  splitMirrors=new Map(level.split.map(([x,y,side])=>[key(x,y),side]));
@@ -297,6 +297,7 @@ async function play(){
   const goalCell=board.querySelector('[data-pos="'+key(...level.goal)+'"]');
   const startCell=board.querySelector('[data-pos="'+key(...level.start)+'"]');
   if(goalCell&&startCell){
+   const original=goalCell.querySelector("img");if(original)original.style.visibility="hidden";
    const actor=document.createElement("div");actor.className="eating-mascot";
    const img=document.createElement("img");img.src="./つるつる君.png";img.alt="食べに行くつるつる君";actor.append(img);
    actor.style.left=goalCell.offsetLeft+"px";actor.style.top=goalCell.offsetTop+"px";
@@ -308,6 +309,7 @@ async function play(){
    if(token!==serial)return;
    await pause(600);if(token!==serial)return;
   }
+  eatingAtStart=true;
   setMessage("もぐもぐ……おいしい！ クリア！ 次のステージへ進もう！");
 
   nextButton.hidden=false;runButton.disabled=true;
