@@ -60,7 +60,7 @@
 <button id="reset" type="button" class="secondary">やり直す</button>
 <button id="next" type="button" hidden>次のステージへ</button>
 </div>
-<p class="puzzle-rule">エンドレスモード：モノクロ君の反転鏡（◩）と分裂鏡（◇）、旋風・冷気・熱気も登場！ クリアするたび新しいステージが登場！ 湯気は<strong>5マス進むと消える</strong>。スリープ雲（☁）に入ると残り5マスに回復！ オレンジの矢印パネルは8方向に回転。◩は進行方向を180度反転、◇は直進と逆方向の2本に分裂するよ。</p>
+<p class="puzzle-rule">エンドレスモード：モノクロ君の反転鏡（◩）と分裂鏡（◇）、旋風・冷気・熱気も登場！ クリアするたび新しいステージが登場！ 湯気は<strong>5マス進むと消える</strong>。スリープ雲（☁）に入ると残り5マスに回復！ オレンジの矢印パネルは8方向に回転。◩は鏡面に合わせて反射、◇は直進と反射の2本に分裂するよ。鏡をタップすると「/」「\\」が切り替わるよ。</p>
 <p id="hint" class="puzzle-rule"></p>
 </div>
 </section><a class="button" href="./index.html">トップページに戻る</a></main>
@@ -69,6 +69,12 @@
 "use strict";
 const DIRS=[[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
 const ARROWS=["→","↘","↓","↙","←","↖","↑","↗"];
+// 鏡面 / : (dx,dy) -> (-dy,-dx)、鏡面 \\ : (dx,dy) -> (dy,dx)
+function reflectedDirection(direction,orientation){
+ const [dx,dy]=DIRS[direction];
+ const rx=orientation===0?-dy:dy, ry=orientation===0?-dx:dx;
+ return DIRS.findIndex(([x,y])=>x===rx&&y===ry);
+}
 const STEW_IMAGE="data:image/webp;base64,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";
 document.getElementById("stew-preview").src=STEW_IMAGE;
 const board=document.getElementById("board");
@@ -157,13 +163,13 @@ function generateLevel(number){
  if(number>=3){
   const blocked=new Set([...clouds,...heat,...ice,...swirl,...turns].map(p=>key(p[0],p[1])));
   const available=path.slice(2,-2).filter(p=>!blocked.has(key(...p)));
-  if(available.length)split.push(available[Math.floor(available.length/2)]);
+  if(available.length){const [sx,sy]=available[Math.floor(available.length/2)];split.push([sx,sy,Math.floor(Math.random()*2)]);}
  }
  if(number>=5){
   const pathSet=new Set(path.map(p=>key(...p)));
   for(let attempts=0;attempts<40;attempts++){
    const mx=1+Math.floor(Math.random()*(w-2)),my=Math.floor(Math.random()*h);
-   if(!pathSet.has(key(mx,my))){mirrors.push([mx,my]);break;}
+   if(!pathSet.has(key(mx,my))){mirrors.push([mx,my,Math.floor(Math.random()*2)]);break;}
   }
  }
  const used=new Set([...path,...mirrors].map(p=>key(...p)));
@@ -178,7 +184,7 @@ function generateLevel(number){
   clouds,heat,swirl,ice,split,mirrors,turns,walls,hint:"スリープ雲で湯気の残りを5マスに回復！ 回転パネルを正しい向きにしよう。"};
 }
 
-let levelIndex=0,level,turns,visited,current,running=false,serial=0,completed=false,activeSmoke=new Set();
+let levelIndex=0,level,turns,mirrors,splitMirrors,visited,current,running=false,serial=0,completed=false,activeSmoke=new Set();
 function setMessage(text){message.textContent=text;}
 function draw(){
  board.replaceChildren();board.style.setProperty("--cols",level.w);
@@ -189,8 +195,8 @@ function draw(){
  const swirlSet=new Set(level.swirl.map(p=>key(...p)));
  const startKey=key(...level.start),goalKey=key(...level.goal);
  for(let y=0;y<level.h;y++)for(let x=0;x<level.w;x++){
-  const k=key(x,y),turn=turns.get(k);
-  const cell=document.createElement(turn!==undefined?"button":"div");
+  const k=key(x,y),turn=turns.get(k),mirror=mirrors.get(k),split=splitMirrors.get(k);
+  const cell=document.createElement(turn!==undefined||mirror!==undefined||split!==undefined?"button":"div");
   cell.dataset.pos=k;
   cell.className="puzzle-cell";
   if(turn!==undefined){
@@ -199,14 +205,20 @@ function draw(){
    cell.setAttribute("aria-label",`(${x+1},${y+1})の方向パネル。現在${ARROWS[turn]}。押すと時計回りに回転`);
    cell.disabled=running||completed;
    cell.onclick=()=>{turns.set(k,(turns.get(k)+1)%8);draw();};
+  }else if(mirror!==undefined||split!==undefined){
+   const isSplit=split!==undefined,orientation=isSplit?split:mirror;
+   cell.type="button";cell.classList.add(isSplit?"split":"mirror");
+   cell.textContent=(isSplit?"◇":"◩")+(orientation===0?"/":"\\");
+   cell.disabled=running||completed;
+   cell.setAttribute("aria-label",(isSplit?"分裂鏡":"反射鏡")+" "+(orientation===0?"/":"バックスラッシュ")+"。タップで鏡面を回転");
+   cell.onclick=()=>{const map=isSplit?splitMirrors:mirrors;map.set(k,1-map.get(k));draw();};
   }else if(k===startKey){cell.classList.add("source");const img=document.createElement("img");img.src=STEW_IMAGE;img.alt="ビーフシチュー";cell.append(img);}
   else if(k===goalKey){cell.classList.add("goal");const img=document.createElement("img");img.src="./つるつる君.png";img.alt="つるつる君";cell.append(img);}
   else if(cloudSet.has(k)){cell.classList.add("cloud");cell.textContent="☁";}
   else if(heatSet.has(k)){cell.classList.add("heat");cell.textContent="🔥";}
   else if(iceSet.has(k)){cell.classList.add("ice");cell.textContent="❄️";}
   else if(swirlSet.has(k)){cell.classList.add("swirl");cell.textContent="🌀";}
-  else if(level.split.some(p=>key(...p)===k)){cell.classList.add("split");cell.textContent="◇";}
-  else if(level.mirrors.some(p=>key(...p)===k)){cell.classList.add("mirror");cell.textContent="◩";}
+
   else if(wallSet.has(k)){cell.textContent="🧱";}
   if(visited.has(k))cell.classList.add("visited");
   if(activeSmoke.has(k)){cell.classList.add("current");const smoke=document.createElement("span");smoke.className="smoke";smoke.setAttribute("aria-label","進行中の湯気");for(let i=0;i<3;i++)smoke.append(document.createElement("i"));cell.append(smoke);}
@@ -216,6 +228,8 @@ function draw(){
 function setup(i){
  serial++;levelIndex=i;level=generateLevel(i+1);running=false;completed=false;
  turns=new Map(level.turns.map(([x,y,d])=>[key(x,y),d]));
+ mirrors=new Map(level.mirrors.map(([x,y,side])=>[key(x,y),side]));
+ splitMirrors=new Map(level.split.map(([x,y,side])=>[key(x,y),side]));
  visited=new Set();current=null;activeSmoke=new Set();
  document.getElementById("level-title").textContent=`エンドレス ステージ ${i+1}`;
  document.getElementById("hint").textContent=level.hint;
@@ -235,8 +249,6 @@ async function play(){
  const heatSet=new Set(level.heat.map(p=>key(...p)));
  const iceSet=new Set(level.ice.map(p=>key(...p)));
  const swirlSet=new Set(level.swirl.map(p=>key(...p)));
- const mirrorSet=new Set(level.mirrors.map(p=>key(...p)));
- const splitSet=new Set(level.split.map(p=>key(...p)));
  const walls=new Set(level.walls.map(p=>key(...p)));
  const seen=new Set();setMessage("もくもく……湯気が進んでいるよ！");draw();
  while(particles.length&&steps++<120){
@@ -253,8 +265,9 @@ async function play(){
    if(iceSet.has(at))life=Math.max(0,life-2);
    if(turns.has(at))dir=turns.get(at);
    if(swirlSet.has(at))dir=(dir+2)%8;
-   if(mirrorSet.has(at))dir=(dir+4)%8;
-   const directions=splitSet.has(at)?[dir,(dir+4)%8]:[dir];
+   if(mirrors.has(at))dir=reflectedDirection(dir,mirrors.get(at));
+   // 分裂鏡は直進と鏡面反射の2本に分岐
+   const directions=splitMirrors.has(at)?[dir,reflectedDirection(dir,splitMirrors.get(at))]:[dir];
    for(const d of directions){
     if(life<=0)continue;
     const state=at+":"+d+":"+life;
