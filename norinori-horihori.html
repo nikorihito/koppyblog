@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ノリノリ掘り掘り！ | こっぴーのマイクラひとやすみ</title><link rel="icon" href="./favicon.png"><link rel="stylesheet" href="./style.css">
+<style>
+[hidden]{display:none!important}.rh-wrap{max-width:890px;margin:auto}.rh-card{background:#fffaf3;border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow-soft)}
+.rh-status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-weight:bold;margin-bottom:14px}.rh-status strong{color:var(--primary-dark)}
+.rh-scene{height:300px;position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(#383b46 0%,#41434d 70%,#504c44 70%);border:5px solid #5a504a}
+.rh-scene::before{content:"";position:absolute;inset:0;background-image:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:42px 42px}
+.rh-ground{position:absolute;bottom:0;height:64px;width:100%;background:repeating-linear-gradient(90deg,#79786d 0 39px,#625f56 40px 42px);border-top:5px solid #b6a489}
+.rh-runner{position:absolute;width:126px;height:157px;left:12%;bottom:45px;display:flex;align-items:end;justify-content:center;transition:left .65s linear;z-index:2}
+.rh-runner img{width:116px;height:138px;object-fit:contain;filter:drop-shadow(2px 5px 3px #0008)}
+.rh-runner.walking img{animation:rh-bob .22s infinite alternate}.rh-runner.mining img{animation:rh-swing .2s 2}
+@keyframes rh-bob{to{transform:translateY(-9px) rotate(-3deg)}}@keyframes rh-swing{to{transform:rotate(-12deg) translateX(8px)}}
+.rh-ore{position:absolute;right:13%;bottom:65px;width:110px;height:110px;display:grid;place-items:center;background:#858d95;border:7px solid #616a73;box-shadow:inset -10px -12px #535e68,0 8px 0 #0004;transform:scale(.6);opacity:0;transition:transform .4s,opacity .35s}
+.rh-ore.show{transform:scale(1);opacity:1}.rh-ore.broken{animation:rh-break .38s forwards}
+@keyframes rh-break{to{opacity:0;transform:scale(1.35) rotate(12deg)}}
+.rh-ore::after{content:"";width:73%;height:73%;background:radial-gradient(circle at 25% 30%,var(--gem) 0 10%,transparent 12%),radial-gradient(circle at 74% 62%,var(--gem) 0 13%,transparent 15%),radial-gradient(circle at 55% 12%,var(--gem) 0 8%,transparent 10%);filter:drop-shadow(1px 2px #0006)}
+.rh-ore.stone{--gem:#aeb6b9}.rh-ore.iron{--gem:#dbac77}.rh-ore.diamond{--gem:#65e9e9}
+.rh-ore-label{position:absolute;bottom:8px;color:white;text-shadow:0 2px 3px #000;font-size:.85rem;font-weight:800}
+.rh-flash{position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:clamp(23px,4vw,38px);font-weight:900;text-shadow:0 3px 5px #0008;color:#fff}
+.rh-flash.perfect{color:#ffe48c}.rh-flash.good{color:#b8f8ff}.rh-flash.miss{color:#ffafaf}
+.rh-controls{padding-top:15px;display:flex;align-items:center;flex-direction:column;gap:10px}
+.rh-hitbox{width:172px;height:172px;position:relative;display:grid;place-items:center;touch-action:none}
+.rh-pickaxe{width:108px;height:108px;position:relative;z-index:2;border:4px solid #a65c27;border-radius:50%;background:linear-gradient(140deg,#ffdc9d,#f49c52);color:#523017;cursor:pointer;font-size:52px;box-shadow:0 6px 0 #a55c2c,0 8px 18px #a5683970;touch-action:none;user-select:none;display:grid;place-items:center}
+.rh-pickaxe:active,.rh-pickaxe.holding{transform:translateY(4px);box-shadow:0 2px 0 #a55c2c}
+.rh-ring{position:absolute;left:32px;top:32px;width:108px;height:108px;border:5px solid #ffe494;border-radius:50%;pointer-events:none;z-index:3;opacity:0;box-shadow:0 0 10px #ffcf64b0}
+.rh-ring.second{border-color:#76e7f1;box-shadow:0 0 11px #7de8f1aa}
+.rh-hold{height:8px;width:172px;border-radius:8px;background:#e7d7c3;overflow:hidden}.rh-hold-fill{width:0;height:100%;background:#f19a46}
+.rh-action{font-weight:bold;color:var(--primary-dark);min-height:1.6em}
+.rh-btn{border:0;border-radius:999px;background:var(--primary);color:white;font:inherit;font-weight:800;padding:14px 26px;cursor:pointer}.rh-btn:disabled{opacity:.5}
+.rh-guide{text-align:left;line-height:1.8;font-size:.94rem;color:var(--subtext)}
+.rh-summary{font-size:1.15rem;font-weight:800;min-height:1.7em}
+@media(max-width:580px){.rh-card{padding:10px}.rh-scene{height:245px}.rh-runner{width:90px;height:120px;bottom:42px}.rh-runner img{height:110px}.rh-ore{width:80px;height:80px;bottom:58px}.rh-ground{height:55px}}
+@media(prefers-reduced-motion:reduce){.rh-runner.walking img,.rh-runner.mining img{animation:none}}
+</style></head>
+<body><header><a href="./index.html"><img src="./favicon.png" class="logo" alt="サイトロゴ"></a><h1>こっぴーのマイクラひとやすみ</h1></header>
+<main><section class="rh-wrap"><h2>ノリノリ掘り掘り！</h2><p>ノリノリヒトといっしょに、リズムに合わせてホリホリ！</p>
+<div class="rh-card">
+<div class="rh-status"><span>鉱石 <strong id="progress">0 / 12</strong></span><span>スコア <strong id="score">0</strong></span><span>コンボ <strong id="combo">0</strong></span></div>
+<div class="rh-scene" aria-label="採掘ゲームの画面">
+<div class="rh-ground"></div><div class="rh-runner" id="runner"><img src="./ノリノリヒト.png" alt="ノリノリヒト"></div>
+<div class="rh-ore stone" id="ore"><span class="rh-ore-label" id="ore-label">石</span></div>
+<div class="rh-flash" id="flash" aria-live="polite"></div>
+</div>
+<div class="rh-controls">
+<div id="instruction" class="rh-action">スタートを押すとノリノリヒトが歩き出す！</div>
+<div class="rh-hitbox" id="hitbox" hidden>
+<div class="rh-ring" id="ring-a"></div><div class="rh-ring second" id="ring-b"></div>
+<button class="rh-pickaxe" id="pickaxe" type="button" aria-label="ツルハシで採掘">⛏</button>
+</div>
+<div class="rh-hold" id="hold" hidden><div class="rh-hold-fill" id="hold-fill"></div></div>
+<button class="rh-btn" id="start" type="button">スタート！</button>
+<div id="summary" class="rh-summary" role="status" aria-live="polite"></div>
+</div>
+<p class="rh-guide"><strong>石：</strong>円がツルハシの外周に重なった瞬間に押す。<strong>鉄：</strong>同じタイミングから長押し（約0.7秒）。<strong>ダイヤ：</strong>重なって現れる2つの円それぞれのタイミングで2回押す。<br>PCは Spaceキー、スマホはツルハシをタップ。音を有効にするとリズムの合図も鳴ります。音は初回操作後に再生します。</p>
+</div></section><a class="button" href="./index.html">トップページに戻る</a></main><footer><p>&copy; こっぴー</p></footer>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const sequence=["stone","stone","iron","stone","diamond","stone","iron","stone","diamond","iron","stone","diamond"];
+const labels={stone:"石",iron:"鉄鉱石",diamond:"ダイヤモンド鉱石"};
+const names={stone:"タイミングよく押そう！",iron:"円が重なったら長押し！",diamond:"重なる2つの円で2回押そう！"};
+const ringDuration=1250, perfectWindow=80,goodWindow=165,holdDuration=680;
+let state="idle",index=0,combo=0,score=0,perfect=0,good=0,miss=0;
+let cues=[],hit=[],holdStart=null,holdJudgement="",held=false,startedAt=0,roundToken=0,raf=0,audio=null;
+const ore=$("ore"),runner=$("runner"),start=$("start"),pickaxe=$("pickaxe"),hitbox=$("hitbox");
+function sound(freq=400,length=.08,kind="triangle",volume=.09){
+ try{if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();audio.resume();
+ const osc=audio.createOscillator(),gain=audio.createGain(),t=audio.currentTime;
+ osc.type=kind;osc.frequency.setValueAtTime(freq,t);gain.gain.setValueAtTime(volume,t);
+ gain.gain.exponentialRampToValueAtTime(.001,t+length);osc.connect(gain).connect(audio.destination);osc.start(t);osc.stop(t+length+.02);
+ }catch(e){/* sound is optional */}
+}
+function updateStats(){$("progress").textContent=index+" / "+sequence.length;$("score").textContent=score;$("combo").textContent=combo;}
+function flash(text,kind=""){const el=$("flash");el.textContent=text;el.className="rh-flash "+kind;}
+function ring(el,target,now){const until=target-now;const scale=1+(until/ ringDuration)*1.1;
+ if(until>ringDuration||until< -goodWindow){el.style.opacity="0";return;}
+ el.style.opacity="1";el.style.transform="scale("+Math.max(.7,scale)+")";
+ el.style.borderColor=Math.abs(until)<=perfectWindow?"#f4f6a2":(el.id==="ring-b"?"#76e7f1":"#ffe494");
+}
+function resetRings(){$("ring-a").style.opacity="0";$("ring-b").style.opacity="0";$("hold").hidden=true;$("hold-fill").style.width="0%";}
+function scheduleRound(){
+ if(index>=sequence.length){finish();return;}
+ const type=sequence[index];hit=[];held=false;holdStart=null;holdJudgement="";
+ resetRings();ore.className="rh-ore "+type;ore.classList.remove("show");
+ $("ore-label").textContent=labels[type];$("instruction").textContent=names[type];flash("");
+ runner.className="rh-runner walking";runner.style.left="11%";
+ const now=performance.now();startedAt=now;
+ // ノリノリヒトが接近してから鉱石と円が出現する
+ const first=now+2050;cues=type==="diamond"?[first,first+440]:[first];
+ state="approach";roundToken++;
+}
+function begin(){
+ cancelAnimationFrame(raf);roundToken++;index=0;combo=0;score=0;perfect=0;good=0;miss=0;
+ start.hidden=true;hitbox.hidden=false;$("summary").textContent="";updateStats();sound(540,.12);
+ scheduleRound();raf=requestAnimationFrame(frame);
+}
+function fail(text="MISS!"){miss++;combo=0;flash(text,"miss");sound(150,.18,"sawtooth",.045);endRound(false);}
+function register(judgement){
+ if(judgement==="PERFECT"){perfect++;score+=300+combo*10;sound(820,.09);}
+ else{good++;score+=150+combo*5;sound(570,.09);}
+ combo++;flash(judgement,judgement.toLowerCase());runner.className="rh-runner mining";updateStats();
+}
+function endRound(success){
+ state="transition";held=false;pickaxe.classList.remove("holding");resetRings();
+ if(success){ore.classList.add("broken");sound(280,.1,"square",.045);}
+ const token=++roundToken;
+ setTimeout(()=>{if(roundToken!==token||state!=="transition")return;index++;updateStats();scheduleRound();},720);
+}
+function press(){
+ if(state!=="active"||held)return;
+ held=true;pickaxe.classList.add("holding");
+ const now=performance.now(),type=sequence[index],next=hit.length;
+ if(next>=cues.length){held=false;pickaxe.classList.remove("holding");return;}
+ const delta=Math.abs(now-cues[next]);
+ if(delta>goodWindow){held=false;pickaxe.classList.remove("holding");fail("タイミングがちがう！");return;}
+ const judgement=delta<=perfectWindow?"PERFECT":"GOOD";
+ if(type==="iron"){holdStart=now;holdJudgement=judgement;$("hold").hidden=false;flash("そのまま長押し！");sound(330,.1);return;}
+ hit.push(judgement);register(judgement);
+ if(hit.length===cues.length)endRound(true);
+}
+function release(){
+ if(!held)return;held=false;pickaxe.classList.remove("holding");
+ if(state==="active"&&sequence[index]==="iron"&&holdStart!==null){
+  if(performance.now()-holdStart<holdDuration){fail("長押しが短い！");return;}
+  register(holdJudgement);endRound(true);
+ }
+}
+function frame(now){
+ if(state==="idle"||state==="finished")return;
+ if(state==="approach"&&now-startedAt>=380){ore.classList.add("show");state="active";}
+ if(state==="active"){
+  if(now-startedAt>=1000){runner.classList.remove("walking");runner.style.left="37%";}
+  for(let i=0;i<2;i++){
+   const target=cues[i],el=$(i?"ring-b":"ring-a");
+   if(target!==undefined&&hit.length<=i)ring(el,target,now);else el.style.opacity="0";
+  }
+  if(sequence[index]==="iron"&&holdStart!==null){
+   const ratio=Math.min(1,(now-holdStart)/holdDuration);
+   $("hold-fill").style.width=(ratio*100)+"%";
+   if(ratio>=1&&held){register(holdJudgement);endRound(true);}
+  }else{
+   const next=hit.length;
+   if(next<cues.length&&now>cues[next]+goodWindow)fail();
+  }
+ }
+ raf=requestAnimationFrame(frame);
+}
+function finish(){
+ state="finished";resetRings();hitbox.hidden=true;start.hidden=false;start.textContent="もう一度あそぶ";
+ flash("FINISH!","perfect");
+ $("summary").textContent="結果："+score+"点／PERFECT "+perfect+"・GOOD "+good+"・MISS "+miss;
+ $("instruction").textContent="ノリノリ採掘完了！";runner.classList.remove("walking");
+}
+start.addEventListener("click",begin);
+pickaxe.addEventListener("pointerdown",e=>{e.preventDefault();pickaxe.setPointerCapture?.(e.pointerId);press();});
+pickaxe.addEventListener("pointerup",e=>{e.preventDefault();release();});
+pickaxe.addEventListener("pointercancel",release);
+window.addEventListener("keydown",e=>{if(e.code!=="Space"||e.repeat)return;if(["active","approach"].includes(state)){e.preventDefault();press();}});
+window.addEventListener("keyup",e=>{if(e.code==="Space")release();});
+window.addEventListener("blur",release);
+updateStats();
+</script></body></html>
