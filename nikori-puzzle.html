@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ニコリパズル | こっぴーのマイクラひとやすみ</title>
+<link rel="icon" href="./favicon.png"><link rel="stylesheet" href="./style.css">
+<style>
+.puzzle-wrap{max-width:830px;margin:auto}
+.puzzle-card{background:#fffaf3;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow-soft)}
+.puzzle-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.puzzle-title{font-size:1.2rem;font-weight:800}
+.puzzle-info{font-weight:bold;color:var(--primary-dark)}
+.puzzle-board{--cols:8;display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:4px;width:min(100%,670px);margin:10px auto 18px;background:#a47f58;border:7px solid #a47f58;border-radius:12px;overflow:hidden}
+.puzzle-cell{min-width:0;aspect-ratio:1;background:#f8ebd8;border:0;border-radius:5px;display:flex;align-items:center;justify-content:center;position:relative;font-size:clamp(14px,3.3vw,27px);padding:0}
+.puzzle-cell.track{background:#fff6de}.puzzle-cell.cloud{background:#e5f4ff}.puzzle-cell.turn{background:#ffdeb5;cursor:pointer}
+.puzzle-cell.turn:focus-visible{outline:3px solid #b34919;outline-offset:-3px}
+.puzzle-cell.source{background:#ffe4a5}.puzzle-cell.goal{background:#dfefce}
+.puzzle-cell.visited{box-shadow:inset 0 0 0 3px #75b1b9}
+.puzzle-cell.current{box-shadow:inset 0 0 0 4px #fb9254}
+.puzzle-cell .marker{position:absolute;top:0;right:1px;font-size:10px;font-weight:bold;color:#6e5543}
+.puzzle-controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.puzzle-controls button{background:var(--primary);border:0;color:#fff;border-radius:999px;padding:12px 20px;font:inherit;font-weight:700;cursor:pointer}
+.puzzle-controls button:disabled{opacity:.45;cursor:not-allowed}
+.puzzle-controls button.secondary{background:#7d8fa8}
+.puzzle-message{min-height:3em;font-weight:700;line-height:1.6}
+.puzzle-characters{display:flex;align-items:center;justify-content:space-between;max-width:670px;margin:12px auto;gap:16px}
+.puzzle-characters img{width:76px;height:76px;object-fit:contain}
+.puzzle-characters .mascot{display:flex;align-items:center;gap:8px;font-size:.88rem;font-weight:bold}
+.puzzle-rule{font-size:.92rem;color:var(--subtext);line-height:1.7}
+@media(max-width:540px){.puzzle-card{padding:10px}.puzzle-board{gap:2px;border-width:4px}.puzzle-characters img{width:50px;height:50px}.puzzle-cell .marker{font-size:8px}}
+</style>
+</head>
+<body>
+<header><a href="./index.html"><img src="./favicon.png" alt="サイトロゴ" class="logo"></a><h1>こっぴーのマイクラひとやすみ</h1></header>
+<main><section class="puzzle-wrap">
+<h2>ニコリパズル 〜つるつる君に届け！〜</h2>
+<p>ニコリヒトのビーフシチューから出る湯気を、つるつる君まで届けよう！</p>
+<div class="puzzle-characters">
+<div class="mascot"><img src="./ニコリヒト.png" alt="ニコリヒト"><span>ニコリヒト<br>ビーフシチュー</span></div>
+<div class="mascot"><span>おなかすいた！<br>つるつる君</span><img src="./つるつる君.png" alt="つるつる君"></div>
+</div>
+<div class="puzzle-card">
+<div class="puzzle-top"><span id="level-title" class="puzzle-title"></span><span id="remaining" class="puzzle-info"></span></div>
+<div id="board" class="puzzle-board" aria-label="ニコリパズルの盤面"></div>
+<p id="message" class="puzzle-message" role="status" aria-live="polite"></p>
+<div class="puzzle-controls">
+<button id="run" type="button">湯気を飛ばす！</button>
+<button id="reset" type="button" class="secondary">やり直す</button>
+<button id="next" type="button" hidden>次のステージへ</button>
+</div>
+<p class="puzzle-rule">ルール：湯気は<strong>5マス進むと消える</strong>。スリープ雲（☁）に入ると残り5マスに回復！ オレンジの矢印パネルはタップするたびに回転するよ。</p>
+<p id="hint" class="puzzle-rule"></p>
+</div>
+</section><a class="button" href="./index.html">トップページに戻る</a></main>
+<footer><p>&copy; こっぴー</p></footer>
+<script>
+"use strict";
+const LEVELS=[{"name":"はじめての湯気","w":8,"h":4,"start":[0,2],"goal":[7,2],"clouds":[[4,2]],"turns":[],"walls":[],"hint":"スリープ雲を通ると、湯気が5マス分回復！"},{"name":"曲がり道","w":8,"h":6,"start":[0,4],"goal":[7,1],"clouds":[[3,2]],"turns":[[3,4,2],[3,1,2]],"walls":[],"hint":"矢印をタップして向きを変えよう。先に上、次に右へ！"},{"name":"雲をつなごう","w":9,"h":7,"start":[0,5],"goal":[8,1],"clouds":[[3,5],[4,3],[6,1]],"turns":[[4,5,1],[4,1,2]],"walls":[],"hint":"5マスで消える前に、雲を次々に通ろう！"}];
+const DIRS=[[1,0],[0,1],[-1,0],[0,-1]];
+const ARROWS=["→","↓","←","↑"];
+const board=document.getElementById("board");
+const message=document.getElementById("message");
+const remaining=document.getElementById("remaining");
+const runButton=document.getElementById("run");
+const nextButton=document.getElementById("next");
+const resetButton=document.getElementById("reset");
+const key=(x,y)=>x+","+y;
+let levelIndex=0,level,turns,visited,current,running=false,serial=0,completed=false;
+function setMessage(text){message.textContent=text;}
+function draw(){
+ board.replaceChildren();board.style.setProperty("--cols",level.w);
+ const cloudSet=new Set(level.clouds.map(p=>key(...p)));
+ const wallSet=new Set(level.walls.map(p=>key(...p)));
+ const startKey=key(...level.start),goalKey=key(...level.goal);
+ for(let y=0;y<level.h;y++)for(let x=0;x<level.w;x++){
+  const k=key(x,y),turn=turns.get(k);
+  const cell=document.createElement(turn!==undefined?"button":"div");
+  cell.className="puzzle-cell";
+  if(turn!==undefined){
+   cell.type="button";cell.classList.add("turn");
+   cell.textContent=ARROWS[turn];
+   cell.setAttribute("aria-label",`(${x+1},${y+1})の方向パネル。現在${ARROWS[turn]}。押すと時計回りに回転`);
+   cell.disabled=running||completed;
+   cell.onclick=()=>{turns.set(k,(turns.get(k)+1)%4);draw();};
+  }else if(k===startKey){cell.classList.add("source");cell.textContent="🍲";}
+  else if(k===goalKey){cell.classList.add("goal");cell.textContent="🍽";}
+  else if(cloudSet.has(k)){cell.classList.add("cloud");cell.textContent="☁";}
+  else if(wallSet.has(k)){cell.textContent="🧱";}
+  if(visited.has(k))cell.classList.add("visited");
+  if(current===k)cell.classList.add("current");
+  board.append(cell);
+ }
+}
+function setup(i){
+ serial++;levelIndex=i;level=LEVELS[i];running=false;completed=false;
+ turns=new Map(level.turns.map(([x,y,d])=>[key(x,y),d]));
+ visited=new Set();current=null;
+ document.getElementById("level-title").textContent=`ステージ ${i+1}：${level.name}`;
+ document.getElementById("hint").textContent=level.hint;
+ remaining.textContent="湯気の残り：5マス";
+ runButton.disabled=false;nextButton.hidden=true;
+ setMessage("矢印をタップして、湯気の通り道を作ろう！");draw();
+}
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function play(){
+ if(running||completed)return;
+ running=true;runButton.disabled=true;nextButton.hidden=true;
+ const token=++serial;
+ let [x,y]=level.start,dir=0,life=5,steps=0;
+ current=key(x,y);visited=new Set([current]);draw();
+ setMessage("もくもく……湯気が進んでいるよ！");
+ const cloudSet=new Set(level.clouds.map(p=>key(...p)));
+ const wallSet=new Set(level.walls.map(p=>key(...p)));
+ const seen=new Set();
+ let success=false,failure="";
+ while(steps<150){
+  await pause(240);
+  if(token!==serial)return;
+  if(life===0){failure="湯気が5マスで消えちゃった！スリープ雲を通ろう。";break;}
+  x+=DIRS[dir][0];y+=DIRS[dir][1];steps++;life--;
+  if(x<0||y<0||x>=level.w||y>=level.h||wallSet.has(key(x,y))){
+   failure="道から外れちゃった！矢印の向きを変えてみよう。";break;
+  }
+  current=key(x,y);visited.add(current);
+  if(key(x,y)===key(...level.goal)){success=true;remaining.textContent="つるつる君に到着！";draw();break;}
+  if(cloudSet.has(current))life=5;
+  if(turns.has(current))dir=turns.get(current);
+  remaining.textContent="湯気の残り："+life+"マス";
+  draw();
+  const state=current+":"+dir+":"+life;
+  if(seen.has(state)){failure="同じ場所をぐるぐる回っているよ！";break;}
+  seen.add(state);
+ }
+ if(!success&&!failure)failure="湯気が迷子になっちゃった！";
+ if(token!==serial)return;
+ running=false;
+ if(success){
+  completed=true;
+  setMessage(levelIndex===LEVELS.length-1?"クリア！ つるつる君がビーフシチューを食べた！ 全ステージ達成！":"クリア！ つるつる君がビーフシチューを食べた！ おいしい〜！");
+  nextButton.hidden=levelIndex===LEVELS.length-1;
+  runButton.disabled=true;
+ }else{
+  setMessage(failure);
+  runButton.disabled=false;
+ }
+ draw();
+}
+runButton.onclick=play;
+resetButton.onclick=()=>setup(levelIndex);
+nextButton.onclick=()=>{if(completed&&levelIndex<LEVELS.length-1)setup(levelIndex+1);};
+setup(0);
+</script>
+</body></html>
