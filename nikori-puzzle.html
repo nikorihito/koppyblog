@@ -48,14 +48,13 @@
 <button id="reset" type="button" class="secondary">やり直す</button>
 <button id="next" type="button" hidden>次のステージへ</button>
 </div>
-<p class="puzzle-rule">ルール：湯気は<strong>5マス進むと消える</strong>。スリープ雲（☁）に入ると残り5マスに回復！ オレンジの矢印パネルはタップするたびに回転するよ。</p>
+<p class="puzzle-rule">エンドレスモード：クリアするたび新しいステージが登場！ 湯気は<strong>5マス進むと消える</strong>。スリープ雲（☁）に入ると残り5マスに回復！ オレンジの矢印パネルはタップするたびに回転するよ。</p>
 <p id="hint" class="puzzle-rule"></p>
 </div>
 </section><a class="button" href="./index.html">トップページに戻る</a></main>
 <footer><p>&copy; こっぴー</p></footer>
 <script>
 "use strict";
-const LEVELS=[{"name":"はじめての湯気","w":8,"h":4,"start":[0,2],"goal":[7,2],"clouds":[[4,2]],"turns":[],"walls":[],"hint":"スリープ雲を通ると、湯気が5マス分回復！"},{"name":"曲がり道","w":8,"h":6,"start":[0,4],"goal":[7,1],"clouds":[[3,2]],"turns":[[3,4,2],[3,1,2]],"walls":[],"hint":"矢印をタップして向きを変えよう。先に上、次に右へ！"},{"name":"雲をつなごう","w":9,"h":7,"start":[0,5],"goal":[8,1],"clouds":[[3,5],[4,3],[6,1]],"turns":[[4,5,1],[4,1,2]],"walls":[],"hint":"5マスで消える前に、雲を次々に通ろう！"}];
 const DIRS=[[1,0],[0,1],[-1,0],[0,-1]];
 const ARROWS=["→","↓","←","↑"];
 const board=document.getElementById("board");
@@ -65,6 +64,58 @@ const runButton=document.getElementById("run");
 const nextButton=document.getElementById("next");
 const resetButton=document.getElementById("reset");
 const key=(x,y)=>x+","+y;
+// クリア可能な道筋を先に作り、その道に合わせて雲と回転パネルを配置する。
+function generateLevel(number){
+ const w=11,h=7;
+ const bends=Math.min(3,Math.floor(number/2));
+ const startY=1+Math.floor(Math.random()*5);
+ const path=[[0,startY]];
+ let x=0,y=startY,dir=0;
+ const columns=[2,4,6,8].sort(()=>Math.random()-.5).slice(0,bends).sort((a,b)=>a-b);
+ function step(nx,ny){x=nx;y=ny;path.push([x,y]);}
+ for(const col of columns){
+  while(x<col)step(x+1,y);
+  const choices=[1,2,3,4,5].filter(v=>v!==y&&Math.abs(v-y)<=3);
+  const nextY=choices[Math.floor(Math.random()*choices.length)];
+  while(y!==nextY)step(x,y+Math.sign(nextY-y));
+ }
+ while(x<w-1)step(x+1,y);
+ const turns=[];
+ for(let i=1;i<path.length-1;i++){
+  const [px,py]=path[i-1],[cx,cy]=path[i],[nx,ny]=path[i+1];
+  const incoming=[cx-px[0],cy-px[1]].join(",");
+  const outgoing=[nx-cx,ny-cy].join(",");
+  if(incoming!==outgoing){
+   const wanted=DIRS.findIndex(d=>d[0]===nx-cx&&d[1]===ny-cy);
+   turns.push([cx,cy,(wanted+1+Math.floor(Math.random()*3))%4]);
+  }
+ }
+ const turnsSet=new Set(turns.map(([tx,ty])=>key(tx,ty)));
+ const eligible=path.map((p,i)=>i>0&&i<path.length-1&&!turnsSet.has(key(...p)));
+ // 5マス以内に次の雲かゴールが来る配置を探索。
+ function plan(last){
+  if(path.length-1-last<=5)return [];
+  const opts=[];
+  for(let at=last+1;at<=Math.min(last+5,path.length-2);at++)if(eligible[at])opts.push(at);
+  opts.sort((a,b)=>Math.abs(a-(last+4))-Math.abs(b-(last+4)));
+  for(const at of opts){const rest=plan(at);if(rest!==null)return [at,...rest];}
+  return null;
+ }
+ const positions=plan(0);
+ if(positions===null)return generateLevel(number);
+ const clouds=positions.map(i=>path[i]);
+ const used=new Set(path.map(p=>key(...p)));
+ const walls=[];
+ const count=Math.min(12,number+1);
+ for(let tries=0;tries<80&&walls.length<count;tries++){
+  const wx=Math.floor(Math.random()*w),wy=Math.floor(Math.random()*h);
+  const k=key(wx,wy);
+  if(!used.has(k)&&!walls.some(p=>key(...p)===k)){walls.push([wx,wy]);}
+ }
+ return {name:"エンドレス",w,h,start:path[0],goal:path[path.length-1],
+  clouds,turns,walls,hint:"スリープ雲で湯気の残りを5マスに回復！ 回転パネルを正しい向きにしよう。"};
+}
+
 let levelIndex=0,level,turns,visited,current,running=false,serial=0,completed=false;
 function setMessage(text){message.textContent=text;}
 function draw(){
@@ -92,10 +143,10 @@ function draw(){
  }
 }
 function setup(i){
- serial++;levelIndex=i;level=LEVELS[i];running=false;completed=false;
+ serial++;levelIndex=i;level=generateLevel(i+1);running=false;completed=false;
  turns=new Map(level.turns.map(([x,y,d])=>[key(x,y),d]));
  visited=new Set();current=null;
- document.getElementById("level-title").textContent=`ステージ ${i+1}：${level.name}`;
+ document.getElementById("level-title").textContent=`エンドレス ステージ ${i+1}`;
  document.getElementById("hint").textContent=level.hint;
  remaining.textContent="湯気の残り：5マス";
  runButton.disabled=false;nextButton.hidden=true;
@@ -136,8 +187,8 @@ async function play(){
  running=false;
  if(success){
   completed=true;
-  setMessage(levelIndex===LEVELS.length-1?"クリア！ つるつる君がビーフシチューを食べた！ 全ステージ達成！":"クリア！ つるつる君がビーフシチューを食べた！ おいしい〜！");
-  nextButton.hidden=levelIndex===LEVELS.length-1;
+  setMessage("クリア！ つるつる君がビーフシチューを食べた！ 次のステージへ進もう！");
+  nextButton.hidden=false;
   runButton.disabled=true;
  }else{
   setMessage(failure);
@@ -147,7 +198,7 @@ async function play(){
 }
 runButton.onclick=play;
 resetButton.onclick=()=>setup(levelIndex);
-nextButton.onclick=()=>{if(completed&&levelIndex<LEVELS.length-1)setup(levelIndex+1);};
+nextButton.onclick=()=>{if(completed)setup(levelIndex+1);};
 setup(0);
 </script>
 </body></html>
