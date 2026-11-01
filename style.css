@@ -921,3 +921,6 @@ code {
   text-align: center;
   color: var(--subtext);
 }
+
+/* Character quiz: sixth book in the mini-game library */
+.book-item:nth-child(6) { background: linear-gradient(180deg, #8c83cf, #6256a8); }
