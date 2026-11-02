@@ -40,3 +40,24 @@ firebase deploy --only functions:verifyKoppyAdmin --project koppyblog
 - コメントには公開コンテンツとして他人が投稿するため、掲示板のモデレーション機能が必要。
 - 返信は同じ記事内のコメント文書に `parentId` を持たせる。親が削除された場合、その返信は親コメントと一緒に表示されなくなる場合がある。後日「削除済みコメント」プレースホルダーを導入する余地がある。
 - Functionsデプロイ前は管理者認証欄は利用できず、通常のコメント投稿には影響しない。
+
+## 管理者コードをお問い合わせ先メールへ送る方式（新仕様）
+従来の固定 `KOPPY_ADMIN_CODE` は使用しません。管理者メニューの「メールに認証コードを送る」ボタンを押すと、Firebase Functionsが8桁の一時コードを生成し、フィードバックフォームの送信先と同じ `nikorihito@gmail.com` に送信します。コードは10分で期限切れ・1回使用・失敗5回で無効、発行はサイト全体で10分に1回に制限しています。
+
+**Firebase Functionsはデプロイ前のため、まだメール送信はできません。**
+SMTP送信元メールの認証情報をFirebase Secret Managerに保存します。ローカルPCでFirebase CLIを使い、以下を実施してください。
+
+```bash
+cd functions
+npm install
+cd ..
+firebase functions:secrets:set KOPPY_SMTP_HOST --project koppyblog
+firebase functions:secrets:set KOPPY_SMTP_USER --project koppyblog
+firebase functions:secrets:set KOPPY_SMTP_PASS --project koppyblog
+firebase functions:secrets:set KOPPY_OTP_PEPPER --project koppyblog
+firebase deploy --only functions:requestKoppyAdminCode,functions:verifyKoppyAdmin --project koppyblog
+```
+
+例：SMTPホストはメール提供事業者から指定された値、SMTP_USERは送信元メールアドレス、SMTP_PASSは送信用パスワード（通常のGoogleアカウントパスワードではなく、専用のSMTP認証情報）、OTP_PEPPERは十分長いランダム文字列。これらの秘密情報はGitHubやサイト、チャットへ掲載しません。メール送信可能なSMTPアカウントと、Firebase Functionsをデプロイできる課金プランが必要です。
+
+**注意**：古い手順内の `firebase functions:secrets:set KOPPY_ADMIN_CODE` は実行不要です。発行する一時コードはサーバーで生成されます。管理者コードの送信先メールはサーバー側の固定設定であり、訪問者が変更することはできません。これは認証機能の基盤実装で、実デプロイ・送信・認証の動作確認はまだ行っていません。

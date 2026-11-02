@@ -26,11 +26,21 @@ if(host){
    nameInput.type="text";nameInput.maxLength=30;nameInput.placeholder="名前（空欄なら匿名）";nameInput.setAttribute("aria-label","投稿者名（任意）");
    const nameLabel=document.createElement("label");nameLabel.textContent="お名前（任意）";nameLabel.append(nameInput);
    const adminPane=document.createElement("details");adminPane.className="be-admin";
-   const adminSummary=document.createElement("summary");adminSummary.textContent="管理者コードを入力";
+   const adminSummary=document.createElement("summary");adminSummary.textContent="管理者コードをメールで受け取る";
    const adminInput=document.createElement("input");adminInput.type="password";adminInput.autocomplete="off";adminInput.placeholder="管理者コード（サイトには保存しません）";
+   const requestButton=document.createElement("button");requestButton.type="button";requestButton.className="be-delete";requestButton.textContent="メールに認証コードを送る";
+   requestButton.onclick=async()=>{
+     if(!user){statusText("匿名認証の準備中です。",true);return;}
+     requestButton.disabled=true;
+     try{const requestCode=httpsCallable(getFunctions(app,"asia-northeast1"),"requestKoppyAdminCode");
+       await requestCode({});
+       adminStatus.textContent="お問い合わせ先のメールに8桁のコードを送信しました（有効期限10分）。";
+     }catch(e){adminStatus.textContent="コード発行エラー："+(e.code||"unknown");}
+     finally{requestButton.disabled=false;}
+   };
    const adminButton=document.createElement("button");adminButton.type="button";adminButton.className="be-delete";adminButton.textContent="管理者認証";
    const adminStatus=document.createElement("span");adminStatus.className="be-help";
-   adminPane.append(adminSummary,adminInput,adminButton,adminStatus);
+   adminPane.append(adminSummary,requestButton,adminInput,adminButton,adminStatus);
    host.querySelector("[data-login-note]").after(adminPane);
    adminButton.onclick=async()=>{
      if(!user){statusText("匿名認証の準備中です。",true);return;}
