@@ -1,3 +1,4 @@
+import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInAnonymously,GoogleAuthProvider,signInWithPopup,signOut} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import {getFirestore,doc,collection,getDoc,getDocs,runTransaction,onSnapshot,setDoc,deleteDoc,addDoc,serverTimestamp,query,orderBy,limit} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
@@ -19,29 +20,88 @@ if(host){
    const likeBtn=host.querySelector("[data-like]"),post=host.querySelector("[data-post]");
    const login=host.querySelector("[data-login]"),logout=host.querySelector("[data-logout]"),commentList=host.querySelector("[data-comments]");
    const commentBox=host.querySelector("[data-comment]");
+   let cachedComments=[],replyTo=null,isAdmin=false;
+   const form=host.querySelector("[data-form]");
+   const nameInput=document.createElement("input");
+   nameInput.type="text";nameInput.maxLength=30;nameInput.placeholder="名前（空欄なら匿名）";nameInput.setAttribute("aria-label","投稿者名（任意）");
+   const nameLabel=document.createElement("label");nameLabel.textContent="お名前（任意）";nameLabel.append(nameInput);
+   const adminPane=document.createElement("details");adminPane.className="be-admin";
+   const adminSummary=document.createElement("summary");adminSummary.textContent="管理者コードを入力";
+   const adminInput=document.createElement("input");adminInput.type="password";adminInput.autocomplete="off";adminInput.placeholder="管理者コード（サイトには保存しません）";
+   const adminButton=document.createElement("button");adminButton.type="button";adminButton.className="be-delete";adminButton.textContent="管理者認証";
+   const adminStatus=document.createElement("span");adminStatus.className="be-help";
+   adminPane.append(adminSummary,adminInput,adminButton,adminStatus);
+   host.querySelector("[data-login-note]").after(adminPane);
+   adminButton.onclick=async()=>{
+     if(!user){statusText("匿名認証の準備中です。",true);return;}
+     adminButton.disabled=true;
+     try{
+       const fn=httpsCallable(getFunctions(app,"asia-northeast1"),"verifyKoppyAdmin");
+       await fn({code:adminInput.value});
+       adminInput.value="";
+       await user.getIdToken(true);
+       isAdmin=(await user.getIdTokenResult()).claims.koppyAdmin===true;
+       adminStatus.textContent=isAdmin?"管理者として認証されました。":"管理者確認が完了しませんでした。";
+       renderComments(cachedComments);
+     }catch(e){adminStatus.textContent="管理者認証エラー："+(e.code||"unknown");}
+     finally{adminButton.disabled=false;}
+   };
+   form.insertBefore(nameLabel,commentBox.closest("label")||commentBox);
+   const replyNote=document.createElement("p");replyNote.className="be-help";replyNote.hidden=true;
+   const replyTarget=document.createElement("span");replyNote.append(replyTarget);
+   const cancelReply=document.createElement("button");cancelReply.type="button";cancelReply.className="be-delete";cancelReply.textContent="返信をやめる";
+   cancelReply.onclick=()=>{replyTo=null;replyNote.hidden=true;};
+   replyNote.append(cancelReply);form.insertBefore(replyNote,commentBox.closest("label")||commentBox);
    function showAuth(){
-    const google=!!user&&!user.isAnonymous;
-    login.hidden=google;logout.hidden=!google;post.disabled=!google;
-    set("[data-login-note]",google?"Googleアカウントでログイン中":"コメントにはGoogleログインが必要です。");
+     // 利用者登録なしで投稿できる（裏側ではFirebase匿名認証を使う）。
+     login.hidden=true;logout.hidden=true;post.disabled=!user;
+     set("[data-login-note]",isAdmin?"こっぴー（管理者）としてログイン中":"ログイン不要。名前が空欄なら匿名で投稿できます。");
    }
-   function showComment(id,data){
-    const li=document.createElement("li");li.className="be-comment";
-    const header=document.createElement("div");header.className="be-comment-head";
-    const name=document.createElement("strong");name.textContent=data.name||"匿名";
-    const date=document.createElement("small");date.textContent=data.createdAt?.toDate?.().toLocaleDateString("ja-JP")||"投稿中";
-    header.append(name,date);
-    const text=document.createElement("p");text.textContent=data.text||"";
-    li.append(header,text);
-    if(user&&data.uid===user.uid){
-     const del=document.createElement("button");del.type="button";del.className="be-delete";del.textContent="削除";
-     del.onclick=async()=>{if(!confirm("このコメントを削除しますか？"))return;try{await deleteDoc(doc(comments,id));}catch(e){statusText("コメントを削除できませんでした。",true);}};
-     li.append(del);
-    }
-    return li;
+   function showComment(id,data,depth=0){
+     const li=document.createElement("li");li.className="be-comment";
+     if(depth)li.classList.add("be-reply");
+     const header=document.createElement("div");header.className="be-comment-head";
+     const name=document.createElement("strong");
+     name.textContent=data.admin===true?"こっぴー（管理者）":(data.name||"匿名");
+     const date=document.createElement("small");
+     date.textContent=data.createdAt?.toDate?.().toLocaleDateString("ja-JP")||"投稿中";
+     header.append(name,date);
+     const body=document.createElement("p");body.textContent=data.text||"";
+     li.append(header,body);
+     const replyBtn=document.createElement("button");replyBtn.type="button";replyBtn.className="be-delete";replyBtn.textContent="返信";
+     replyBtn.onclick=()=>{replyTo=id;replyNote.hidden=false;
+       replyTarget.textContent=(data.name||"匿名")+" さんに返信中　";
+       commentBox.focus();};
+     li.append(replyBtn);
+     if(user && (data.uid===user.uid||isAdmin)){
+       const del=document.createElement("button");del.type="button";del.className="be-delete";del.textContent="削除";
+       del.onclick=async()=>{if(!confirm("このコメントを削除しますか？"))return;try{await deleteDoc(doc(comments,id));}catch(e){statusText("コメントを削除できませんでした。",true);}};
+       li.append(del);
+     }
+     return li;
    }
-   function renderComments(items){commentList.replaceChildren();if(!items.length){const li=document.createElement("li");li.textContent="まだコメントはありません。";commentList.append(li);return;}items.forEach(item=>commentList.append(showComment(item.id,item.data())));}
-   let cachedComments=[];
-   onSnapshot(query(comments,orderBy("createdAt","desc"),limit(50)),snapshot=>{cachedComments=snapshot.docs;renderComments(cachedComments);},()=>statusText("コメントの読み込みに失敗しました。",true));
+   function renderComments(items){
+     commentList.replaceChildren();
+     const data=items.map(d=>({id:d.id,value:d.data()}));
+     if(!data.length){const li=document.createElement("li");li.textContent="まだコメントはありません。";commentList.append(li);return;}
+     const byId=new Map(data.map(d=>[d.id,d]));
+     const children=new Map();
+     data.forEach(d=>{const parent=d.value.parentId||null;
+       const p=parent && byId.has(parent)?parent:null;
+       if(!children.has(p))children.set(p,[]);children.get(p).push(d);});
+     function add(parent,container,depth,stack){
+       for(const d of children.get(parent)||[]){
+         if(stack.has(d.id))continue;
+         const li=showComment(d.id,d.value,depth);container.append(li);
+         if(depth<5){const replies=children.get(d.id)||[];
+           if(replies.length){const ul=document.createElement("ul");ul.className="be-replies";li.append(ul);add(d.id,ul,depth+1,new Set([...stack,d.id]));}}
+       }
+     }
+     add(null,commentList,0,new Set());
+   }
+   onSnapshot(query(comments,orderBy("createdAt","desc"),limit(100)),snapshot=>{
+     cachedComments=snapshot.docs;renderComments(cachedComments);
+   },e=>statusText("コメントの読み込みに失敗しました。["+e.code+"]",true));
    onSnapshot(mainRef,snapshot=>set("[data-views]",snapshot.exists()?snapshot.data().views||0:0),()=>statusText("閲覧数を取得できませんでした。",true));
    onSnapshot(likes,snapshot=>{set("[data-likes]",snapshot.size);liked=!!user&&snapshot.docs.some(d=>d.id===user.uid);likeBtn.classList.toggle("active",liked);likeBtn.setAttribute("aria-pressed",String(liked));},()=>statusText("いいねを取得できませんでした。",true));
    async function registerView(){
@@ -55,7 +115,9 @@ if(host){
     try{sessionStorage.setItem(sessionKey,"1");}catch(e){}
    }
    onAuthStateChanged(auth,async next=>{
-    user=next;showAuth();liked=false;
+    user=next;isAdmin=false;
+    if(user){try{isAdmin=(await user.getIdTokenResult()).claims.koppyAdmin===true;}catch(e){}}
+    showAuth();liked=false;
     renderComments(cachedComments);
     if(!user){if(loginInProgress)return;try{await signInAnonymously(auth);}catch(e){statusText("匿名認証エラー："+(e.code||"unknown"),true);}return;}
     try{await registerView();}catch(e){statusText("閲覧数を記録できませんでした。",true);}
@@ -90,15 +152,18 @@ if(host){
     }finally{loginInProgress=false;login.disabled=false;}
    };
    logout.onclick=async()=>{try{await signOut(auth);}catch(e){statusText("ログアウトできませんでした。",true);}};
-   host.querySelector("[data-form]").onsubmit=async e=>{
-    e.preventDefault();if(!user||user.isAnonymous)return;
-    const content=commentBox.value.trim();if(!content||content.length>500){statusText("コメントは1〜500文字で入力してください。",true);return;}
-    post.disabled=true;
-    try{
-     await addDoc(comments,{uid:user.uid,name:(user.displayName||"ユーザー").slice(0,60),text:content,createdAt:serverTimestamp()});
-     commentBox.value="";statusText("コメントを投稿しました。");
-    }catch(e){statusText("コメントの投稿に失敗しました。",true);}
-    finally{post.disabled=false;}
+   form.onsubmit=async e=>{
+     e.preventDefault();
+     if(!user){statusText("認証準備中です。しばらくして再度お試しください。",true);return;}
+     const content=commentBox.value.trim(),name=nameInput.value.trim()||"匿名";
+     if(!content||content.length>500||name.length>30){statusText("コメントは1〜500文字、名前は30文字以内にしてください。",true);return;}
+     post.disabled=true;
+     try{
+       // adminフラグは閲覧者のコード入力で決めない。Firebaseの検証済みclaimのみ。
+       await addDoc(comments,{uid:user.uid,name,text:content,parentId:replyTo||null,admin:isAdmin,createdAt:serverTimestamp()});
+       commentBox.value="";replyTo=null;replyNote.hidden=true;statusText("コメントを投稿しました。");
+     }catch(e){statusText("投稿失敗 ["+(e.code||"unknown")+"]。Firestoreルールが更新されているか確認してください。",true);}
+     finally{post.disabled=false;}
    };
    statusText("記事へのリアクションをお待ちしています。");
   }catch(e){statusText("記事のリアクション機能を読み込めませんでした。",true);}

@@ -1,0 +1,33 @@
+"use strict";
+const {onCall,HttpsError}=require("firebase-functions/v2/https");
+const {defineSecret}=require("firebase-functions/params");
+const {initializeApp}=require("firebase-admin/app");
+const {getAuth}=require("firebase-admin/auth");
+const {getFirestore,FieldValue}=require("firebase-admin/firestore");
+const {timingSafeEqual}=require("node:crypto");
+initializeApp();
+const adminCode=defineSecret("KOPPY_ADMIN_CODE");
+exports.verifyKoppyAdmin=onCall({region:"asia-northeast1",secrets:[adminCode],maxInstances:4},async(request)=>{
+ const uid=request.auth?.uid;
+ if(!uid)throw new HttpsError("unauthenticated","認証が必要です。");
+ const code=request.data?.code;
+ if(typeof code!=="string"||code.length<8||code.length>128)throw new HttpsError("invalid-argument","コードの形式が不正です。");
+ const attempts=getFirestore().doc("adminVerificationAttempts/"+uid);
+ const now=Date.now();
+ const lock=await getFirestore().runTransaction(async transaction=>{
+  const snap=await transaction.get(attempts);
+  const data=snap.data()||{};
+  if(data.until>now)return true;
+  const sameWindow=data.start&&now-data.start<3600000;
+  const count=sameWindow?(data.count||0):0;
+  transaction.set(attempts,{start:sameWindow?data.start:now,count:count+1,until:count>=4?now+3600000:0,updatedAt:FieldValue.serverTimestamp()});
+  return false;
+ });
+ if(lock)throw new HttpsError("resource-exhausted","認証試行の上限に達しました。");
+ const expected=Buffer.from(adminCode.value()||"");
+ const provided=Buffer.from(code);
+ if(expected.length===0||expected.length!==provided.length||!timingSafeEqual(expected,provided))throw new HttpsError("permission-denied","管理者コードが違います。");
+ const auth=getAuth();const user=await auth.getUser(uid);
+ await auth.setCustomUserClaims(uid,{...user.customClaims,koppyAdmin:true});
+ return {verified:true};
+});
