@@ -333,6 +333,7 @@ img {
 }
 
 .book-item {
+  background: linear-gradient(180deg, #6b96b1, #416781);
   position: relative;
   z-index: 1;
   display: flex;
@@ -927,3 +928,11 @@ code {
 
 /* ニコリパズル: ミニゲーム本棚 */
 .book-item:nth-child(7){background:linear-gradient(180deg,#7cae87,#407f58)}
+
+/* 本が増えてもタイトルが白地に埋もれないよう、未指定の本には .book-item の既定色を適用 */
+.book-item[href="./10seconds.html"] {
+  background: linear-gradient(180deg, #658fb0, #395b83);
+}
+.book-item[href="./norinori-horihori.html"] {
+  background: linear-gradient(180deg, #c18446, #865222);
+}
