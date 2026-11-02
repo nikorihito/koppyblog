@@ -1,0 +1,7 @@
+.blog-engagement{max-width:820px;margin:28px auto;padding:22px;background:#fff9f0;border:1px solid #ead3bc;border-radius:20px;box-shadow:0 6px 18px #60432010;text-align:left}
+.blog-engagement h3{margin:0 0 12px;color:#65402d}.blog-engagement .be-meta{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:18px;font-weight:700;color:#775440}
+.be-like,.be-post,.be-login,.be-logout,.be-delete{font:inherit;cursor:pointer;border:1px solid #dfbba0;border-radius:999px;padding:8px 16px;background:#fff;color:#724829}
+.be-like.active{background:#ffe0df;border-color:#dc817b;color:#b03e43}.be-post{background:#f08a4b;color:#fff;border:none}.be-post:disabled,.be-like:disabled{opacity:.6;cursor:not-allowed}
+.be-form{display:grid;gap:10px}.be-form textarea{font:inherit;border:1px solid #dcc4aa;border-radius:12px;width:100%;padding:12px;min-height:94px;resize:vertical}
+.be-comments{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:10px}.be-comment{border-top:1px solid #e8d8c8;padding:12px 0;overflow-wrap:anywhere}
+.be-comment-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.be-comment p{margin:4px 0;white-space:pre-wrap;line-height:1.65}.be-comment small{color:#896954}.be-error{color:#b42e36}.be-help{color:#765846;font-size:.89rem}.be-delete{font-size:.78rem;padding:5px 10px}
