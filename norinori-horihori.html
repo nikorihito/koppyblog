@@ -51,18 +51,29 @@
 .rh-summary{font-size:1.15rem;font-weight:800;min-height:1.7em}
 @media(max-width:580px){.rh-card{padding:10px}.rh-scene{height:245px}.rh-runner{width:90px;height:120px;bottom:42px}.rh-runner img{height:110px}.rh-ore{width:80px;height:80px;bottom:58px}.rh-ground{height:55px}}
 @media(prefers-reduced-motion:reduce){.rh-runner.walking img,.rh-runner.mining img{animation:none}}
+
+.rh-ore{display:grid!important;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:2px;padding:3px;background:#555d61!important;border:6px solid #4a5054!important}
+.rh-ore::before,.rh-ore::after{display:none!important}
+.rh-pebble{min-width:0;min-height:0;background:#92989a;border:2px solid #6e767a;box-shadow:inset -3px -3px #747b7d;border-radius:3px}
+.rh-ore.iron .rh-pebble:nth-child(3n){background:#cbaa83}
+.rh-ore.diamond .rh-pebble:nth-child(3n){background:#6fe1e9}
+.rh-ore-label{grid-column:1/-1;position:absolute;top:-32px;bottom:auto!important;left:0;right:0}
+.rh-scene.moving .rh-ground{animation:rh-scroll .42s linear infinite}
+.rh-runner.dancing img{animation:rh-dance .33s infinite alternate}
+.rh-flash.perfect{font-size:clamp(29px,5vw,46px);filter:drop-shadow(0 0 8px #ffbd57)}
+@media(max-width:580px){.rh-ore{height:145px!important}}
 </style></head>
 <body><header><a href="./index.html"><img src="./favicon.png" class="logo" alt="サイトロゴ"></a><h1>こっぴーのマイクラひとやすみ</h1></header>
-<main><section class="rh-wrap"><h2>ノリノリ掘り掘り！</h2><p>ノリノリヒトといっしょに、リズムに合わせてホリホリ！</p>
+<main><section class="rh-wrap"><h2>ノリノリ掘り掘り！</h2><p>ノリノリヒトと踊りながら、石をどんどん砕いてエンドレスに進もう！</p>
 <div class="rh-card">
-<div class="rh-status"><span>鉱石 <strong id="progress">0 / 12</strong></span><span>スコア <strong id="score">0</strong></span><span>コンボ <strong id="combo">0</strong></span></div>
+<div class="rh-status"><span>採掘数 <strong id="progress">0</strong></span><span>スコア <strong id="score">0</strong></span><span>コンボ <strong id="combo">0</strong></span></div>
 <div class="rh-scene" aria-label="採掘ゲームの画面">
 <div class="rh-tunnel" id="tunnel"></div><div class="rh-depth" id="depth">深さ 0 m</div><div class="rh-ground"></div><div class="rh-runner" id="runner"><img src="./ノリノリヒト.png" alt="ノリノリヒト"></div>
 <div class="rh-ore stone" id="ore"><span class="rh-ore-label" id="ore-label">石</span></div>
 <div class="rh-flash" id="flash" aria-live="polite"></div>
 </div>
 <div class="rh-controls">
-<div id="instruction" class="rh-action">スタートを押すとノリノリヒトが歩き出す！</div>
+<div id="instruction" class="rh-action">スタートでエンドレス採掘！ どんどん掘って進もう！</div>
 <div class="rh-lanes" id="hitbox" hidden>
 <div class="rh-lane" data-dir="ArrowLeft"><span class="rh-lane-ring"></span><span class="rh-lane-ring second"></span><button type="button" class="rh-key" data-dir="ArrowLeft" aria-label="左">←</button></div>
 <div class="rh-lane" data-dir="ArrowUp"><span class="rh-lane-ring"></span><span class="rh-lane-ring second"></span><button type="button" class="rh-key" data-dir="ArrowUp" aria-label="上">↑</button></div>
@@ -70,7 +81,7 @@
 <div class="rh-lane" data-dir="ArrowRight"><span class="rh-lane-ring"></span><span class="rh-lane-ring second"></span><button type="button" class="rh-key" data-dir="ArrowRight" aria-label="右">→</button></div>
 </div>
 <div class="rh-hold" id="hold" hidden><div class="rh-hold-fill" id="hold-fill"></div></div>
-<button class="rh-btn" id="start" type="button">スタート！</button>
+<button class="rh-btn" id="start" type="button">スタート！</button><button class="rh-btn" id="stop" type="button" hidden>終了して記録を見る</button>
 <div id="summary" class="rh-summary" role="status" aria-live="polite"></div>
 </div>
 <p class="rh-guide"><strong>石：</strong>光の枠が矢印ボタンと重なった瞬間に、対応する方向を押す。<strong>鉄：</strong>対応する矢印を長押し（約0.7秒）。<strong>ダイヤ：</strong>黄色と青の2つの輪に合わせて2回押す。<br>PCは方向キー（←↑↓→）、スマホは画面の矢印。ノリノリヒトが踊りながら、壁を掘り進むよ！</p>
@@ -81,10 +92,10 @@ const sequence=["stone","stone","iron","stone","diamond","stone","iron","stone",
 const dirs=["ArrowLeft","ArrowUp","ArrowRight","ArrowDown"];
 const labels={stone:"石",iron:"鉄鉱石",diamond:"ダイヤモンド鉱石"};
 const icons={ArrowLeft:"←",ArrowUp:"↑",ArrowRight:"→",ArrowDown:"↓"};
-const beatTime=1500, perfectWindow=95,goodWindow=185,holdDuration=680;
+const beatTime=1800, perfectWindow=165,goodWindow=350,holdDuration=420;
 let state="idle",index=0,score=0,combo=0,perfect=0,good=0,miss=0,frameId=0,roundId=0;
 let targets=[],done=0,heldKey=null,holdAt=0,holdRating="",audio=null,depth=0,visibleAt=0;
-const start=$("start"),ore=$("ore"),runner=$("runner"),scene=document.querySelector(".rh-scene");
+const start=$("start"),stop=$("stop"),ore=$("ore"),runner=$("runner"),scene=document.querySelector(".rh-scene");
 const keyEls=[...document.querySelectorAll(".rh-key")],lanes=[...document.querySelectorAll(".rh-lane")];
 function sound(freq=420,length=.09,type="triangle"){
  try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;if(!audio)audio=new Audio();
@@ -92,56 +103,59 @@ function sound(freq=420,length=.09,type="triangle"){
  o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(.055,t);
  g.gain.exponentialRampToValueAtTime(.001,t+length);o.connect(g).connect(audio.destination);o.start(t);o.stop(t+length+.02);}catch(e){}
 }
-function stats(){$("progress").textContent=index+" / "+sequence.length;$("score").textContent=score;$("combo").textContent=combo;$("depth").textContent="深さ "+depth+" m";}
+function stats(){$("progress").textContent=index;$("score").textContent=score;$("combo").textContent=combo;$("depth").textContent="深さ "+depth+" m";}
 function flash(t,kind=""){const el=$("flash");el.textContent=t;el.className="rh-flash "+kind;}
-function setInstruction(){const type=sequence[index],d=targets.map(t=>icons[t.dir]).join(" → ");
+function setInstruction(){const type=sequence[index%sequence.length],d=targets.map(t=>icons[t.dir]).join(" → ");
  $("instruction").textContent=(type==="iron"?"長押し：":type==="diamond"?"2連続：":"タイミング：")+d;}
 function clearRings(){lanes.forEach(l=>l.querySelectorAll(".rh-lane-ring").forEach(r=>r.style.opacity="0"));$("hold").hidden=true;$("hold-fill").style.width="0%";}
 function scheduleRound(){
- if(index>=sequence.length){finish();return;}
+ // エンドレスモード
  roundId++;done=0;heldKey=null;holdAt=0;clearRings();flash("");
- const type=sequence[index];
+ const type=sequence[index%sequence.length];
  const d1=dirs[(index*5+Math.floor(index/3))%4];
  const d2=dirs[(index*3+2)%4];
  const t=performance.now()+beatTime;
- targets=type==="diamond"?[{dir:d1,time:t},{dir:d2,time:t+510}]:[{dir:d1,time:t}];
- ore.className="rh-ore "+type+" show";$("ore-label").textContent=labels[type];
+ targets=type==="diamond"?[{dir:d1,time:t},{dir:d2,time:t+720}]:[{dir:d1,time:t}];
+ ore.className="rh-ore "+type+" show";
+ ore.querySelectorAll(".rh-pebble").forEach(n=>n.remove());
+ for(let i=0;i<25;i++){const chip=document.createElement("i");chip.className="rh-pebble";ore.append(chip);}
+ $("ore-label").textContent=labels[type];
  runner.className="rh-runner dancing";scene.classList.add("moving");
  state="approach";visibleAt=performance.now()+520;setInstruction();
  sound(320,.08);
 }
 function startGame(){
  cancelAnimationFrame(frameId);roundId++;index=0;score=0;combo=0;perfect=0;good=0;miss=0;depth=0;
- start.hidden=true;$("hitbox").hidden=false;$("summary").textContent="";stats();
+ start.hidden=true;stop.hidden=false;$("hitbox").hidden=false;$("summary").textContent="";stats();
  scheduleRound();frameId=requestAnimationFrame(frame);
 }
 function judge(r){
  if(r==="PERFECT"){perfect++;score+=300+combo*10;sound(850);}
  else{good++;score+=150+combo*5;sound(630);}
- combo++;flash(r,r.toLowerCase());runner.className="rh-runner mining";stats();
+ combo++;flash(r,r.toLowerCase());runner.className="rh-runner dancing";stats();
 }
 function advance(won){
  state="transition";heldKey=null;keyEls.forEach(k=>k.classList.remove("held"));clearRings();
  if(won){ore.classList.add("broken");depth+=3;stats();sound(250,.12,"square");}
- else{miss++;combo=0;stats();sound(160,.15,"sawtooth");}
+ else{miss++;combo=0;depth+=1;ore.classList.add("broken");stats();sound(230,.07,"triangle");}
  const ticket=++roundId;
- setTimeout(()=>{if(ticket!==roundId||state!=="transition")return;index++;stats();scheduleRound();},730);
+ setTimeout(()=>{if(ticket!==roundId||state!=="transition")return;index++;stats();scheduleRound();},350);
 }
 function press(dir){
  if(state!=="active"||heldKey)return;
  const target=targets[done];if(!target)return;
  const deviation=Math.abs(performance.now()-target.time);
- if(dir!==target.dir||deviation>goodWindow){flash("MISS!","miss");advance(false);return;}
+ if(dir!==target.dir||deviation>goodWindow){flash("あと少し！","good");sound(310,.07);return;}
  heldKey=dir;document.querySelector('.rh-key[data-dir="'+dir+'"]').classList.add("held");
  const rating=deviation<=perfectWindow?"PERFECT":"GOOD";
- if(sequence[index]==="iron"){holdAt=performance.now();holdRating=rating;$("hold").hidden=false;flash("長押し！");sound(350,.1);return;}
+ if(sequence[index%sequence.length]==="iron"){holdAt=performance.now();holdRating=rating;$("hold").hidden=false;flash("長押し！");sound(350,.1);return;}
  done++;judge(rating);heldKey=null;keyEls.forEach(k=>k.classList.remove("held"));
  if(done===targets.length)advance(true);
 }
 function release(dir){
  if(heldKey!==dir)return;
  heldKey=null;keyEls.forEach(k=>k.classList.remove("held"));
- if(state==="active"&&sequence[index]==="iron"){
+ if(state==="active"&&sequence[index%sequence.length]==="iron"){
   if(performance.now()-holdAt<holdDuration){flash("長押しが短い！","miss");advance(false);}
   else{judge(holdRating);advance(true);}
  }
@@ -151,8 +165,8 @@ function frame(now){
  if(state==="approach"&&now>=visibleAt)state="active";
  if(state==="active"){
   const t=targets[done];
-  if(t&&now>t.time+goodWindow&&!(sequence[index]==="iron"&&heldKey)){flash("MISS!","miss");advance(false);}
-  else if(sequence[index]==="iron"&&heldKey){
+  if(t&&now>t.time+goodWindow&&!(sequence[index%sequence.length]==="iron"&&heldKey)){flash("次へ！","good");advance(false);}
+  else if(sequence[index%sequence.length]==="iron"&&heldKey){
    const portion=Math.min(1,(now-holdAt)/holdDuration);$("hold-fill").style.width=(portion*100)+"%";
    if(portion>=1){judge(holdRating);advance(true);}
   }
@@ -169,11 +183,12 @@ function frame(now){
 }
 function finish(){
  state="finished";scene.classList.remove("moving");runner.className="rh-runner dancing";
- clearRings();$("hitbox").hidden=true;start.hidden=false;start.textContent="もう一度あそぶ";
+ clearRings();$("hitbox").hidden=true;stop.hidden=true;start.hidden=false;start.textContent="もう一度あそぶ";
  flash("FINISH!","perfect");$("instruction").textContent="採掘完了！";
  $("summary").textContent="深さ "+depth+" m・"+score+"点 / PERFECT "+perfect+"・GOOD "+good+"・MISS "+miss;
 }
 start.addEventListener("click",startGame);
+stop.addEventListener("click",()=>{roundId++;cancelAnimationFrame(frameId);finish();});
 keyEls.forEach(button=>{
  button.addEventListener("pointerdown",e=>{e.preventDefault();try{button.setPointerCapture(e.pointerId)}catch(_){}press(button.dataset.dir)});
  button.addEventListener("pointerup",e=>{e.preventDefault();release(button.dataset.dir)});
