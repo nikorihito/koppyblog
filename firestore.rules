@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function registered() { return signedIn() && request.auth.token.firebase.sign_in_provider == 'google.com'; }
+    match /blogEngagement/{articleId} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['views'])
+        && request.resource.data.views == 1;
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+        && request.resource.data.views == resource.data.views + 1;
+      allow delete: if false;
+      match /likes/{uid} {
+        allow get, list: if true;
+        allow create: if signedIn() && uid == request.auth.uid
+          && request.resource.data.keys().hasOnly(['createdAt'])
+          && request.resource.data.createdAt == request.time;
+        allow delete: if signedIn() && uid == request.auth.uid;
+        allow update: if false;
+      }
+      match /comments/{commentId} {
+        allow get, list: if true;
+        allow create: if registered()
+          && request.resource.data.keys().hasOnly(['uid', 'name', 'text', 'createdAt'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.name is string && request.resource.data.name.size() <= 60
+          && request.resource.data.text is string
+          && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 500
+          && request.resource.data.createdAt == request.time;
+        allow update: if false;
+        allow delete: if registered() && resource.data.uid == request.auth.uid;
+      }
+    }
+  }
+}
