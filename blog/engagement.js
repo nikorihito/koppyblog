@@ -26,6 +26,7 @@ if(host){
    const nameLabel=document.createElement("label");nameLabel.textContent="お名前（任意）";nameLabel.append(nameInput);
    form.insertBefore(nameLabel,commentBox.closest("label")||commentBox);
    const replyNote=document.createElement("p");replyNote.className="be-help";replyNote.hidden=true;
+   const replyTarget=document.createElement("span");replyNote.append(replyTarget);
    const cancelReply=document.createElement("button");cancelReply.type="button";cancelReply.className="be-delete";cancelReply.textContent="返信をやめる";
    cancelReply.onclick=()=>{replyTo=null;replyNote.hidden=true;};
    replyNote.append(cancelReply);form.insertBefore(replyNote,commentBox.closest("label")||commentBox);
@@ -47,8 +48,7 @@ if(host){
      li.append(header,body);
      const replyBtn=document.createElement("button");replyBtn.type="button";replyBtn.className="be-delete";replyBtn.textContent="返信";
      replyBtn.onclick=()=>{replyTo=id;replyNote.hidden=false;
-       replyNote.firstChild?.remove?.();
-       replyNote.prepend(document.createTextNode((data.name||"匿名")+" さんに返信中　"));
+       replyTarget.textContent=(data.name||"匿名")+" さんに返信中　";
        commentBox.focus();};
      li.append(replyBtn);
      if(user && (data.uid===user.uid||isAdmin)){
