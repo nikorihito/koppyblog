@@ -6,6 +6,7 @@
   <title>ニコリヒト vs つるつる君 タイピングバトル</title>
   <link rel="stylesheet" href="../style.css" />
   <link rel="icon" href="https://nikorihito.github.io/koppyblog/favicon.png" type="image/png">
+<link rel="stylesheet" href="./engagement.css">
 </head>
 <body>
   <header>
@@ -49,10 +50,24 @@
     </article>
 
     <p><a href="../lasted-articles.html" class="button">← 最新のブログに戻る</a></p>
-  </main>
+  
+<section class="blog-engagement" aria-label="この記事へのリアクション">
+<h3>この記事へのリアクション</h3>
+<div class="be-meta"><span>閲覧数 <span data-views>—</span></span><button type="button" class="be-like" data-like disabled aria-pressed="false">♥ いいね <span data-likes>—</span></button></div>
+<h3>コメント</h3>
+<div><button type="button" class="be-login" data-login>Googleでログイン</button> <button type="button" class="be-logout" data-logout hidden>ログアウト</button></div>
+<p class="be-help" data-login-note>コメントにはGoogleログインが必要です。</p>
+<form class="be-form" data-form><label>コメントを書く（500文字まで）<textarea data-comment maxlength="500" required placeholder="記事への感想を書いてください"></textarea></label><button class="be-post" data-post type="submit" disabled>コメントを投稿</button></form>
+<p class="be-help" data-status aria-live="polite">読み込み中…</p>
+<ul class="be-comments" data-comments><li>コメントを読み込んでいます…</li></ul>
+</section>
+
+</main>
 
   <footer>
     <p>&copy; 2025 こっぴー</p>
   </footer>
+<script src="./firebase-config.js"></script>
+<script type="module" src="./engagement.js"></script>
 </body>
 </html>
