@@ -15,7 +15,7 @@ if(host){
   try{
    const app=initializeApp(conf);const db=getFirestore(app),auth=getAuth(app);
    const mainRef=doc(db,"blogEngagement",articleId),likes=collection(mainRef,"likes"),comments=collection(mainRef,"comments");
-   let user=null,liked=false,updatingLike=false;
+   let user=null,liked=false,updatingLike=false,loginInProgress=false;
    const likeBtn=host.querySelector("[data-like]"),post=host.querySelector("[data-post]");
    const login=host.querySelector("[data-login]"),logout=host.querySelector("[data-logout]"),commentList=host.querySelector("[data-comments]");
    const commentBox=host.querySelector("[data-comment]");
@@ -57,7 +57,7 @@ if(host){
    onAuthStateChanged(auth,async next=>{
     user=next;showAuth();liked=false;
     renderComments(cachedComments);
-    if(!user){try{await signInAnonymously(auth);}catch(e){statusText("認証に失敗しました。",true);}return;}
+    if(!user){if(loginInProgress)return;try{await signInAnonymously(auth);}catch(e){statusText("匿名認証エラー："+(e.code||"unknown"),true);}return;}
     try{await registerView();}catch(e){statusText("閲覧数を記録できませんでした。",true);}
     try{const own=await getDoc(doc(likes,user.uid));liked=own.exists();likeBtn.classList.toggle("active",liked);likeBtn.setAttribute("aria-pressed",String(liked));}catch(e){}
     likeBtn.disabled=false;
@@ -68,7 +68,27 @@ if(host){
     catch(e){statusText("いいねの更新に失敗しました。",true);}
     finally{updatingLike=false;likeBtn.disabled=false;}
    };
-   login.onclick=async()=>{try{const provider=new GoogleAuthProvider();await signInWithPopup(auth,provider);}catch(e){statusText("Googleログインが完了しませんでした。",true);}};
+   login.onclick=async()=>{
+    if(loginInProgress)return;
+    loginInProgress=true;login.disabled=true;statusText("Googleログイン画面を開いています…");
+    try{
+     const provider=new GoogleAuthProvider();
+     await signInWithPopup(auth,provider);
+     statusText("Googleログインが完了しました。");
+    }catch(e){
+     const code=e?.code||"unknown";
+     const help={
+      "auth/unauthorized-domain":"Firebase Authentication → 設定 → 承認済みドメインに nikorihito.github.io を追加してください。",
+      "auth/operation-not-allowed":"Firebase Authentication → ログイン方法でGoogleを有効化してください。",
+      "auth/popup-blocked":"ブラウザのポップアップを許可して再試行してください。",
+      "auth/popup-closed-by-user":"ログイン画面が閉じられました。もう一度お試しください。",
+      "auth/cancelled-popup-request":"別のログイン処理が進行中です。",
+      "auth/network-request-failed":"通信状態を確認してください。"
+     }[code]||"ブラウザの開発者ツールのConsoleで詳細を確認してください。";
+     statusText("Googleログインエラー ["+code+"] "+help,true);
+     console.error("Koppy blog Google login",e);
+    }finally{loginInProgress=false;login.disabled=false;}
+   };
    logout.onclick=async()=>{try{await signOut(auth);}catch(e){statusText("ログアウトできませんでした。",true);}};
    host.querySelector("[data-form]").onsubmit=async e=>{
     e.preventDefault();if(!user||user.isAnonymous)return;
