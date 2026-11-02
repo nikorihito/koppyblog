@@ -1,3 +1,4 @@
+import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInAnonymously,GoogleAuthProvider,signInWithPopup,signOut} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import {getFirestore,doc,collection,getDoc,getDocs,runTransaction,onSnapshot,setDoc,deleteDoc,addDoc,serverTimestamp,query,orderBy,limit} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
@@ -24,6 +25,27 @@ if(host){
    const nameInput=document.createElement("input");
    nameInput.type="text";nameInput.maxLength=30;nameInput.placeholder="名前（空欄なら匿名）";nameInput.setAttribute("aria-label","投稿者名（任意）");
    const nameLabel=document.createElement("label");nameLabel.textContent="お名前（任意）";nameLabel.append(nameInput);
+   const adminPane=document.createElement("details");adminPane.className="be-admin";
+   const adminSummary=document.createElement("summary");adminSummary.textContent="管理者コードを入力";
+   const adminInput=document.createElement("input");adminInput.type="password";adminInput.autocomplete="off";adminInput.placeholder="管理者コード（サイトには保存しません）";
+   const adminButton=document.createElement("button");adminButton.type="button";adminButton.className="be-delete";adminButton.textContent="管理者認証";
+   const adminStatus=document.createElement("span");adminStatus.className="be-help";
+   adminPane.append(adminSummary,adminInput,adminButton,adminStatus);
+   host.querySelector("[data-login-note]").after(adminPane);
+   adminButton.onclick=async()=>{
+     if(!user){statusText("匿名認証の準備中です。",true);return;}
+     adminButton.disabled=true;
+     try{
+       const fn=httpsCallable(getFunctions(app,"asia-northeast1"),"verifyKoppyAdmin");
+       await fn({code:adminInput.value});
+       adminInput.value="";
+       await user.getIdToken(true);
+       isAdmin=(await user.getIdTokenResult()).claims.koppyAdmin===true;
+       adminStatus.textContent=isAdmin?"管理者として認証されました。":"管理者確認が完了しませんでした。";
+       renderComments(cachedComments);
+     }catch(e){adminStatus.textContent="管理者認証エラー："+(e.code||"unknown");}
+     finally{adminButton.disabled=false;}
+   };
    form.insertBefore(nameLabel,commentBox.closest("label")||commentBox);
    const replyNote=document.createElement("p");replyNote.className="be-help";replyNote.hidden=true;
    const replyTarget=document.createElement("span");replyNote.append(replyTarget);
@@ -33,7 +55,7 @@ if(host){
    function showAuth(){
      // 利用者登録なしで投稿できる（裏側ではFirebase匿名認証を使う）。
      login.hidden=true;logout.hidden=true;post.disabled=!user;
-     set("[data-login-note]","ログイン不要。名前が空欄なら匿名で投稿できます。");
+     set("[data-login-note]",isAdmin?"こっぴー（管理者）としてログイン中":"ログイン不要。名前が空欄なら匿名で投稿できます。");
    }
    function showComment(id,data,depth=0){
      const li=document.createElement("li");li.className="be-comment";
