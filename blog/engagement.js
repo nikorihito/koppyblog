@@ -1,4 +1,3 @@
-import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInAnonymously,GoogleAuthProvider,signInWithPopup,signOut} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import {getFirestore,doc,collection,getDoc,getDocs,runTransaction,onSnapshot,setDoc,deleteDoc,addDoc,serverTimestamp,query,orderBy,limit} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
@@ -26,36 +25,31 @@ if(host){
    nameInput.type="text";nameInput.maxLength=30;nameInput.placeholder="名前（空欄なら匿名）";nameInput.setAttribute("aria-label","投稿者名（任意）");
    const nameLabel=document.createElement("label");nameLabel.textContent="お名前（任意）";nameLabel.append(nameInput);
    const adminPane=document.createElement("details");adminPane.className="be-admin";
-   const adminSummary=document.createElement("summary");adminSummary.textContent="管理者コードをメールで受け取る";
-   const adminInput=document.createElement("input");adminInput.type="password";adminInput.autocomplete="off";adminInput.placeholder="管理者コード（サイトには保存しません）";
-   const requestButton=document.createElement("button");requestButton.type="button";requestButton.className="be-delete";requestButton.textContent="メールに認証コードを送る";
-   requestButton.onclick=async()=>{
-     if(!user){statusText("匿名認証の準備中です。",true);return;}
-     requestButton.disabled=true;
-     try{const requestCode=httpsCallable(getFunctions(app,"asia-northeast1"),"requestKoppyAdminCode");
-       await requestCode({});
-       adminStatus.textContent="お問い合わせ先のメールに8桁のコードを送信しました（有効期限10分）。";
-     }catch(e){adminStatus.textContent="コード発行エラー："+(e.code||"unknown");}
-     finally{requestButton.disabled=false;}
+   const adminSummary=document.createElement("summary");adminSummary.textContent="管理者認証を申請";
+   const adminHelp=document.createElement("p");adminHelp.className="be-help";
+   adminHelp.textContent="お問い合わせと同じフォームから申請を送ります。申請だけでは管理者権限は付きません。";
+   const adminForm=document.createElement("form");adminForm.method="POST";
+   adminForm.action="https://formspree.io/f/mdkzgoeb";adminForm.target="_blank";adminForm.className="be-form";
+   const subject=document.createElement("input");subject.type="hidden";subject.name="_subject";subject.value="【こっぴー】ブログ管理者権限申請";
+   const applicant=document.createElement("input");applicant.name="name";applicant.maxLength=60;applicant.required=true;applicant.placeholder="申請者名";
+   const applicantLabel=document.createElement("label");applicantLabel.textContent="申請者名";applicantLabel.append(applicant);
+   const email=document.createElement("input");email.type="email";email.name="email";email.required=true;email.placeholder="返信を受け取るメールアドレス";
+   const emailLabel=document.createElement("label");emailLabel.textContent="返信先メールアドレス";emailLabel.append(email);
+   const requestMessage=document.createElement("textarea");requestMessage.name="message";requestMessage.readOnly=true;
+   requestMessage.style.display="none";
+   const requestButton=document.createElement("button");requestButton.type="submit";requestButton.className="be-delete";requestButton.textContent="お問い合わせと同じ宛先へ申請する";
+   const adminStatus=document.createElement("p");adminStatus.className="be-help";adminStatus.textContent="申請は管理者が手作業で確認します。";
+   adminForm.append(subject,applicantLabel,emailLabel,requestMessage,requestButton);
+   adminForm.onsubmit=e=>{
+     if(!user){e.preventDefault();adminStatus.textContent="Firebase認証の準備中です。";return;}
+     requestMessage.value="ブログの管理者権限を申請します。\\nFirebase UID: "+user.uid+
+       "\\n記事: "+location.pathname+"\\n申請者名: "+applicant.value.trim()+
+       "\\n※権限の付与はFirebase管理者が本人確認後に行います。";
+     adminStatus.textContent="送信先のフォームが別タブで開きます。申請だけでは権限は付与されません。";
    };
-   const adminButton=document.createElement("button");adminButton.type="button";adminButton.className="be-delete";adminButton.textContent="管理者認証";
-   const adminStatus=document.createElement("span");adminStatus.className="be-help";
-   adminPane.append(adminSummary,requestButton,adminInput,adminButton,adminStatus);
+   const uidDisplay=document.createElement("code");uidDisplay.textContent="Firebase UID：認証準備中";
+   adminPane.append(adminSummary,adminHelp,adminForm,uidDisplay,adminStatus);
    host.querySelector("[data-login-note]").after(adminPane);
-   adminButton.onclick=async()=>{
-     if(!user){statusText("匿名認証の準備中です。",true);return;}
-     adminButton.disabled=true;
-     try{
-       const fn=httpsCallable(getFunctions(app,"asia-northeast1"),"verifyKoppyAdmin");
-       await fn({code:adminInput.value});
-       adminInput.value="";
-       await user.getIdToken(true);
-       isAdmin=(await user.getIdTokenResult()).claims.koppyAdmin===true;
-       adminStatus.textContent=isAdmin?"管理者として認証されました。":"管理者確認が完了しませんでした。";
-       renderComments(cachedComments);
-     }catch(e){adminStatus.textContent="管理者認証エラー："+(e.code||"unknown");}
-     finally{adminButton.disabled=false;}
-   };
    form.insertBefore(nameLabel,commentBox.closest("label")||commentBox);
    const replyNote=document.createElement("p");replyNote.className="be-help";replyNote.hidden=true;
    const replyTarget=document.createElement("span");replyNote.append(replyTarget);
@@ -125,7 +119,7 @@ if(host){
     try{sessionStorage.setItem(sessionKey,"1");}catch(e){}
    }
    onAuthStateChanged(auth,async next=>{
-    user=next;isAdmin=false;
+    user=next;uidDisplay.textContent=user?"Firebase UID："+user.uid:"Firebase UID：認証準備中";isAdmin=false;
     if(user){try{isAdmin=(await user.getIdTokenResult()).claims.koppyAdmin===true;}catch(e){}}
     showAuth();liked=false;
     renderComments(cachedComments);
