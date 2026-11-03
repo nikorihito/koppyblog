@@ -18,7 +18,7 @@ exports.requestKoppyAdminCode=onCall({region:"asia-northeast1",secrets:[smtpHost
  const uid=request.auth?.uid;
  if(!uid)throw new HttpsError("unauthenticated","認証が必要です。");
  const now=Date.now();
- const code=String(randomInt(0,100000000)).padStart(8,"0");
+ const code=String(randomInt(0,10000000000)).padStart(10,"0");
  const record=globalRef();
  await getFirestore().runTransaction(async tx=>{
    const snap=await tx.get(record),old=snap.data()||{};
@@ -40,7 +40,7 @@ exports.requestKoppyAdminCode=onCall({region:"asia-northeast1",secrets:[smtpHost
 exports.verifyKoppyAdmin=onCall({region:"asia-northeast1",secrets:[otpPepper],maxInstances:2},async request=>{
  const uid=request.auth?.uid,code=request.data?.code;
  if(!uid)throw new HttpsError("unauthenticated","認証が必要です。");
- if(typeof code!=="string"||!/^[0-9]{8}$/.test(code))throw new HttpsError("invalid-argument","8桁のコードを入力してください。");
+ if(typeof code!=="string"||!/^[0-9]{10}$/.test(code))throw new HttpsError("invalid-argument","10桁のコードを入力してください。");
  const record=globalRef(),now=Date.now();
  await getFirestore().runTransaction(async tx=>{
    const snap=await tx.get(record),data=snap.data();
