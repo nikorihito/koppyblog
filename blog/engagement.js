@@ -19,6 +19,10 @@ if(host){
    const likeBtn=host.querySelector("[data-like]"),post=host.querySelector("[data-post]");
    const login=host.querySelector("[data-login]"),logout=host.querySelector("[data-logout]"),commentList=host.querySelector("[data-comments]");
    const commentBox=host.querySelector("[data-comment]");
+   // 以前のHTMLに残る「Googleログインが必要」の表示を初期化時に解消する。
+   login.hidden=true;logout.hidden=true;
+   set("[data-login-note]","ログイン不要。名前が空欄なら匿名で投稿できます。");
+
    let cachedComments=[],replyTo=null,isAdmin=false;
    const form=host.querySelector("[data-form]");
    const nameInput=document.createElement("input");
@@ -109,11 +113,23 @@ if(host){
        replyTarget.textContent=(data.name||"匿名")+" さんに返信中　";
        commentBox.focus();};
      li.append(replyBtn);
-     if(user && (data.uid===user.uid||isAdmin)){
-       const del=document.createElement("button");del.type="button";del.className="be-delete";del.textContent="削除";
-       del.onclick=async()=>{if(!confirm("このコメントを削除しますか？"))return;try{await deleteDoc(doc(comments,id));}catch(e){statusText("コメントを削除できませんでした。",true);}};
-       li.append(del);
-     }
+     // 投稿者本人でも削除には管理者認証が必要。
+     const del=document.createElement("button");del.type="button";del.className="be-delete";del.textContent="削除";
+     del.onclick=async()=>{
+       if(!isAdmin){
+         adminCheck.checked=true;adminPane.hidden=false;
+         adminStatus.textContent=adminOtpAvailable
+           ?"削除には管理者認証が必要です。10桁コードを発行して入力してください。"
+           :"削除には管理者認証が必要です。10桁コード認証サーバーがまだ未設定です。";
+         adminPane.scrollIntoView({behavior:"smooth",block:"center"});
+         return;
+       }
+       if(!confirm("このコメントを削除しますか？"))return;
+       del.disabled=true;
+       try{await deleteDoc(doc(comments,id));statusText("コメントを削除しました。");}
+       catch(e){statusText("削除に失敗しました ["+(e?.code||"unknown")+"]。Firestoreの管理者専用削除ルールを確認してください。",true);del.disabled=false;}
+     };
+     li.append(del);
      return li;
    }
    function renderComments(items){
@@ -151,7 +167,7 @@ if(host){
     try{sessionStorage.setItem(sessionKey,"1");}catch(e){}
    }
    onAuthStateChanged(auth,async next=>{
-    user=next;uidDisplay.textContent=user?"Firebase UID："+user.uid:"Firebase UID：認証準備中";isAdmin=false;
+    user=next;isAdmin=false;
     if(user){try{isAdmin=(await user.getIdTokenResult()).claims.koppyAdmin===true;}catch(e){}}
     showAuth();liked=false;
     renderComments(cachedComments);
@@ -213,7 +229,7 @@ if(host){
      }
      finally{post.disabled=false;}
    };
-   statusText("記事へのリアクションをお待ちしています。");
+   statusText("匿名コメント・返信を利用できます。");
   }catch(e){statusText("記事のリアクション機能を読み込めませんでした。",true);}
  }
 }

@@ -38,7 +38,7 @@ service cloud.firestore {
           && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 500
           && request.resource.data.createdAt == request.time;
         allow update: if false;
-        allow delete: if signedIn() && (resource.data.uid == request.auth.uid || admin());
+        allow delete: if admin();
       }
     }
   }
