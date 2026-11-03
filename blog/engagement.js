@@ -27,25 +27,20 @@ if(host){
    const adminPane=document.createElement("details");adminPane.className="be-admin";
    const adminSummary=document.createElement("summary");adminSummary.textContent="管理者認証を申請";
    const adminHelp=document.createElement("p");adminHelp.className="be-help";
-   adminHelp.textContent="お問い合わせと同じフォームから申請を送ります。申請だけでは管理者権限は付きません。";
+   adminHelp.textContent="お問い合わせと同じ管理者宛てに申請を送ります。送信先は変更できません。申請だけでは管理者権限は付きません。";
    const adminForm=document.createElement("form");adminForm.method="POST";
    adminForm.action="https://formspree.io/f/mdkzgoeb";adminForm.target="_blank";adminForm.className="be-form";
-   const subject=document.createElement("input");subject.type="hidden";subject.name="_subject";subject.value="【こっぴー】ブログ管理者権限申請";
-   const applicant=document.createElement("input");applicant.name="name";applicant.maxLength=60;applicant.required=true;applicant.placeholder="申請者名";
-   const applicantLabel=document.createElement("label");applicantLabel.textContent="申請者名";applicantLabel.append(applicant);
-   const email=document.createElement("input");email.type="email";email.name="email";email.required=true;email.placeholder="返信を受け取るメールアドレス";
-   const emailLabel=document.createElement("label");emailLabel.textContent="返信先メールアドレス";emailLabel.append(email);
+   const subject=document.createElement("input");subject.type="hidden";subject.name="_subject";subject.value="【こっぴー】ブログ管理者認証申請";
    const requestMessage=document.createElement("textarea");requestMessage.name="message";requestMessage.readOnly=true;
-   requestMessage.style.display="none";
-   const requestButton=document.createElement("button");requestButton.type="submit";requestButton.className="be-delete";requestButton.textContent="お問い合わせと同じ宛先へ申請する";
-   const adminStatus=document.createElement("p");adminStatus.className="be-help";adminStatus.textContent="申請は管理者が手作業で確認します。";
-   adminForm.append(subject,applicantLabel,emailLabel,requestMessage,requestButton);
+   requestMessage.hidden=true;requestMessage.style.display="none";
+   const requestButton=document.createElement("button");requestButton.type="submit";requestButton.className="be-delete";requestButton.textContent="管理者宛てに認証申請を送る";
+   const adminStatus=document.createElement("p");adminStatus.className="be-help";adminStatus.textContent="申請が届いたあと、管理者本人の確認とFirebase側での権限設定が必要です。";
+   adminForm.append(subject,requestMessage,requestButton);
    adminForm.onsubmit=e=>{
      if(!user){e.preventDefault();adminStatus.textContent="Firebase認証の準備中です。";return;}
-     requestMessage.value="ブログの管理者権限を申請します。\\nFirebase UID: "+user.uid+
-       "\\n記事: "+location.pathname+"\\n申請者名: "+applicant.value.trim()+
-       "\\n※権限の付与はFirebase管理者が本人確認後に行います。";
-     adminStatus.textContent="送信先のフォームが別タブで開きます。申請だけでは権限は付与されません。";
+     requestMessage.value="ブログ管理者権限の申請です。\\nFirebase UID: "+user.uid+
+       "\\n記事: "+location.pathname+"\\n本人確認が完了するまでは管理者権限を付与しないでください。";
+     adminStatus.textContent="申請を別タブで送信します。これだけでは管理者にはなりません。";
    };
    const uidDisplay=document.createElement("code");uidDisplay.textContent="Firebase UID：認証準備中";
    adminPane.append(adminSummary,adminHelp,adminForm,uidDisplay,adminStatus);
