@@ -26,7 +26,7 @@ service cloud.firestore {
         allow create: if signedIn()
           && request.resource.data.keys().hasAll(['uid', 'name', 'text', 'createdAt','parentId','admin'])
           && request.resource.data.keys().hasOnly(['uid', 'name', 'text', 'createdAt','parentId','admin'])
-          && request.resource.data.admin == admin()
+          && (request.resource.data.admin == false || (request.resource.data.admin == true && admin()))
           && (request.resource.data.parentId == null
             || (request.resource.data.parentId is string
             && request.resource.data.parentId.size() > 0

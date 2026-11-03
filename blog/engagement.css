@@ -12,3 +12,5 @@
 .be-admin{margin:12px 0;padding:9px 12px;border:1px dashed #ddb892;border-radius:10px}
 .be-admin summary{cursor:pointer;font-size:.9rem;color:#76513d;font-weight:700}
 .be-admin button{margin:6px}.be-comment button{margin:4px 5px 0 0}
+
+.be-admin-toggle{display:flex!important;align-items:center;gap:9px;cursor:pointer;font-weight:700}.be-admin-toggle input{width:18px;height:18px;margin:0;flex:none}.be-admin[hidden]{display:none!important}
