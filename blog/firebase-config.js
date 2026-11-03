@@ -9,3 +9,6 @@ window.KOPPY_BLOG_FIREBASE_CONFIG = {
   appId: "1:1059075101839:web:8d68888f53b99936e94cfa",
   measurementId: "G-Z9S68LNHCK"
 };
+
+// Cloudflare Workerの公開URLは動作検証後に設定してください。
+window.KOPPY_ADMIN_OTP_API = "";
