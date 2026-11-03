@@ -34,63 +34,51 @@ if(host){
    const adminExplain=document.createElement("p");adminExplain.className="be-help";
    adminExplain.textContent="お問い合わせと同じ窓口へ管理者認証を申請します。安全な10桁コードの自動発行・照合はまだ準備中です。";
    const codeButton=document.createElement("button");codeButton.type="button";codeButton.className="be-delete";
-   codeButton.textContent="お問い合わせと同じ窓口へ申請する";
+   codeButton.textContent="10桁のコードを管理者に送る";
    const adminCodeInput=document.createElement("input");adminCodeInput.type="text";
    adminCodeInput.inputMode="numeric";adminCodeInput.pattern="[0-9]{10}";
    adminCodeInput.maxLength=10;adminCodeInput.autocomplete="one-time-code";
    adminCodeInput.placeholder="10桁の認証コード";adminCodeInput.setAttribute("aria-label","10桁の認証コード");
    const verifyButton=document.createElement("button");verifyButton.type="button";verifyButton.className="be-delete";
    verifyButton.textContent="コードを確認";
-   // Firebase SparkプランではFunctionsをデプロイできないため、認証操作を無効化。
-   // 認証サーバーが稼働し、動作検証を終えるまでは有効にしない。
-   const adminOtpAvailable=false;
-   codeButton.disabled=false;
+   const adminApi=String(window.KOPPY_ADMIN_OTP_API||"").trim().replace(/\/$/,"");
+   const adminOtpAvailable=/^https:\/\/[a-z0-9.-]+\.workers\.dev$/i.test(adminApi);
+   codeButton.disabled=!adminOtpAvailable;
    verifyButton.disabled=!adminOtpAvailable;
-   adminCodeInput.hidden=!adminOtpAvailable;
-   verifyButton.hidden=!adminOtpAvailable;
+   adminCodeInput.hidden=!adminOtpAvailable;verifyButton.hidden=!adminOtpAvailable;
    const adminStatus=document.createElement("p");adminStatus.className="be-help";
-   adminPane.append(adminExplain,codeButton,adminCodeInput,verifyButton,adminStatus);
-   adminRow.after(adminPane);
+   adminPane.append(adminExplain,codeButton,adminCodeInput,verifyButton,adminStatus);adminRow.after(adminPane);
+   function displayError(e){const errors={"request-limit":"短時間の申請上限です。","cooldown":"再発行まで10分間あけてください。","delivery-failed":"メール通知が失敗しました。","invalid-code":"コードが違います。","expired-or-locked":"期限切れ・使用済み・試行回数超過です。","admin-setup-error":"Firebase管理者権限の設定を確認してください。"};return errors[e.message]||"認証エラー："+e.message;}
+   async function otpPost(route,data){
+     if(!adminOtpAvailable)throw Error("backend-not-configured");
+     const response=await fetch(adminApi+route,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:await user.getIdToken(),...data})});
+     const body=await response.json().catch(()=>({error:"response-invalid"}));
+     if(!response.ok)throw Error(body.error||"server-error");
+     return body;
+   }
    adminCheck.onchange=()=>{
      adminPane.hidden=!adminCheck.checked||isAdmin;
-     adminStatus.textContent=adminCheck.checked
-       ?(isAdmin?"管理者認証済みです。":"管理者認証を申請できます。申請後も管理者権限は自動付与されません。")
-       :"";
+     adminStatus.textContent=adminCheck.checked?(adminOtpAvailable?"10桁コードを発行・入力してください。":"管理者認証は設定中です。通常コメントはチェックを外してください。"):"";
    };
    codeButton.onclick=async()=>{
-     if(!user){adminStatus.textContent="Firebase匿名認証が完了していません。";return;}
-     codeButton.disabled=true;adminStatus.textContent="申請を送信しています…";
-     try{
-       const data=new FormData();
-       data.set("_subject","【こっぴー】管理者認証申請");
-       data.set("message","ブログ管理者認証の申請\\nFirebase UID: "+user.uid+
-          "\\n記事: "+location.pathname+
-          "\\n※送信しただけでは管理者権限を付与しないでください。本人確認が必要です。");
-       const response=await fetch("https://formspree.io/f/mdkzgoeb",{
-         method:"POST",headers:{"Accept":"application/json"},body:data
-       });
-       if(!response.ok)throw new Error("HTTP "+response.status);
-       adminStatus.textContent="管理者へ認証申請を送りました。10桁コードはまだ発行されていません。";
-     }catch(e){
-       adminStatus.textContent="申請を送信できませんでした。通信状態を確認してください。";
-       console.error("Koppy admin request via Formspree",e);
-     }finally{codeButton.disabled=false;}
+     if(!adminOtpAvailable||!user)return;
+     codeButton.disabled=true;adminStatus.textContent="コードを送信中…";
+     try{await otpPost("/request",{});adminStatus.textContent="管理者に10桁のコードを送りました。有効期限は10分です。";}
+     catch(e){adminStatus.textContent=displayError(e);console.error("OTP send failed",e);}
+     finally{codeButton.disabled=false;}
    };
    verifyButton.onclick=async()=>{
-     if(!adminOtpAvailable)return;
-     if(!user){adminStatus.textContent="匿名認証が完了していません。";return;}
+     if(!adminOtpAvailable||!user)return;
      if(!/^[0-9]{10}$/.test(adminCodeInput.value)){adminStatus.textContent="10桁の数字を入力してください。";return;}
      verifyButton.disabled=true;
      try{
-       const {getFunctions,httpsCallable}=await import("https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js");
-       await httpsCallable(getFunctions(app,"asia-northeast1"),"verifyKoppyAdmin")({code:adminCodeInput.value});
+       await otpPost("/verify",{code:adminCodeInput.value});
        await user.getIdToken(true);
        isAdmin=(await user.getIdTokenResult(true)).claims.koppyAdmin===true;
        adminCodeInput.value="";
-       adminPane.hidden=isAdmin;
-       adminStatus.textContent=isAdmin?"管理者として認証されました。":"認証状態を確認できませんでした。";
+       adminStatus.textContent=isAdmin?"管理者として認証されました。":"認証確認ができませんでした。";
        showAuth();renderComments(cachedComments);
-     }catch(e){adminStatus.textContent=endpointError(e);}
+     }catch(e){adminStatus.textContent=displayError(e);console.error("OTP verify failed",e);}
      finally{verifyButton.disabled=false;}
    };
    form.insertBefore(nameLabel,commentBox.closest("label")||commentBox);
