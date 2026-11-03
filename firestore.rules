@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
-    function admin() { return signedIn() && request.auth.token.koppyAdmin == true; }
+    function admin() { return signedIn() && request.auth.token.get('koppyAdmin', false) == true; }
     match /blogEngagement/{articleId} {
       allow get: if true;
       allow list: if false;
