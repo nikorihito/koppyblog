@@ -166,7 +166,18 @@ if(host){
        // adminフラグは閲覧者のコード入力で決めない。Firebaseの検証済みclaimのみ。
        await addDoc(comments,{uid:user.uid,name,text:content,parentId:replyTo||null,admin:isAdmin,createdAt:serverTimestamp()});
        commentBox.value="";replyTo=null;replyNote.hidden=true;statusText("コメントを投稿しました。");
-     }catch(e){statusText("投稿失敗 ["+(e.code||"unknown")+"]。Firestoreルールが更新されているか確認してください。",true);}
+     }catch(e){
+       const code=e?.code||"unknown";
+       const messages={
+         "permission-denied":"投稿がFirestoreルールで拒否されました。Firebase Consoleの「Firestore Database → ルール」で最新版のルールを公開してください。",
+         "unauthenticated":"匿名認証が完了していません。Firebase Authenticationで匿名ログインを有効にしてください。",
+         "unavailable":"通信できませんでした。ネットワークを確認して再試行してください。",
+         "resource-exhausted":"利用上限に達した可能性があります。Firebaseの使用量を確認してください。",
+         "failed-precondition":"Firestoreの設定またはインデックスを確認してください。"
+       };
+       statusText("コメントを送信できませんでした ["+code+"] "+(messages[code]||"ブラウザのConsoleに詳細を記録しました。"),true);
+       console.error("Koppy blog comment submit",e);
+     }
      finally{post.disabled=false;}
    };
    statusText("記事へのリアクションをお待ちしています。");
