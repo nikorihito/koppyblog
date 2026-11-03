@@ -19,6 +19,10 @@ if(host){
    const likeBtn=host.querySelector("[data-like]"),post=host.querySelector("[data-post]");
    const login=host.querySelector("[data-login]"),logout=host.querySelector("[data-logout]"),commentList=host.querySelector("[data-comments]");
    const commentBox=host.querySelector("[data-comment]");
+   // 以前のHTMLに残る「Googleログインが必要」の表示を初期化時に解消する。
+   login.hidden=true;logout.hidden=true;
+   set("[data-login-note]","ログイン不要。名前が空欄なら匿名で投稿できます。");
+
    let cachedComments=[],replyTo=null,isAdmin=false;
    const form=host.querySelector("[data-form]");
    const nameInput=document.createElement("input");
