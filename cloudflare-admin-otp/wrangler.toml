@@ -1,0 +1,14 @@
+name = "koppyblog-admin-otp"
+main = "src/index.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+# After: npx wrangler d1 create koppyblog-admin-otp
+# Replace REPLACE_WITH_D1_DATABASE_ID with the real database_id.
+[[d1_databases]]
+binding = "DB"
+database_name = "koppyblog-admin-otp"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[secrets]
+required = ["FIREBASE_API_KEY", "FIREBASE_SERVICE_ACCOUNT_JSON", "OTP_PEPPER"]
