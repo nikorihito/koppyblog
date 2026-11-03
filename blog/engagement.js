@@ -24,27 +24,60 @@ if(host){
    const nameInput=document.createElement("input");
    nameInput.type="text";nameInput.maxLength=30;nameInput.placeholder="名前（空欄なら匿名）";nameInput.setAttribute("aria-label","投稿者名（任意）");
    const nameLabel=document.createElement("label");nameLabel.textContent="お名前（任意）";nameLabel.append(nameInput);
-   const adminPane=document.createElement("details");adminPane.className="be-admin";
-   const adminSummary=document.createElement("summary");adminSummary.textContent="管理者認証を申請";
-   const adminHelp=document.createElement("p");adminHelp.className="be-help";
-   adminHelp.textContent="お問い合わせと同じ管理者宛てに申請を送ります。送信先は変更できません。申請だけでは管理者権限は付きません。";
-   const adminForm=document.createElement("form");adminForm.method="POST";
-   adminForm.action="https://formspree.io/f/mdkzgoeb";adminForm.target="_blank";adminForm.className="be-form";
-   const subject=document.createElement("input");subject.type="hidden";subject.name="_subject";subject.value="【こっぴー】ブログ管理者認証申請";
-   const requestMessage=document.createElement("textarea");requestMessage.name="message";requestMessage.readOnly=true;
-   requestMessage.hidden=true;requestMessage.style.display="none";
-   const requestButton=document.createElement("button");requestButton.type="submit";requestButton.className="be-delete";requestButton.textContent="管理者宛てに認証申請を送る";
-   const adminStatus=document.createElement("p");adminStatus.className="be-help";adminStatus.textContent="申請が届いたあと、管理者本人の確認とFirebase側での権限設定が必要です。";
-   adminForm.append(subject,requestMessage,requestButton);
-   adminForm.onsubmit=e=>{
-     if(!user){e.preventDefault();adminStatus.textContent="Firebase認証の準備中です。";return;}
-     requestMessage.value="ブログ管理者権限の申請です。\\nFirebase UID: "+user.uid+
-       "\\n記事: "+location.pathname+"\\n本人確認が完了するまでは管理者権限を付与しないでください。";
-     adminStatus.textContent="申請を別タブで送信します。これだけでは管理者にはなりません。";
+   // 管理者を名乗る操作は、認証済みのFirebase Custom Claimがある場合のみ有効。
+   const adminRow=document.createElement("label");adminRow.className="be-admin-toggle";
+   const adminCheck=document.createElement("input");adminCheck.type="checkbox";
+   const adminCheckText=document.createElement("span");adminCheckText.textContent="管理者としてコメントする";
+   adminRow.append(adminCheck,adminCheckText);
+   form.insertBefore(adminRow,commentBox.closest("label")||commentBox);
+   const adminPane=document.createElement("section");adminPane.className="be-admin";adminPane.hidden=true;
+   const adminExplain=document.createElement("p");adminExplain.className="be-help";
+   adminExplain.textContent="管理者本人だけが使用してください。管理者宛てメールに10桁の認証コードを送ります。";
+   const codeButton=document.createElement("button");codeButton.type="button";codeButton.className="be-delete";
+   codeButton.textContent="10桁のコードを管理者に送る";
+   const adminCodeInput=document.createElement("input");adminCodeInput.type="text";
+   adminCodeInput.inputMode="numeric";adminCodeInput.pattern="[0-9]{10}";
+   adminCodeInput.maxLength=10;adminCodeInput.autocomplete="one-time-code";
+   adminCodeInput.placeholder="10桁の認証コード";adminCodeInput.setAttribute("aria-label","10桁の認証コード");
+   const verifyButton=document.createElement("button");verifyButton.type="button";verifyButton.className="be-delete";
+   verifyButton.textContent="コードを確認";
+   const adminStatus=document.createElement("p");adminStatus.className="be-help";
+   adminPane.append(adminExplain,codeButton,adminCodeInput,verifyButton,adminStatus);
+   adminRow.after(adminPane);
+   const endpointError=e=>(e?.code==="functions/not-found"||e?.code==="functions/internal")
+     ?"認証サーバーがまだ利用できません。管理者用バックエンドの設定が必要です。"
+     :"認証処理に失敗しました ["+(e?.code||"unknown")+"]";
+   adminCheck.onchange=()=>{
+     adminPane.hidden=!adminCheck.checked||isAdmin;
+     adminStatus.textContent=adminCheck.checked
+       ?(isAdmin?"管理者認証済みです。":"コードを発行して認証すると、管理者として投稿できます。"):"";
    };
-   const uidDisplay=document.createElement("code");uidDisplay.textContent="Firebase UID：認証準備中";
-   adminPane.append(adminSummary,adminHelp,adminForm,uidDisplay,adminStatus);
-   host.querySelector("[data-login-note]").after(adminPane);
+   codeButton.onclick=async()=>{
+     if(!user){adminStatus.textContent="匿名認証が完了していません。";return;}
+     codeButton.disabled=true;
+     try{
+       const {getFunctions,httpsCallable}=await import("https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js");
+       await httpsCallable(getFunctions(app,"asia-northeast1"),"requestKoppyAdminCode")({});
+       adminStatus.textContent="管理者に10桁のコードを送りました。メールを確認してください（有効期限10分）。";
+     }catch(e){adminStatus.textContent=endpointError(e);}
+     finally{codeButton.disabled=false;}
+   };
+   verifyButton.onclick=async()=>{
+     if(!user){adminStatus.textContent="匿名認証が完了していません。";return;}
+     if(!/^[0-9]{10}$/.test(adminCodeInput.value)){adminStatus.textContent="10桁の数字を入力してください。";return;}
+     verifyButton.disabled=true;
+     try{
+       const {getFunctions,httpsCallable}=await import("https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js");
+       await httpsCallable(getFunctions(app,"asia-northeast1"),"verifyKoppyAdmin")({code:adminCodeInput.value});
+       await user.getIdToken(true);
+       isAdmin=(await user.getIdTokenResult(true)).claims.koppyAdmin===true;
+       adminCodeInput.value="";
+       adminPane.hidden=isAdmin;
+       adminStatus.textContent=isAdmin?"管理者として認証されました。":"認証状態を確認できませんでした。";
+       showAuth();renderComments(cachedComments);
+     }catch(e){adminStatus.textContent=endpointError(e);}
+     finally{verifyButton.disabled=false;}
+   };
    form.insertBefore(nameLabel,commentBox.closest("label")||commentBox);
    const replyNote=document.createElement("p");replyNote.className="be-help";replyNote.hidden=true;
    const replyTarget=document.createElement("span");replyNote.append(replyTarget);
@@ -54,7 +87,8 @@ if(host){
    function showAuth(){
      // 利用者登録なしで投稿できる（裏側ではFirebase匿名認証を使う）。
      login.hidden=true;logout.hidden=true;post.disabled=!user;
-     set("[data-login-note]",isAdmin?"こっぴー（管理者）としてログイン中":"ログイン不要。名前が空欄なら匿名で投稿できます。");
+     set("[data-login-note]",isAdmin?"管理者認証済みです。チェックを入れたときだけ管理者として投稿します。":"ログイン不要。名前が空欄なら匿名で投稿できます。");
+     adminPane.hidden=!adminCheck.checked||isAdmin;
    }
    function showComment(id,data,depth=0){
      const li=document.createElement("li");li.className="be-comment";
@@ -155,11 +189,12 @@ if(host){
      e.preventDefault();
      if(!user){statusText("認証準備中です。しばらくして再度お試しください。",true);return;}
      const content=commentBox.value.trim(),name=nameInput.value.trim()||"匿名";
+     if(adminCheck.checked&&!isAdmin){statusText("管理者用コードを認証してから投稿してください。",true);return;}
      if(!content||content.length>500||name.length>30){statusText("コメントは1〜500文字、名前は30文字以内にしてください。",true);return;}
      post.disabled=true;
      try{
        // adminフラグは閲覧者のコード入力で決めない。Firebaseの検証済みclaimのみ。
-       await addDoc(comments,{uid:user.uid,name,text:content,parentId:replyTo||null,admin:isAdmin,createdAt:serverTimestamp()});
+       await addDoc(comments,{uid:user.uid,name,text:content,parentId:replyTo||null,admin:adminCheck.checked&&isAdmin,createdAt:serverTimestamp()});
        commentBox.value="";replyTo=null;replyNote.hidden=true;statusText("コメントを投稿しました。");
      }catch(e){
        const code=e?.code||"unknown";
