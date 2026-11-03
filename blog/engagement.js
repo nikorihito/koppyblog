@@ -41,6 +41,11 @@ if(host){
    adminCodeInput.placeholder="10桁の認証コード";adminCodeInput.setAttribute("aria-label","10桁の認証コード");
    const verifyButton=document.createElement("button");verifyButton.type="button";verifyButton.className="be-delete";
    verifyButton.textContent="コードを確認";
+   // Firebase SparkプランではFunctionsをデプロイできないため、認証操作を無効化。
+   // 認証サーバーが稼働し、動作検証を終えるまでは有効にしない。
+   const adminOtpAvailable=false;
+   codeButton.disabled=!adminOtpAvailable;
+   verifyButton.disabled=!adminOtpAvailable;
    const adminStatus=document.createElement("p");adminStatus.className="be-help";
    adminPane.append(adminExplain,codeButton,adminCodeInput,verifyButton,adminStatus);
    adminRow.after(adminPane);
@@ -50,9 +55,10 @@ if(host){
    adminCheck.onchange=()=>{
      adminPane.hidden=!adminCheck.checked||isAdmin;
      adminStatus.textContent=adminCheck.checked
-       ?(isAdmin?"管理者認証済みです。":"コードを発行して認証すると、管理者として投稿できます。"):"";
+       ?(isAdmin?"管理者認証済みです。":adminOtpAvailable?"コードを発行して認証すると、管理者として投稿できます。":"管理者コード機能は準備中です。現在の無料プランではメール送信・認証サーバーが利用できません。通常コメントを送る場合はチェックを外してください。"):"";
    };
    codeButton.onclick=async()=>{
+     if(!adminOtpAvailable)return;
      if(!user){adminStatus.textContent="匿名認証が完了していません。";return;}
      codeButton.disabled=true;
      try{
@@ -63,6 +69,7 @@ if(host){
      finally{codeButton.disabled=false;}
    };
    verifyButton.onclick=async()=>{
+     if(!adminOtpAvailable)return;
      if(!user){adminStatus.textContent="匿名認証が完了していません。";return;}
      if(!/^[0-9]{10}$/.test(adminCodeInput.value)){adminStatus.textContent="10桁の数字を入力してください。";return;}
      verifyButton.disabled=true;
@@ -189,7 +196,7 @@ if(host){
      e.preventDefault();
      if(!user){statusText("認証準備中です。しばらくして再度お試しください。",true);return;}
      const content=commentBox.value.trim(),name=nameInput.value.trim()||"匿名";
-     if(adminCheck.checked&&!isAdmin){statusText("管理者用コードを認証してから投稿してください。",true);return;}
+     if(adminCheck.checked&&!isAdmin){statusText("管理者コード機能は現在準備中です。通常コメントの場合は「管理者としてコメントする」のチェックを外してください。",true);return;}
      if(!content||content.length>500||name.length>30){statusText("コメントは1〜500文字、名前は30文字以内にしてください。",true);return;}
      post.disabled=true;
      try{
