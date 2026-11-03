@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS otp_codes (
+  uid TEXT PRIMARY KEY,
+  hash TEXT NOT NULL,
+  expires_at INTEGER NOT NULL,
+  sent_at INTEGER NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  consumed INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS otp_rate (
+  key TEXT PRIMARY KEY,
+  window_start INTEGER NOT NULL,
+  attempts INTEGER NOT NULL
+);

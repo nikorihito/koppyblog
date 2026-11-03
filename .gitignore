@@ -1,0 +1,5 @@
+cloudflare-admin-otp/.dev.vars*
+cloudflare-admin-otp/.env*
+cloudflare-admin-otp/node_modules/
+cloudflare-admin-otp/.wrangler/
+cloudflare-admin-otp/*service-account*.json
